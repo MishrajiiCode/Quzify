@@ -3,7 +3,7 @@
 // Only business logic - questions stored in separate data files
 
 // ===================== APP CONFIGURATION =====================
-const APP_VERSION = '1.5.6-Beta.'; // Increment this to show an update notification
+const APP_VERSION = '1.5.7-Beta.'; // Increment this to show an update notification
 
 // ===================== GLOBAL STATE VARIABLES =====================
 let currentSubject = '';
@@ -22,6 +22,7 @@ let currentClass = '';
 let currentStream = '';
 let classMode = false; // true if user is in class (academic) mode
 
+let cameFromHomepageSearch = false; // NEW: Tracks if navigation is from homepage search
 // NEW: Daily Challenge state
 let dailyChallengeMode = false;
 
@@ -44,6 +45,8 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeTheme();
     checkForUpdates();
     initializeSideMenu(); // New function to handle menu logic
+    initializeHomepageSearch(); // Initialize the new homepage search
+    initializeLogoutConfirmation(); // Initialize the new logout modal
 });
 
 function initializeApp() {
@@ -125,6 +128,13 @@ function goToClass() {
 }
 
 function goToSubject() {
+    // NEW: If user came from homepage search, go directly home
+    if (cameFromHomepageSearch) {
+        cameFromHomepageSearch = false; // Reset the flag
+        goToHome();
+        return;
+    }
+
     if (dailyChallengeMode) {
         goToHome();
     } else if (classMode) {
@@ -483,6 +493,10 @@ function displayProgressInfo(completedSets, averageScore) {
 
 // ===================== QUIZ FUNCTIONALITY (PRESERVED) =====================
 function startQuiz(setIndex) {
+    // Reset the homepage search flag when a quiz starts
+    if (cameFromHomepageSearch) {
+        cameFromHomepageSearch = false;
+    }
     dailyChallengeMode = false;
     currentSet = setIndex;
     currentQuestionIndex = 0;
@@ -988,12 +1002,37 @@ function personalizeHomepage(userName, userFocus) {
 }
 
 function logout() {
-    if (confirm('Are you sure you want to logout? This will allow you to change your preparation focus.')) {
+    // Close the side menu for a smoother experience
+    closeSideMenu();
+    // Show the custom confirmation modal instead of the browser's confirm dialog
+    document.getElementById('logout-confirm-modal').style.display = 'flex';
+}
+
+// ===================== NEW: LOGOUT CONFIRMATION MODAL =====================
+function initializeLogoutConfirmation() {
+    const modal = document.getElementById('logout-confirm-modal');
+    const confirmBtn = document.getElementById('confirm-logout-btn');
+    const cancelBtn = document.getElementById('cancel-logout-btn');
+
+    const closeModal = () => {
+        modal.style.display = 'none';
+    };
+
+    confirmBtn.addEventListener('click', () => {
         localStorage.removeItem('userName');
         localStorage.removeItem('userFocus');
         // Reload the page to reset the state and show the onboarding modal
         window.location.reload();
-    }
+    });
+
+    cancelBtn.addEventListener('click', closeModal);
+
+    // Also allow closing by clicking the overlay
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            closeModal();
+        }
+    });
 }
 
 // ===================== ERROR HANDLING =====================
@@ -1121,30 +1160,132 @@ function showNotification(message) {
     }, 6000); // Hide after 6 seconds
 }
 
+function closeSideMenu() {
+    const sideMenu = document.getElementById('side-menu');
+    const menuOverlay = document.getElementById('menu-overlay');
+    const menuToggleBtn = document.getElementById('menu-toggle-btn');
+
+    sideMenu.classList.remove('open');
+    menuOverlay.classList.remove('visible');
+    menuToggleBtn.classList.remove('is-active');
+}
+
 // ===================== NEW: SIDE MENU (HAMBURGER) =====================
 function initializeSideMenu() {
     const menuToggleBtn = document.getElementById('menu-toggle-btn');
     const closeMenuBtn = document.getElementById('close-menu-btn');
     const menuHomeBtn = document.getElementById('menu-home-btn');
-    const sideMenu = document.getElementById('side-menu');
     const menuOverlay = document.getElementById('menu-overlay');
-
+    
     const openMenu = () => {
-        sideMenu.classList.add('open');
-        menuOverlay.classList.add('visible');
-    };
-
-    const closeMenu = () => {
-        sideMenu.classList.remove('open');
-        menuOverlay.classList.remove('visible');
+        document.getElementById('side-menu').classList.add('open');
+        document.getElementById('menu-overlay').classList.add('visible');
+        document.getElementById('menu-toggle-btn').classList.add('is-active');
     };
 
     menuToggleBtn.addEventListener('click', openMenu);
-    closeMenuBtn.addEventListener('click', closeMenu);
+    closeMenuBtn.addEventListener('click', closeSideMenu);
     menuHomeBtn.addEventListener('click', () => {
         goToHome();
-        closeMenu();
+        closeSideMenu();
     });
-    menuOverlay.addEventListener('click', closeMenu);
+    menuOverlay.addEventListener('click', closeSideMenu);
 }
 
+// ===================== NEW: HOMEPAGE GLOBAL SEARCH =====================
+function initializeHomepageSearch() {
+    const searchInput = document.getElementById('homepage-search-input');
+    const resultsContainer = document.getElementById('homepage-search-results');
+
+    searchInput.addEventListener('input', () => {
+        const query = searchInput.value.trim().toLowerCase();
+
+        if (query.length < 2) {
+            resultsContainer.style.display = 'none';
+            return;
+        }
+
+        const searchResults = performGlobalSearch(query);
+        displayHomepageSearchResults(searchResults, query);
+    });
+
+    // Hide results when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!searchInput.contains(e.target)) {
+            resultsContainer.style.display = 'none';
+        }
+    });
+}
+
+function performGlobalSearch(query) {
+    const results = [];
+
+    // 1. Search Competitive Exams
+    for (const subjectKey in subjectData) {
+        subjectData[subjectKey]?.chapters.forEach(chapter => {
+            if (chapter.name.toLowerCase().includes(query)) {
+                results.push({
+                    chapterName: chapter.name,
+                    subject: subjectKey,
+                    type: 'competitive'
+                });
+            }
+        });
+    }
+
+    // 2. Search Academic Classes
+    for (const classKey in classData) {
+        const classInfo = classData[classKey];
+        for (const subjectKey in classInfo.chapters) {
+            classInfo.chapters[subjectKey].forEach(chapter => {
+                if (chapter.name.toLowerCase().includes(query)) {
+                    results.push({
+                        chapterName: chapter.name,
+                        subject: subjectKey,
+                        class: classKey,
+                        type: 'academic'
+                    });
+                }
+            });
+        }
+    }
+    return results;
+}
+
+function displayHomepageSearchResults(results, query) {
+    const resultsContainer = document.getElementById('homepage-search-results');
+    resultsContainer.innerHTML = '';
+
+    if (results.length === 0) {
+        resultsContainer.innerHTML = '<div class="search-result-item">No chapters found.</div>';
+    } else {
+        results.forEach(result => {
+            const item = document.createElement('div');
+            item.className = 'search-result-item';
+
+            // Highlight the matched query in the chapter name
+            const chapterName = result.chapterName;
+            const highlightedName = chapterName.replace(new RegExp(query, 'gi'), (match) => `<mark>${match}</mark>`);
+
+            const context = result.type === 'academic' ? `(Class ${result.class} - ${getSubjectTitle(result.subject)})` : `(${getSubjectTitle(result.subject)})`;
+            item.innerHTML = `${highlightedName} <span>${context}</span>`;
+            
+            item.onclick = () => {
+                cameFromHomepageSearch = true; // Set flag to true on click
+                currentChapter = result.chapterName;
+                currentSubject = result.subject;
+                classMode = result.type === 'academic';
+                currentClass = result.class || '';
+                // Note: Stream is not needed here as we navigate directly to the chapter
+                displayChapterInfo();
+                showPage('chapter-page');
+                
+                // Clear search input and hide results after selection
+                document.getElementById('homepage-search-input').value = '';
+                resultsContainer.style.display = 'none';
+            };
+            resultsContainer.appendChild(item);
+        });
+    }
+    resultsContainer.style.display = 'block';
+}
