@@ -26,7 +26,23 @@
 
     <div class="container">
         <header class="app-header">
-            <div class="header-actions">
+            <!-- Hamburger Menu Button -->
+            <button id="menu-toggle-btn" class="menu-toggle-btn" aria-label="Open menu">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+            </button>
+        </header>
+
+        <!-- Side Menu (Drawer) -->
+        <div id="side-menu" class="side-menu">
+            <div class="side-menu-header">
+                <h3>Settings</h3>
+                <button id="close-menu-btn" class="close-btn" aria-label="Close menu">&times;</button>
+            </div>
+            <div class="side-menu-content">
+                <button id="menu-home-btn" class="side-menu-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                    <span>Home</span>
+                </button>
                 <div class="theme-switcher">
                     <label for="theme-toggle" class="theme-toggle-label">Dark Mode</label>
                     <label class="switch">
@@ -34,9 +50,15 @@
                         <span class="slider round"></span>
                     </label>
                 </div>
-                <button id="logout-btn" onclick="logout()">Logout</button>
             </div>
-        </header>
+            <div class="side-menu-bottom">
+                <button id="logout-btn" class="side-menu-logout-btn" onclick="logout()">Logout</button>
+                <div class="side-menu-footer">
+                    <p>Quizify <span id="menu-app-version"></span></p>
+                </div>
+            </div>
+        </div>
+        <div id="menu-overlay" class="menu-overlay"></div>
 
         <!-- Home Page -->
         <div id="home-page" class="page active">
