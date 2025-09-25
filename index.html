@@ -38,6 +38,18 @@
     </div>
 
     <div class="container">
+        <!-- Page-level Background Animation -->
+        <div class="leaves-container">
+            <i></i><i></i><i></i><i></i><i></i>
+            <i></i><i></i><i></i><i></i><i></i><i></i>
+            <i></i><i></i><i></i><i></i><i></i>
+            <i></i><i></i><i></i><i></i><i></i>
+            <i></i><i></i><i></i><i></i><i></i>
+            <i></i><i></i><i></i><i></i><i></i>
+            <i></i><i></i><i></i><i></i><i></i>
+            <i></i><i></i><i></i><i></i>
+        </div>
+
         <header class="app-header">
             <!-- Hamburger Menu Button -->
             <button id="menu-toggle-btn" class="menu-toggle-btn" aria-label="Open menu">
@@ -64,6 +76,10 @@
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
                     <span>Feedback</span>
                 </a>
+                <button id="menu-bookmarks-btn" class="side-menu-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+                    <span>Bookmarks</span>
+                </button>
                 <div class="theme-switcher">
                     <label for="theme-toggle" class="theme-toggle-label">Dark Mode</label>
                     <label class="switch">
@@ -100,9 +116,18 @@
             <!-- Daily Challenge Section -->
             <div id="daily-challenge-section">
                 <div class="daily-challenge-card" onclick="startDailyChallenge()">
+                    <div class="rain-container">
+                        <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+                        <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+                        <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+                    </div>
                     <h2>🔥 Daily Challenge</h2>
                     <p>Test your knowledge with 20 random questions from all subjects. A new quiz is available every day!</p>
                     <span id="daily-challenge-status"></span>
+                    <div class="daily-challenge-cta">
+                        <span>Start Challenge</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="12 5 19 12 12 19"></polyline><line x1="19" y1="12" x2="5" y2="12"></line></svg>
+                    </div>
                 </div>
             </div>
 
@@ -235,6 +260,9 @@
                 <div class="quiz-info">
                     <div id="timer">20:00</div>
                 </div>
+                <button id="bookmark-btn" class="bookmark-btn" title="Bookmark this question">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+                </button>
             </div>
 
             <div class="question-container">
@@ -291,6 +319,15 @@
             <h1>Review Your Answers</h1>
             <div id="review-container" class="review-container">
                 <!-- Review content will be populated by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Bookmarks Page -->
+        <div id="bookmarks-page" class="page">
+            <button class="back-btn" onclick="goToHome()">← Back to Home</button>
+            <h1>Bookmarked Questions</h1>
+            <div id="bookmarks-container" class="review-container">
+                <!-- Bookmarked questions will be populated by JavaScript -->
             </div>
         </div>
     </div>
