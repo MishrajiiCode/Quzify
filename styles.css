@@ -1457,6 +1457,28 @@ button:focus-visible {
   line-height: 1.4;
 }
 
+/* New App Header */
+.app-header {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: var(--space-16) var(--space-32);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-24);
+}
+
+#logout-btn {
+  background-color: var(--color-secondary);
+  color: var(--color-text);
+  display: none; /* Hidden by default, shown by JS */
+  padding: var(--space-8) var(--space-16);
+}
+
 /* Footer */
 footer {
   display: flex;
@@ -1473,17 +1495,6 @@ footer {
   display: flex;
   align-items: center;
   gap: var(--space-24);
-}
-
-#logout-btn {
-  background-color: var(--color-secondary);
-  color: var(--color-text);
-  display: none; /* Hidden by default */
-}
-
-footer a {
-  color: var(--color-btn-primary-text);
-  text-decoration: none;
 }
 
 footer a:hover svg {
