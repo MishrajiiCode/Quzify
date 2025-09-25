@@ -42,6 +42,7 @@ document.addEventListener('DOMContentLoaded', function() {
 function initializeApp() {
     showPage('home-page');
     classMode = false;
+    document.getElementById('app-version').textContent = `v${APP_VERSION}`;
     currentClass = '';
     currentStream = '';
 }
@@ -803,74 +804,113 @@ function checkDataAvailability() {
 }
 
 // ===================== UPDATE NOTIFICATION SYSTEM =====================
+/**
+ * Checks for application and content updates on startup.
+ */
 function checkForUpdates() {
-    // 1. Check for App Version Update
+    // 1. Check for App Version Update (for UI/feature changes)
     const lastVersion = localStorage.getItem('appVersion');
     if (!lastVersion) {
         localStorage.setItem('appVersion', APP_VERSION);
     } else if (lastVersion !== APP_VERSION) {
         showNotification(`App updated to version ${APP_VERSION}! Enjoy the new features.`);
         localStorage.setItem('appVersion', APP_VERSION);
+        // Don't check for content on app version change to avoid multiple notifications
+        localStorage.setItem('contentMap', JSON.stringify(generateContentMap()));
+        return;
     }
 
-    // 2. Check for New Content
-    const lastContentCount = parseInt(localStorage.getItem('contentCount') || '0', 10);
-    const currentContentCount = calculateTotalSets();
+    // 2. Check for New Content (specific topics)
+    const currentContentMap = generateContentMap();
+    const lastContentMapString = localStorage.getItem('contentMap');
 
-    if (currentContentCount > lastContentCount) {
-        showNotification('New quiz sets have been added! Check them out.');
-        localStorage.setItem('contentCount', currentContentCount);
-    } else if (lastContentCount === 0) {
-        // First time user, just set the count
-        localStorage.setItem('contentCount', currentContentCount);
+    if (!lastContentMapString) {
+        // First time user, just set the map
+        localStorage.setItem('contentMap', JSON.stringify(currentContentMap));
+        return;
+    }
+
+    const lastContentMap = JSON.parse(lastContentMapString);
+    const updatedChapters = [];
+
+    for (const chapterKey in currentContentMap) {
+        const currentSetCount = currentContentMap[chapterKey].count;
+        const lastSetCount = lastContentMap[chapterKey]?.count || 0;
+
+        if (currentSetCount > lastSetCount) {
+            updatedChapters.push(currentContentMap[chapterKey].name);
+        }
+    }
+
+    if (updatedChapters.length > 0) {
+        // Show notifications for new content
+        if (updatedChapters.length <= 2) {
+            updatedChapters.forEach(chapterName => {
+                showNotification(`New quiz available for ${chapterName}!`);
+            });
+        } else {
+            showNotification(`${updatedChapters.length} topics have new quizzes. Check them out!`);
+        }
+        // Update the stored map
+        localStorage.setItem('contentMap', JSON.stringify(currentContentMap));
     }
 }
 
-function calculateTotalSets() {
-    let totalSets = 0;
+/**
+ * Generates a map of all available content.
+ * The map key is a unique identifier, and the value contains the chapter name and set count.
+ * e.g., { 'quantitative_Time and Work': { name: 'Time and Work', count: 5 } }
+ * @returns {object} The content map.
+ */
+function generateContentMap() {
+    const contentMap = {};
 
-    // Count sets in competitive exams
-    Object.values(subjectData).forEach(subject => {
-        if (subject && subject.chapters) {
-            subject.chapters.forEach(chapter => {
-                if (chapter.sets) {
-                    chapter.sets.forEach(set => {
-                        if (set.length > 0) {
-                            totalSets++;
-                        }
-                    });
+    // Helper to process chapters
+    const processChapters = (chapters, prefix) => {
+        if (!chapters) return;
+        chapters.forEach(chapter => {
+            if (chapter && chapter.name && chapter.sets) {
+                const nonEmptySets = chapter.sets.filter(set => set.length > 0).length;
+                if (nonEmptySets > 0) {
+                    const key = `${prefix}_${chapter.name}`;
+                    contentMap[key] = { name: chapter.name, count: nonEmptySets };
                 }
-            });
-        }
+            }
+        });
+    };
+
+    // 1. Process competitive exams
+    Object.values(subjectData).forEach(subject => {
+        const subjectKey = Object.keys(subjectData).find(key => subjectData[key] === subject);
+        processChapters(subject?.chapters, subjectKey);
     });
 
-    // Count sets in academic classes
+    // 2. Process academic classes
     if (classData) {
         Object.values(classData).forEach(cls => {
-            if (cls.chapters) {
+            const classKey = Object.keys(classData).find(key => classData[key] === cls);
+            if (cls && cls.chapters) {
                 Object.values(cls.chapters).forEach(subjectChapters => {
-                    subjectChapters.forEach(chapter => {
-                        if (chapter.sets) {
-                            chapter.sets.forEach(set => {
-                                if (set.length > 0) {
-                                    totalSets++;
-                                }
-                            });
-                        }
-                    });
+                    const subjectKey = Object.keys(cls.chapters).find(key => cls.chapters[key] === subjectChapters);
+                    const prefix = `class${classKey}_${subjectKey}`;
+                    processChapters(subjectChapters, prefix);
                 });
             }
         });
     }
 
-    return totalSets;
+    return contentMap;
 }
 
+/**
+ * Displays a toast notification.
+ * @param {string} message The message to display.
+ */
 function showNotification(message) {
     const toast = document.getElementById('notification-toast');
     toast.textContent = message;
     toast.classList.add('show');
     setTimeout(() => {
         toast.classList.remove('show');
-    }, 5000); // Hide after 5 seconds
+    }, 6000); // Hide after 6 seconds
 }
