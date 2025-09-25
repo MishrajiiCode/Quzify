@@ -558,7 +558,7 @@ const quantitativeData = {
 
         // Set 2: Questions 1-20
         [
-            { question: 'Five friends A, B, C, D, E are sitting in a row. A and E are not at the ends. B is to the left of C. D is not next to B. Who sits at the left end?', options: ['A', 'B', 'C', 'D'], answer: 3 },
+          { question: 'Five friends A, B, C, D, E are sitting in a row. A and E are not at the ends. B is to the left of C. D is not next to B. Who sits at the left end?', options: ['A', 'B', 'C', 'D'], answer: 3 },
           { question: 'If today is Tuesday, what day will it be after 100 days?', options: ['Monday', 'Tuesday', 'Wednesday', 'Thursday'], answer: 3 },
           { question: 'DOCTOR : PATIENT :: TEACHER : ?', options: ['SCHOOL', 'STUDENT', 'BOOK', 'CLASS'], answer: 1 },
           { question: 'Statement: All birds can fly. Penguin is a bird. Conclusion: Penguin can fly.', options: ['True', 'False', 'Uncertain', 'None of these'], answer: 1 },
@@ -905,7 +905,7 @@ const quantitativeData = {
 
 
     {
-      name: '',
+      name: 'Pipe and Cistern',
       sets: [
         // 5 sets, each with 20 unique questions
         [],
@@ -913,11 +913,141 @@ const quantitativeData = {
         [],
         [],
         []
-      ]
-    }
-  ]
-     
-      
+      ]//Complete Pipe and Cistern
+    },
+
+    {
+      name: 'Train',
+      sets: [
+        // 5 sets, each with 20 unique questions
+        [],
+        [],
+        [],
+        [],
+        []
+      ]// Complete train
+    },
+
+    {
+      name: 'Boat and Stream',
+      sets: [
+        // 5 sets, each with 20 unique questions
+        [],
+        [],
+        [],
+        [],
+        []
+      ]//Complete Boat and Stream
+    },
+
+    {
+      name: 'Ratio and Proportion',
+      sets: [
+        // 5 sets, each with 20 unique questions
+        [],
+        [],
+        [],
+        [],
+        []
+      ]//Complete Ratio and proportion
+    },
+
+    {
+      name: 'Partnership',
+      sets: [
+        // 5 sets, each with 20 unique questions
+        [],
+        [],
+        [],
+        [],
+        []
+      ]//Complete Partnership
+    },
+
+    {
+      name: 'Data Interpretation',
+      sets: [
+        // 5 sets, each with 20 unique questions
+        [],
+        [],
+        [],
+        [],
+        []
+      ]//Complete Data Interpretation
+    },
+
+    {
+      name: 'Ages',
+      sets: [
+        // 5 sets, each with 20 unique questions
+        [],
+        [],
+        [],
+        [],
+        []
+      ]//Complete Ages
+    },
+
+    {
+      name: 'Mixture Alligation',
+      sets: [
+        // 5 sets, each with 20 unique questions
+        [],
+        [],
+        [],
+        [],
+        []
+      ]//Complete Mixture Alligation
+    },
+
+    {
+      name: 'Discount',
+      sets: [
+        // 5 sets, each with 20 unique questions
+        [],
+        [],
+        [],
+        [],
+        []
+      ]//Complete Discount
+    },
+
+    {
+      name: 'Simple Intrest',
+      sets: [
+        // 5 sets, each with 20 unique questions
+        [],
+        [],
+        [],
+        [],
+        []
+      ]//Complete Simple Intrest
+    },
+
+    {
+      name: 'Compound Intrest',
+      sets: [
+        // 5 sets, each with 20 unique questions
+        [],
+        [],
+        [],
+        [],
+        []
+      ]//Complete Compound Intrest
+    },
+
+    {
+      name: 'SI CI Installment',
+      sets: [
+        // 5 sets, each with 20 unique questions
+        [],
+        [],
+        [],
+        [],
+        []
+      ]//Complete SI CI Installment
+    },
+  ]    
   
 };
 
