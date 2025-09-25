@@ -43,6 +43,7 @@ document.addEventListener('DOMContentLoaded', function() {
     checkUserProfile();
     initializeTheme();
     checkForUpdates();
+    initializeSideMenu(); // New function to handle menu logic
 });
 
 function initializeApp() {
@@ -940,6 +941,7 @@ function checkUserProfile() {
         personalizeHomepage(userName, userFocus);
     }
     document.getElementById('app-version').textContent = `v${APP_VERSION}`;
+    document.getElementById('menu-app-version').textContent = `v${APP_VERSION}`;
 }
 
 function saveUserPreferences(focus) {
@@ -1117,4 +1119,31 @@ function showNotification(message) {
     setTimeout(() => {
         toast.classList.remove('show');
     }, 6000); // Hide after 6 seconds
+}
+
+// ===================== NEW: SIDE MENU (HAMBURGER) =====================
+function initializeSideMenu() {
+    const menuToggleBtn = document.getElementById('menu-toggle-btn');
+    const closeMenuBtn = document.getElementById('close-menu-btn');
+    const menuHomeBtn = document.getElementById('menu-home-btn');
+    const sideMenu = document.getElementById('side-menu');
+    const menuOverlay = document.getElementById('menu-overlay');
+
+    const openMenu = () => {
+        sideMenu.classList.add('open');
+        menuOverlay.classList.add('visible');
+    };
+
+    const closeMenu = () => {
+        sideMenu.classList.remove('open');
+        menuOverlay.classList.remove('visible');
+    };
+
+    menuToggleBtn.addEventListener('click', openMenu);
+    closeMenuBtn.addEventListener('click', closeMenu);
+    menuHomeBtn.addEventListener('click', () => {
+        goToHome();
+        closeMenu();
+    });
+    menuOverlay.addEventListener('click', closeMenu);
 }
