@@ -1,8 +1,9 @@
+
 // app.js - Complete Quiz Platform with Class and Competitive Exam functionality
 // Only business logic - questions stored in separate data files
 
 // ===================== APP CONFIGURATION =====================
-const APP_VERSION = '1.5.0'; // Increment this to show an update notification
+const APP_VERSION = ' 1.5.6.0- Beta.'; // Increment this to show an update notification
 
 // ===================== GLOBAL STATE VARIABLES =====================
 let currentSubject = '';
@@ -888,15 +889,16 @@ function generateDailyChallengeQuestions() {
     const allQuestions = [];
 
     // 1. Gather all non-empty questions from competitive exams
-    Object.values(subjectData).forEach(subject => { // Only competitive subjects
+    for (const key in subjectData) {
+        const subject = subjectData[key];
         subject?.chapters?.forEach(chapter => {
-            chapter?.sets?.forEach(set => {
-                if (set.length > 0) {
+            chapter.sets?.forEach(set => {
+                if (Array.isArray(set) && set.length > 0) {
                     allQuestions.push(...set);
                 }
             });
         });
-    }); // <--- Added missing closing parenthesis and semicolon
+    }
 
     if (allQuestions.length < 20) {
         return null; // Not enough questions
