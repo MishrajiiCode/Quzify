@@ -1925,3 +1925,26 @@ footer a:hover svg {
     text-align: center;
   }
 }
+
+/* Notification Toast */
+#notification-toast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background-color: var(--color-primary);
+  color: var(--color-btn-primary-text);
+  padding: var(--space-16);
+  border-radius: var(--radius-base);
+  box-shadow: var(--shadow-lg);
+  z-index: 1000;
+  opacity: 0;
+  transform: translateY(-20px);
+  transition: opacity 300ms var(--ease-standard), transform 300ms var(--ease-standard);
+  visibility: hidden;
+}
+
+#notification-toast.show {
+  opacity: 1;
+  transform: translateY(0);
+  visibility: visible;
+}
