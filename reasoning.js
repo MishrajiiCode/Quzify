@@ -4,36 +4,312 @@
 const reasoningData = {
   chapters: [
     {
-      name: 'Logical Deduction',
+      name: 'Counting of Figures',
       sets: [
+        // Set 1: Questions 1-20
         [
-          {
-            question: 'If all roses are flowers and some flowers fade quickly, can we say all roses fade quickly?',
-            options: ['Yes', 'No', 'Cannot be determined', 'None of the above'],
-            answer: 2
-          },
-          // ...19 more questions for Set 1
+
         ],
-        // Set 2
+        
+        // Set 2: Questions 21-40
+        [
+        
+        ],
+        // Set 4: Questions 61-80
+        
+          
+      ]// End of Noun
+    },
+
+    {
+      name: 'Calendar',
+      sets: [
+        // Set 1: Questions 1-20
+        [
+          
+        ],
+
+        // Set 2: Questions 1-20
+        [
+          
+        ],
+     ]
+    },
+    // End of Pronoun
+
+    {
+      name: 'Direction and Distance',
+      sets: [
+        // Set 1: Questions 1-20
+        [
+
+        ],
+
+        // Set 2: Questions 21–40
+
+        [ 
+          
+        ],
+      ]
+    
+    }, // End of SV Agreement
+
+    {
+      name: 'Venn Diagram',
+      sets: [
+        // 5 sets, each with 20 unique questions
         [],
-        // Set 3, 4, 5
-      ]
+        [],
+        [],
+        [],
+        []
+      ]//Complete Adjective
     },
+
     {
-      name: 'Puzzles',
+      name: 'Pair Formation',
       sets: [
-        // 5 sets, 20 questions per set
-      ]
+        // 5 sets, each with 20 unique questions
+        [],
+        [],
+        [],
+        [],
+        []
+      ]// Complete Articles
     },
+
     {
-      name: 'Series',
+      name: 'Coding Decoding',
       sets: [
-        // 5 sets, 20 questions per set
-      ]
+        // 5 sets, each with 20 unique questions
+        [],
+        [],
+        [],
+        [],
+        []
+      ]//Complete Verbs
     },
-    // Add more chapters
-  ]
+
+    {
+      name: 'Letter Analogy',
+      sets: [
+        // 5 sets, each with 20 unique questions
+        [],
+        [],
+        [],
+        [],
+        []
+      ]//Complete Tenses
+    },
+
+    {
+      name: 'Alphabet Series',
+      sets: [
+        // 5 sets, each with 20 unique questions
+        [],
+        [],
+        [],
+        [],
+        []
+      ]//Complete Conditionals
+    },
+
+    {
+      name: 'Letter Series',
+      sets: [
+        // 5 sets, each with 20 unique questions
+        [],
+        [],
+        [],
+        [],
+        []
+      ]//Complete Advance Verbs
+    },
+
+    {
+      name: 'Word Formation and Logican Sequence of Series',
+      sets: [
+        // 5 sets, each with 20 unique questions
+        [],
+        [],
+        [],
+        [],
+        []
+      ]//Complete Modals
+    },
+
+    {
+      name: 'Dice',
+      sets: [
+        // 5 sets, each with 20 unique questions
+        [],
+        [],
+        [],
+        [],
+        []
+      ]//Complete Adverb
+    },
+
+    {
+      name: 'Cube & Cuboid',
+      sets: [
+        // 5 sets, each with 20 unique questions
+        [],
+        [],
+        [],
+        [],
+        []
+      ]//Complete Preposition
+    },
+
+    {
+      name: 'Number Series',
+      sets: [
+        // 5 sets, each with 20 unique questions
+        [],
+        [],
+        [],
+        [],
+        []
+      ]//Complete Conjuction
+    },
+
+    {
+      name: 'Number Anology',
+      sets: [
+        // 5 sets, each with 20 unique questions
+        [],
+        [],
+        [],
+        [],
+        []
+      ]//Complete Question Tag
+    },
+
+    {
+      name: 'Missing Number',
+      sets: [
+        // 5 sets, each with 20 unique questions
+        [],
+        [],
+        [],
+        [],
+        []
+      ]//Complete Passive Voice
+    },
+
+    {
+      name: 'Syllogism',
+      sets: [
+        // 5 sets, each with 20 unique questions
+        [],
+        [],
+        [],
+        [],
+        []
+      ]//Complete Narration
+    },
+
+    {
+      name: 'Ranking',
+      sets: [
+        // 5 sets, each with 20 unique questions
+        [],
+        [],
+        [],
+        [],
+        []
+      ]//Complete Parajumbles
+    },
+
+    {
+      name: 'Clock',
+      sets: [
+        // 5 sets, each with 20 unique questions
+        [],
+        [],
+        [],
+        [],
+        []
+      ]//Complete Cloze Test
+    },
+
+    {
+      name: 'Mirror & Water Images',
+      sets: [
+        // 5 sets, each with 20 unique questions
+        [],
+        [],
+        [],
+        [],
+        []
+      ]//Complete Passage
+    },
+
+    {
+      name: 'Paper Cutting & Folding',
+      sets: [
+        // 5 sets, each with 20 unique questions
+        [],
+        [],
+        [],
+        [],
+        []
+      ]//Complete Vocabulary
+    },
+
+    {
+      name: 'Figure Series',
+      sets: [
+        // 5 sets, each with 20 unique questions
+        [],
+        [],
+        [],
+        [],
+        []
+      ]//Complete Vocabulary
+    },
+
+    {
+      name: 'Cause & Its Effect',
+      sets: [
+        // 5 sets, each with 20 unique questions
+        [],
+        [],
+        [],
+        [],
+        []
+      ]//Complete Vocabulary
+    },
+
+    {
+      name: 'Statement & Course of Action',
+      sets: [
+        // 5 sets, each with 20 unique questions
+        [],
+        [],
+        [],
+        [],
+        []
+      ]//Complete Vocabulary
+    },
+
+    {
+      name: 'Mathematical Operator',
+      sets: [
+        // 5 sets, each with 20 unique questions
+        [],
+        [],
+        [],
+        [],
+        []
+      ]//Complete Vocabulary
+    },
+
+  ]    
+  
 };
+    
 
 // Export for app.js
 window.reasoningData = reasoningData;
