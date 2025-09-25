@@ -2,7 +2,7 @@
 // Only business logic - questions stored in separate data files
 
 // ===================== APP CONFIGURATION =====================
-const APP_VERSION = '1.3.0'; // Increment this to show an update notification
+const APP_VERSION = '1.5.0'; // Increment this to show an update notification
 
 // ===================== GLOBAL STATE VARIABLES =====================
 let currentSubject = '';
@@ -21,6 +21,10 @@ let currentClass = '';
 let currentStream = '';
 let classMode = false; // true if user is in class (academic) mode
 
+// NEW: Daily Challenge state
+let dailyChallengeMode = false;
+
+
 // ===================== DATA MAPPING =====================
 // Competitive exam data mapping (loaded from external files)
 const subjectData = {
@@ -35,16 +39,17 @@ const classData = window.classesData || null;
 // ===================== INITIALIZATION =====================
 document.addEventListener('DOMContentLoaded', function() {
     loadUserProgress();
-    initializeApp();
+    checkUserProfile();
+    initializeTheme();
     checkForUpdates();
 });
 
 function initializeApp() {
     showPage('home-page');
     classMode = false;
-    document.getElementById('app-version').textContent = `v${APP_VERSION}`;
     currentClass = '';
     currentStream = '';
+    dailyChallengeMode = false;
 }
 
 // ===================== NAVIGATION FUNCTIONS =====================
@@ -56,6 +61,7 @@ function showPage(pageId) {
 }
 
 function goToHome() {
+    dailyChallengeMode = false;
     classMode = false;
     currentClass = '';
     currentStream = '';
@@ -65,7 +71,11 @@ function goToHome() {
 }
 
 function goBack() {
-    if (classMode && currentClass) {
+    if (dailyChallengeMode) {
+        // From daily challenge subject page back to home
+        goToHome();
+    }
+    else if (classMode && currentClass) {
         if (currentClass === '11' || currentClass === '12') {
             if (currentStream && currentSubject) {
                 // From academic subject page back to class subjects grid
@@ -80,7 +90,7 @@ function goBack() {
             } else {
                 // From stream selection back to combined home page
                 classMode = false;
-                currentClass = '';
+                currentClass = ''; 
                 showPage('home-page');
             }
         } else {
@@ -93,7 +103,7 @@ function goBack() {
             } else {
                 // From class subjects grid back to combined home page
                 classMode = false;
-                currentClass = '';
+                currentClass = ''; 
                 showPage('home-page');
             }
         }
@@ -113,7 +123,9 @@ function goToClass() {
 }
 
 function goToSubject() {
-    if (classMode) {
+    if (dailyChallengeMode) {
+        goToHome();
+    } else if (classMode) {
         displaySubjectsForClass();
         showPage('class-page');
     } else {
@@ -122,7 +134,11 @@ function goToSubject() {
 }
 
 function goToChapter() {
-    displayChapterInfo();
+    if (dailyChallengeMode) {
+        goToHome();
+        return;
+    }
+    displayChapterInfo(); // This will handle both class and competitive modes
     showPage('chapter-page');
 }
 
@@ -132,6 +148,7 @@ function goToResults() {
 
 // ===================== COMPETITIVE EXAM FUNCTIONS (ORIGINAL) =====================
 function selectSubject(subject) {
+    dailyChallengeMode = false;
     classMode = false;
     currentSubject = subject;
     currentClass = '';
@@ -184,6 +201,7 @@ function displayChapters(subject) {
 
 // ===================== NEW: CLASS-BASED FUNCTIONS =====================
 function selectClass(cls) {
+    dailyChallengeMode = false;
     classMode = true;
     currentClass = cls;
     currentSubject = '';
@@ -463,6 +481,7 @@ function displayProgressInfo(completedSets, averageScore) {
 
 // ===================== QUIZ FUNCTIONALITY (PRESERVED) =====================
 function startQuiz(setIndex) {
+    dailyChallengeMode = false;
     currentSet = setIndex;
     currentQuestionIndex = 0;
     userAnswers = [];
@@ -664,7 +683,7 @@ function calculateResults() {
 
 function displayResults(results, timeTaken) {
     // Update score display
-    document.getElementById('score-percentage').textContent = `${results.percentage}%`;
+    animateValue('score-percentage', 0, results.percentage, 1000, '%');
     document.getElementById('correct-count').textContent = results.correctCount;
     document.getElementById('incorrect-count').textContent = results.incorrectCount;
     
@@ -682,6 +701,20 @@ function displayResults(results, timeTaken) {
         resultStatus.textContent = '❌ You need to score 98% or above to pass. Try again!';
         resultStatus.className = 'result-status failed';
     }
+}
+
+function animateValue(id, start, end, duration, suffix = '') {
+    const obj = document.getElementById(id);
+    let startTimestamp = null;
+    const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        obj.innerHTML = Math.floor(progress * (end - start) + start) + suffix;
+        if (progress < 1) {
+            window.requestAnimationFrame(step);
+        }
+    };
+    window.requestAnimationFrame(step);
 }
 
 function retakeQuiz() {
@@ -788,6 +821,175 @@ function formatTime(seconds) {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+}
+
+// ===================== NEW: THEME SWITCHER =====================
+function initializeTheme() {
+    const themeToggle = document.getElementById('theme-toggle');
+    const savedTheme = localStorage.getItem('theme') || 'light';
+
+    document.documentElement.setAttribute('data-color-scheme', savedTheme);
+    themeToggle.checked = savedTheme === 'dark';
+
+    themeToggle.addEventListener('change', function() {
+        const newTheme = this.checked ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-color-scheme', newTheme);
+        localStorage.setItem('theme', newTheme);
+    });
+}
+
+// ===================== NEW: DAILY CHALLENGE =====================
+function checkDailyChallengeStatus() {
+    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+    const dailyProgressKey = `daily_${today}`;
+    const progress = userProgress[dailyProgressKey];
+    const statusEl = document.getElementById('daily-challenge-status');
+
+    if (progress) {
+        if (progress.score >= 98) {
+            statusEl.textContent = `Completed Today! Score: ${progress.score}%`;
+            statusEl.style.color = 'var(--color-success)';
+        } else {
+            statusEl.textContent = `Attempted Today. Score: ${progress.score}%. Try again!`;
+            statusEl.style.color = 'var(--color-warning)';
+        }
+    } else {
+        statusEl.textContent = 'A new challenge awaits!';
+    }
+}
+
+function startDailyChallenge() {
+    dailyChallengeMode = true;
+    currentSubject = 'Daily Challenge';
+    currentChapter = 'Mixed Questions';
+    currentSet = 0;
+    currentQuestionIndex = 0;
+    userAnswers = [];
+
+    quizData = generateDailyChallengeQuestions();
+
+    if (!quizData || quizData.length < 20) {
+        alert('Not enough questions available for a Daily Challenge. Please add more content.');
+        goToHome();
+        return;
+    }
+
+    userAnswers = new Array(quizData.length).fill(null);
+    timeRemaining = quizData.length * 60;
+    totalTime = timeRemaining;
+
+    displayQuestion();
+    startTimer();
+    setupQuestionNumbers();
+    showPage('quiz-page');
+}
+
+function generateDailyChallengeQuestions() {
+    const allQuestions = [];
+
+    // 1. Gather all non-empty questions from competitive exams
+    Object.values(subjectData).forEach(subject => { // Only competitive subjects
+        subject?.chapters?.forEach(chapter => {
+            chapter?.sets?.forEach(set => {
+                if (set.length > 0) {
+                    allQuestions.push(...set);
+                }
+            });
+        });
+    }); // <--- Added missing closing parenthesis and semicolon
+
+    if (allQuestions.length < 20) {
+        return null; // Not enough questions
+    }
+
+    // 3. Use today's date as a seed for a pseudo-random number generator
+    const today = new Date();
+    let seed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
+    const pseudoRandom = () => {
+        const x = Math.sin(seed++) * 10000;
+        return x - Math.floor(x);
+    };
+
+    // 4. Shuffle the array using the seeded random function (Fisher-Yates shuffle)
+    let currentIndex = allQuestions.length, randomIndex;
+    while (currentIndex !== 0) {
+        randomIndex = Math.floor(pseudoRandom() * currentIndex);
+        currentIndex--;
+        [allQuestions[currentIndex], allQuestions[randomIndex]] = [
+            allQuestions[randomIndex], allQuestions[currentIndex]
+        ];
+    }
+
+    // 5. Return the first 20 questions
+    return allQuestions.slice(0, 20);
+}
+
+// ===================== NEW: ONBOARDING & PERSONALIZATION =====================
+function checkUserProfile() {
+    const userName = localStorage.getItem('userName');
+    const userFocus = localStorage.getItem('userFocus');
+
+    if (!userName || !userFocus) {
+        document.getElementById('onboarding-modal').style.display = 'flex';
+        document.getElementById('logout-btn').style.display = 'none';
+    } else {
+        document.getElementById('onboarding-modal').style.display = 'none';
+        document.getElementById('logout-btn').style.display = 'inline-flex';
+        personalizeHomepage(userName, userFocus);
+    }
+    document.getElementById('app-version').textContent = `v${APP_VERSION}`;
+}
+
+function saveUserPreferences(focus) {
+    const nameInput = document.getElementById('user-name-input');
+    const userName = nameInput.value.trim();
+
+    if (!userName) {
+        alert('Please enter your name.');
+        nameInput.focus();
+        return;
+    }
+
+    localStorage.setItem('userName', userName);
+    localStorage.setItem('userFocus', focus);
+
+    document.getElementById('onboarding-modal').style.display = 'none';
+    document.getElementById('logout-btn').style.display = 'inline-flex';
+    personalizeHomepage(userName, focus);
+}
+
+function personalizeHomepage(userName, userFocus) {
+    // Personalize welcome message
+    document.getElementById('welcome-heading').textContent = `Welcome, ${userName}!`;
+
+    // Get section elements
+    const competitiveSection = document.getElementById('competitive-section');
+    const academicSection = document.getElementById('academic-section');
+    const dailyChallengeSection = document.getElementById('daily-challenge-section');
+
+    // Show/hide sections based on focus
+    if (userFocus === 'competitive') {
+        competitiveSection.style.display = 'block';
+        dailyChallengeSection.style.display = 'block';
+        academicSection.style.display = 'none';
+        checkDailyChallengeStatus(); // Check status only for competitive users
+    } else if (userFocus === 'academic') {
+        competitiveSection.style.display = 'none';
+        dailyChallengeSection.style.display = 'none';
+        academicSection.style.display = 'block';
+    }
+
+    // Initialize the app view
+    initializeApp();
+}
+
+function logout() {
+    if (confirm('Are you sure you want to logout? This will allow you to change your preparation focus.')) {
+        localStorage.removeItem('userName');
+        localStorage.removeItem('userFocus');
+        // Reload the page to reset the state and show the onboarding modal
+        window.location.reload();
+    }
 }
 
 // ===================== ERROR HANDLING =====================
@@ -914,5 +1116,3 @@ function showNotification(message) {
         toast.classList.remove('show');
     }, 6000); // Hide after 6 seconds
 }
-
-
