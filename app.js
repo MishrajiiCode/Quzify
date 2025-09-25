@@ -3,7 +3,7 @@
 // Only business logic - questions stored in separate data files
 
 // ===================== APP CONFIGURATION =====================
-const APP_VERSION = '1.5.7-Beta.'; // Increment this to show an update notification
+const APP_VERSION = '1.5.8-Beta.'; // Increment this to show an update notification
 
 // ===================== GLOBAL STATE VARIABLES =====================
 let currentSubject = '';
@@ -15,6 +15,7 @@ let timer = null;
 let totalTime = 0;
 let timeRemaining = 1200; // 20 minutes for 20 questions
 let quizData = null;
+let bookmarkedQuestions = []; // NEW: For bookmarks
 let userProgress = {};
 
 // NEW: Class-related state variables
@@ -40,6 +41,7 @@ const classData = window.classesData || null;
 
 // ===================== INITIALIZATION =====================
 document.addEventListener('DOMContentLoaded', function() {
+    loadBookmarkedQuestions();
     loadUserProgress();
     checkUserProfile();
     initializeTheme();
@@ -568,6 +570,9 @@ function displayQuestion() {
     document.getElementById('next-btn').textContent = 
         currentQuestionIndex === quizData.length - 1 ? 'Finish' : 'Next';
     
+    // Update bookmark button
+    updateBookmarkButton();
+
     updateQuestionNumbers();
 }
 
@@ -832,6 +837,18 @@ function loadUserProgress() {
     }
 }
 
+function loadBookmarkedQuestions() {
+    const saved = localStorage.getItem('bookmarkedQuestions');
+    if (saved) {
+        try {
+            bookmarkedQuestions = JSON.parse(saved);
+        } catch (error) {
+            console.error('Error loading bookmarks:', error);
+            bookmarkedQuestions = [];
+        }
+    }
+}
+
 // ===================== UTILITY FUNCTIONS =====================
 function formatTime(seconds) {
     const minutes = Math.floor(seconds / 60);
@@ -896,6 +913,7 @@ function startDailyChallenge() {
 
     displayQuestion();
     startTimer();
+    updateBookmarkButton(); // Add this line
     setupQuestionNumbers();
     showPage('quiz-page');
 }
@@ -1175,6 +1193,7 @@ function initializeSideMenu() {
     const menuToggleBtn = document.getElementById('menu-toggle-btn');
     const closeMenuBtn = document.getElementById('close-menu-btn');
     const menuHomeBtn = document.getElementById('menu-home-btn');
+    const menuBookmarksBtn = document.getElementById('menu-bookmarks-btn');
     const menuOverlay = document.getElementById('menu-overlay');
     
     const openMenu = () => {
@@ -1187,6 +1206,10 @@ function initializeSideMenu() {
     closeMenuBtn.addEventListener('click', closeSideMenu);
     menuHomeBtn.addEventListener('click', () => {
         goToHome();
+        closeSideMenu();
+    });
+    menuBookmarksBtn.addEventListener('click', () => {
+        displayBookmarkedQuestions();
         closeSideMenu();
     });
     menuOverlay.addEventListener('click', closeSideMenu);
@@ -1288,4 +1311,84 @@ function displayHomepageSearchResults(results, query) {
         });
     }
     resultsContainer.style.display = 'block';
+}
+
+// ===================== NEW: BOOKMARKING FEATURE =====================
+function saveBookmarkedQuestions() {
+    localStorage.setItem('bookmarkedQuestions', JSON.stringify(bookmarkedQuestions));
+}
+
+function toggleBookmark() {
+    const currentQuestion = quizData[currentQuestionIndex];
+    // Create a unique ID for the question to check for existence
+    const questionId = `${currentSubject}-${currentChapter}-${currentSet}-${currentQuestionIndex}`;
+
+    const existingIndex = bookmarkedQuestions.findIndex(bm => bm.id === questionId);
+
+    if (existingIndex > -1) {
+        // Already bookmarked, so remove it
+        bookmarkedQuestions.splice(existingIndex, 1);
+        showNotification('Bookmark removed.');
+    } else {
+        // Not bookmarked, so add it
+        bookmarkedQuestions.push({
+            id: questionId,
+            question: currentQuestion,
+            context: {
+                subject: getSubjectTitle(currentSubject),
+                chapter: currentChapter
+            }
+        });
+        showNotification('Bookmark added!');
+    }
+
+    saveBookmarkedQuestions();
+    updateBookmarkButton();
+}
+
+function updateBookmarkButton() {
+    const bookmarkBtn = document.getElementById('bookmark-btn');
+    if (!bookmarkBtn) return;
+
+    const questionId = `${currentSubject}-${currentChapter}-${currentSet}-${currentQuestionIndex}`;
+    const isBookmarked = bookmarkedQuestions.some(bm => bm.id === questionId);
+
+    bookmarkBtn.classList.toggle('bookmarked', isBookmarked);
+    bookmarkBtn.title = isBookmarked ? 'Remove bookmark' : 'Bookmark this question';
+    bookmarkBtn.onclick = toggleBookmark;
+}
+
+function displayBookmarkedQuestions() {
+    const container = document.getElementById('bookmarks-container');
+    container.innerHTML = '';
+
+    if (bookmarkedQuestions.length === 0) {
+        container.innerHTML = '<p>You have no bookmarked questions yet. You can bookmark questions during a quiz.</p>';
+        showPage('bookmarks-page');
+        return;
+    }
+
+    bookmarkedQuestions.forEach((bm, index) => {
+        const div = document.createElement('div');
+        div.className = 'review-question';
+        div.innerHTML = `
+            <h3>${bm.context.subject} - ${bm.context.chapter}</h3>
+            <p><strong>${bm.question.question}</strong></p>
+            <p><strong>Correct Answer:</strong> ${String.fromCharCode(65 + bm.question.answer)}. ${bm.question.options[bm.question.answer]}</p>
+            <button class="remove-bookmark-btn" onclick="removeBookmark(${index})">Remove Bookmark</button>
+        `;
+        container.appendChild(div);
+    });
+
+    showPage('bookmarks-page');
+}
+
+function removeBookmark(index) {
+    if (index > -1 && index < bookmarkedQuestions.length) {
+        bookmarkedQuestions.splice(index, 1);
+        saveBookmarkedQuestions();
+        showNotification('Bookmark removed.');
+        // Refresh the view
+        displayBookmarkedQuestions();
+    }
 }
