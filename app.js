@@ -2,7 +2,7 @@
 // Only business logic - questions stored in separate data files
 
 // ===================== APP CONFIGURATION =====================
-const APP_VERSION = '1.1.0'; // Increment this to show an update notification
+const APP_VERSION = '1.2.0'; // Increment this to show an update notification
 
 // ===================== GLOBAL STATE VARIABLES =====================
 let currentSubject = '';
@@ -914,3 +914,4 @@ function showNotification(message) {
         toast.classList.remove('show');
     }, 6000); // Hide after 6 seconds
 }
+
