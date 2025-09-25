@@ -802,6 +802,61 @@ body {
   margin-bottom: var(--space-32);
 }
 
+/* Homepage Search Bar */
+.homepage-search-container {
+  position: relative;
+  max-width: 600px;
+  margin: 0 auto var(--space-32) auto;
+}
+
+#homepage-search-input {
+  width: 100%;
+  padding: var(--space-16);
+  font-size: var(--font-size-lg);
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-secondary);
+  color: var(--color-text);
+  transition: all var(--duration-normal) var(--ease-standard);
+}
+
+#homepage-search-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: var(--focus-ring);
+}
+
+.homepage-search-results {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  margin-top: var(--space-8);
+  max-height: 300px;
+  overflow-y: auto;
+  z-index: 100;
+  box-shadow: var(--shadow-lg);
+}
+
+.search-result-item {
+  padding: var(--space-12) var(--space-16);
+  cursor: pointer;
+  border-bottom: 1px solid var(--color-border);
+}
+.search-result-item:last-child { border-bottom: none; }
+.search-result-item:hover { background-color: var(--color-secondary); }
+.search-result-item span { font-size: var(--font-size-sm); color: var(--color-text-secondary); margin-left: var(--space-8); }
+.search-result-item mark {
+  background-color: var(--color-primary-hover);
+  color: var(--color-btn-primary-text);
+  border-radius: var(--radius-sm);
+  padding: 0 2px;
+}
+
 /* Daily Challenge Card */
 .daily-challenge-card {
   background: linear-gradient(135deg, var(--color-primary), var(--color-blue-500));
@@ -1476,6 +1531,28 @@ button:focus-visible {
 
 .menu-toggle-btn svg {
   stroke: var(--color-text);
+  transition: transform 0.3s var(--ease-standard);
+}
+
+.menu-toggle-btn svg line {
+  transition: transform 0.3s var(--ease-standard), opacity 0.3s var(--ease-standard);
+  transform-origin: center;
+}
+
+/* Hamburger to X animation */
+.menu-toggle-btn.is-active svg line:nth-child(1) {
+  transform: translateY(6px) rotate(45deg);
+}
+
+.menu-toggle-btn.is-active svg line:nth-child(2) {
+  opacity: 0;
+}
+
+.menu-toggle-btn.is-active svg line:nth-child(3) {
+  transform: translateY(-6px) rotate(-45deg);
+}
+.menu-toggle-btn:hover {
+    transform: none; /* Prevent button hover effect from interfering */
 }
 
 /* Side Menu (Drawer) */
@@ -1544,6 +1621,7 @@ button:focus-visible {
   border-radius: var(--radius-base);
   cursor: pointer;
   transition: background-color var(--duration-normal) var(--ease-standard);
+  text-decoration: none; /* Ensure links don't have underlines */
 }
 
 .side-menu-item:hover {
@@ -1915,6 +1993,11 @@ input:checked + .slider:before { transform: translateX(24px); }
   text-align: center;
   max-width: 500px;
   width: 90%;
+}
+.modal-actions {
+  display: flex;
+  gap: var(--space-16);
+  justify-content: flex-end;
 }
 
 .modal-content h2 {
