@@ -132,6 +132,7 @@ function selectSubject(subject) {
     currentClass = '';
     currentStream = '';
     const subjectTitle = getSubjectTitle(subject);
+    document.getElementById('search-chapters').value = ''; // Clear search bar
     document.getElementById('subject-title').textContent = subjectTitle;
     displayChapters(subject);
     showPage('subject-page');
@@ -286,6 +287,7 @@ function displayStreamsForClass() {
 
 function selectClassSubject(subject) {
     currentSubject = subject;
+    document.getElementById('search-chapters').value = ''; // Clear search bar
     document.getElementById('subject-title').textContent = `${getSubjectTitle(subject)} - Class ${currentClass}`;
     displayChaptersForClass();
     showPage('subject-page');
@@ -316,6 +318,34 @@ function displayChaptersForClass() {
         };
         grid.appendChild(chapterCard);
     });
+}
+
+// ===================== NEW: CHAPTER SEARCH FUNCTION =====================
+function filterChapters() {
+    const searchTerm = document.getElementById('search-chapters').value.toLowerCase();
+    const chapterCards = document.querySelectorAll('#chapters-grid .chapter-card');
+    let chaptersFound = false;
+
+    chapterCards.forEach(card => {
+        const chapterName = card.querySelector('h3').textContent.toLowerCase();
+        if (chapterName.includes(searchTerm)) {
+            card.style.display = '';
+            chaptersFound = true;
+        } else {
+            card.style.display = 'none';
+        }
+    });
+
+    // Display a message if no chapters are found
+    let noResultsMessage = document.getElementById('no-results-message');
+    if (!chaptersFound && !noResultsMessage) {
+        noResultsMessage = document.createElement('p');
+        noResultsMessage.id = 'no-results-message';
+        noResultsMessage.textContent = 'No chapters found matching your search.';
+        document.getElementById('chapters-grid').appendChild(noResultsMessage);
+    } else if (chaptersFound && noResultsMessage) {
+        noResultsMessage.remove();
+    }
 }
 
 // ===================== CHAPTER INFO DISPLAY =====================
@@ -767,4 +797,3 @@ function checkDataAvailability() {
         console.warn('No quiz data loaded. Please ensure data files are included.');
     }
 }
-
