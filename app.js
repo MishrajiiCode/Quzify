@@ -3,7 +3,7 @@
 // Only business logic - questions stored in separate data files
 
 // ===================== APP CONFIGURATION =====================
-const APP_VERSION = '1.5.8-Beta.'; // Increment this to show an update notification
+const APP_VERSION = '1.5.9-Beta.'; // Increment this to show an update notification
 
 // ===================== GLOBAL STATE VARIABLES =====================
 let currentSubject = '';
@@ -697,8 +697,8 @@ function calculateResults() {
     return {
         correctCount,
         incorrectCount: quizData.length - correctCount,
-        percentage,
-        passed: percentage >= 98
+        percentage, 
+        passed: percentage >= 40 // Changed passing criteria to 40%
     };
 }
 
@@ -719,7 +719,7 @@ function displayResults(results, timeTaken) {
         resultStatus.textContent = '🎉 Congratulations! You passed the quiz!';
         resultStatus.className = 'result-status passed';
     } else {
-        resultStatus.textContent = '❌ You need to score 98% or above to pass. Try again!';
+        resultStatus.textContent = '❌ You need to score 40% or above to pass. Try again!';
         resultStatus.className = 'result-status failed';
     }
 }
