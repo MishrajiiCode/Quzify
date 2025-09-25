@@ -8,6 +8,21 @@
 </head>
 <body>
     <div id="notification-toast"></div>
+
+    <!-- Onboarding Modal -->
+    <div id="onboarding-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h2>Welcome to Quizify!</h2>
+            <p>Let's personalize your experience. What should we call you?</p>
+            <input type="text" id="user-name-input" placeholder="Enter your name">
+            <p>What are you preparing for?</p>
+            <div class="onboarding-choices">
+                <button onclick="saveUserPreferences('competitive')">Competitive Exams</button>
+                <button onclick="saveUserPreferences('academic')">Academics</button>
+            </div>
+        </div>
+    </div>
+
     <div class="container">
         <!-- Home Page -->
         <div id="home-page" class="page active">
@@ -16,51 +31,64 @@
                     <img src="img.png" alt="Quiz Logo">
                     <span>Quizify</span>
                 </div>
-                <h1>Welcome to our modern Quizify Platform!</h1>
+                <h1 id="welcome-heading">Welcome to Quizify!</h1>
+            </div>
+
+            <!-- Daily Challenge Section -->
+            <div id="daily-challenge-section">
+                <div class="daily-challenge-card" onclick="startDailyChallenge()">
+                    <h2>🔥 Daily Challenge</h2>
+                    <p>Test your knowledge with 20 random questions from all subjects. A new quiz is available every day!</p>
+                    <span id="daily-challenge-status"></span>
+                </div>
             </div>
 
             <!-- Competitive Exams Section -->
-            <h2>Competitive Exams</h2>
-            <div class="subjects-grid">
-                <div class="subject-card" onclick="selectSubject('quantitative')">
-                    <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Math Icon" class="card-icon">
-                    <h2>Quantitative Aptitude</h2>
-                    <p>Mathematics and numerical ability</p>
-                </div>
-                <div class="subject-card" onclick="selectSubject('english')">
-                    <img src="https://cdn-icons-png.flaticon.com/512/3652/3652191.png" alt="English Icon" class="card-icon">
-                    <h2>English</h2>
-                    <p>Grammar, vocabulary, and comprehension</p>
-                </div>
-                <div class="subject-card" onclick="selectSubject('reasoning')">
-                    <img src="https://cdn-icons-png.flaticon.com/512/4727/4727266.png" alt="Reasoning Icon" class="card-icon">
-                    <h2>Reasoning</h2>
-                    <p>Logical and analytical reasoning</p>
+            <div id="competitive-section">
+                <h2>Competitive Exams</h2>
+                <div class="subjects-grid">
+                    <div class="subject-card" onclick="selectSubject('quantitative')">
+                        <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Math Icon" class="card-icon">
+                        <h2>Quantitative Aptitude</h2>
+                        <p>Mathematics and numerical ability</p>
+                    </div>
+                    <div class="subject-card" onclick="selectSubject('english')">
+                        <img src="https://cdn-icons-png.flaticon.com/512/3652/3652191.png" alt="English Icon" class="card-icon">
+                        <h2>English</h2>
+                        <p>Grammar, vocabulary, and comprehension</p>
+                    </div>
+                    <div class="subject-card" onclick="selectSubject('reasoning')">
+                        <img src="https://cdn-icons-png.flaticon.com/512/4727/4727266.png" alt="Reasoning Icon" class="card-icon">
+                        <h2>Reasoning</h2>
+                        <p>Logical and analytical reasoning</p>
+                    </div>
                 </div>
             </div>
 
             <!-- Academic Classes Section -->
-            <h2>Academic Classes</h2>
-            <div class="subjects-grid">
-                <div class="subject-card" onclick="selectClass('9')">
-                    <img src="https://cdn-icons-png.flaticon.com/512/3749/3749124.png" alt="Class 9 Icon" class="card-icon">
-                    <h2>Class 9</h2>
-                    <p>Foundation level science and mathematics</p>
-                </div>
-                <div class="subject-card" onclick="selectClass('10')">
-                    <img src="https://cdn-icons-png.flaticon.com/512/3749/3749124.png" alt="Class 10 Icon" class="card-icon">
-                    <h2>Class 10</h2>
-                    <p>Board exam preparation</p>
-                </div>
-                <div class="subject-card" onclick="selectClass('11')">
-                    <img src="https://cdn-icons-png.flaticon.com/512/4185/4185283.png" alt="Class 11 Icon" class="card-icon">
-                    <h2>Class 11</h2>
-                    <p>Higher secondary - Stream based</p>
-                </div>
-                <div class="subject-card" onclick="selectClass('12')">
-                    <img src="https://cdn-icons-png.flaticon.com/512/4185/4185283.png" alt="Class 12 Icon" class="card-icon">
-                    <h2>Class 12</h2>
-                    <p>Board &amp; competitive exam prep</p>
+            <div id="academic-section">
+                <h2>Academic Classes</h2>
+                <div class="subjects-grid">
+                    <div class="subject-card" onclick="selectClass('9')">
+                        <img src="https://cdn-icons-png.flaticon.com/512/3749/3749124.png" alt="Class 9 Icon" class="card-icon">
+                        <h2>Class 9</h2>
+                        <p>Foundation level science and mathematics</p>
+                    </div>
+                    <div class="subject-card" onclick="selectClass('10')">
+                        <img src="https://cdn-icons-png.flaticon.com/512/3749/3749124.png" alt="Class 10 Icon" class="card-icon">
+                        <h2>Class 10</h2>
+                        <p>Board exam preparation</p>
+                    </div>
+                    <div class="subject-card" onclick="selectClass('11')">
+                        <img src="https://cdn-icons-png.flaticon.com/512/4185/4185283.png" alt="Class 11 Icon" class="card-icon">
+                        <h2>Class 11</h2>
+                        <p>Higher secondary - Stream based</p>
+                    </div>
+                    <div class="subject-card" onclick="selectClass('12')">
+                        <img src="https://cdn-icons-png.flaticon.com/512/4185/4185283.png" alt="Class 12 Icon" class="card-icon">
+                        <h2>Class 12</h2>
+                        <p>Board &amp; competitive exam prep</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -188,9 +216,18 @@
 
                 <div class="action-buttons">
                     <button onclick="retakeQuiz()">Retake Quiz</button>
-                    
+                    <button id="review-answers-btn" onclick="reviewAnswers()">Review Answers</button>
                     <button onclick="goToChapter()">Back to Chapter</button>
                 </div>
+            </div>
+        </div>
+
+        <!-- Review Page -->
+        <div id="review-page" class="page">
+            <button class="back-btn" onclick="goToResults()">← Back to Results</button>
+            <h1>Review Your Answers</h1>
+            <div id="review-container" class="review-container">
+                <!-- Review content will be populated by JavaScript -->
             </div>
         </div>
     </div>
@@ -209,9 +246,20 @@
   <!-- Footer Section -->
   <footer>
     <div class="footer-content">
-        <p>Made with love by Raj Mishra! - <span id="app-version"></span></p>
-        <p>&copy; 2025 Quizify. All rights reserved.</p>
-        <!-- Social icons can be placed here if desired -->
+        <div>
+            <p>Made with love by Raj Mishra! - <span id="app-version"></span></p>
+            <p>&copy; 2025 Quizify. All rights reserved.</p>
+        </div>
+        <div class="footer-actions">
+            <div class="theme-switcher">
+                <label for="theme-toggle" class="theme-toggle-label">Dark Mode</label>
+                <label class="switch">
+                    <input type="checkbox" id="theme-toggle">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+            <button id="logout-btn" onclick="logout()">Logout & Change Preference</button>
+        </div>
     </div>
   </footer>
 
