@@ -1,6 +1,9 @@
 // app.js - Complete Quiz Platform with Class and Competitive Exam functionality
 // Only business logic - questions stored in separate data files
 
+// ===================== APP CONFIGURATION =====================
+const APP_VERSION = '1.1.0'; // Increment this to show an update notification
+
 // ===================== GLOBAL STATE VARIABLES =====================
 let currentSubject = '';
 let currentChapter = '';
@@ -33,6 +36,7 @@ const classData = window.classesData || null;
 document.addEventListener('DOMContentLoaded', function() {
     loadUserProgress();
     initializeApp();
+    checkForUpdates();
 });
 
 function initializeApp() {
@@ -796,4 +800,77 @@ function checkDataAvailability() {
     if (!window.classesData && !window.quantitativeData && !window.englishData && !window.reasoningData) {
         console.warn('No quiz data loaded. Please ensure data files are included.');
     }
+}
+
+// ===================== UPDATE NOTIFICATION SYSTEM =====================
+function checkForUpdates() {
+    // 1. Check for App Version Update
+    const lastVersion = localStorage.getItem('appVersion');
+    if (!lastVersion) {
+        localStorage.setItem('appVersion', APP_VERSION);
+    } else if (lastVersion !== APP_VERSION) {
+        showNotification(`App updated to version ${APP_VERSION}! Enjoy the new features.`);
+        localStorage.setItem('appVersion', APP_VERSION);
+    }
+
+    // 2. Check for New Content
+    const lastContentCount = parseInt(localStorage.getItem('contentCount') || '0', 10);
+    const currentContentCount = calculateTotalSets();
+
+    if (currentContentCount > lastContentCount) {
+        showNotification('New quiz sets have been added! Check them out.');
+        localStorage.setItem('contentCount', currentContentCount);
+    } else if (lastContentCount === 0) {
+        // First time user, just set the count
+        localStorage.setItem('contentCount', currentContentCount);
+    }
+}
+
+function calculateTotalSets() {
+    let totalSets = 0;
+
+    // Count sets in competitive exams
+    Object.values(subjectData).forEach(subject => {
+        if (subject && subject.chapters) {
+            subject.chapters.forEach(chapter => {
+                if (chapter.sets) {
+                    chapter.sets.forEach(set => {
+                        if (set.length > 0) {
+                            totalSets++;
+                        }
+                    });
+                }
+            });
+        }
+    });
+
+    // Count sets in academic classes
+    if (classData) {
+        Object.values(classData).forEach(cls => {
+            if (cls.chapters) {
+                Object.values(cls.chapters).forEach(subjectChapters => {
+                    subjectChapters.forEach(chapter => {
+                        if (chapter.sets) {
+                            chapter.sets.forEach(set => {
+                                if (set.length > 0) {
+                                    totalSets++;
+                                }
+                            });
+                        }
+                    });
+                });
+            }
+        });
+    }
+
+    return totalSets;
+}
+
+function showNotification(message) {
+    const toast = document.getElementById('notification-toast');
+    toast.textContent = message;
+    toast.classList.add('show');
+    setTimeout(() => {
+        toast.classList.remove('show');
+    }, 5000); // Hide after 5 seconds
 }
