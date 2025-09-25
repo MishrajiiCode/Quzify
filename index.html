@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -24,6 +25,19 @@
     </div>
 
     <div class="container">
+        <header class="app-header">
+            <div class="header-actions">
+                <div class="theme-switcher">
+                    <label for="theme-toggle" class="theme-toggle-label">Dark Mode</label>
+                    <label class="switch">
+                        <input type="checkbox" id="theme-toggle">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <button id="logout-btn" onclick="logout()">Logout</button>
+            </div>
+        </header>
+
         <!-- Home Page -->
         <div id="home-page" class="page active">
             <div class="home-header">
@@ -249,16 +263,6 @@
         <div>
             <p>Made with love by Raj Mishra! - <span id="app-version"></span></p>
             <p>&copy; 2025 Quizify. All rights reserved.</p>
-        </div>
-        <div class="footer-actions">
-            <div class="theme-switcher">
-                <label for="theme-toggle" class="theme-toggle-label">Dark Mode</label>
-                <label class="switch">
-                    <input type="checkbox" id="theme-toggle">
-                    <span class="slider round"></span>
-                </label>
-            </div>
-            <button id="logout-btn" onclick="logout()">Logout & Change Preference</button>
         </div>
     </div>
   </footer>
