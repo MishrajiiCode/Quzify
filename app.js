@@ -11,7 +11,7 @@ const CHANGELOG = {
     ]
 };
 // ===================== APP CONFIGURATION =====================
-const APP_VERSION = '1.5.12-Beta.'; // Increment this to show an update notification
+const APP_VERSION = '1.5.13-Beta.'; // Increment this to show an update notification
 
 // ===================== GLOBAL STATE VARIABLES =====================
 let currentSubject = '';
@@ -76,6 +76,9 @@ function showPage(pageId) {
 }
 
 function goToHome() {
+    if (timer) {
+        clearInterval(timer);
+    }
     dailyChallengeMode = false;
     classMode = false;
     currentClass = '';
@@ -633,6 +636,9 @@ function updateQuestionNumbers() {
 }
 
 function startTimer() {
+    if (timer) {
+        clearInterval(timer);
+    }
     timer = setInterval(() => {
         timeRemaining--;
         updateTimerDisplay();
@@ -907,11 +913,17 @@ function checkDailyChallengeStatus() {
             statusEl.style.color = 'var(--color-warning)';
         }
     } else {
-        // User has not attempted the challenge today
+        // User has not attempted the challenge today.
         statusEl.textContent = 'A new challenge awaits!';
         statusEl.style.color = ''; // Reset color
         notificationDot.style.display = 'block';
-        showNotification('A new Daily Challenge is available!', 'info');
+
+        // Only show the notification once per day.
+        const lastNotificationDate = localStorage.getItem('dailyChallengeNotificationDate');
+        if (lastNotificationDate !== today) {
+            showNotification('A new Daily Challenge is available!', 'info');
+            localStorage.setItem('dailyChallengeNotificationDate', today);
+        }
     }
 }
 
@@ -1084,6 +1096,9 @@ function setDailyChallengeDate() {
 
 function logout() {
     // Close the side menu for a smoother experience
+    if (timer) {
+        clearInterval(timer);
+    }
     closeSideMenu();
     // Show the custom confirmation modal instead of the browser's confirm dialog
     document.getElementById('logout-confirm-modal').classList.add('visible');
