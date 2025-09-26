@@ -4,14 +4,14 @@
 
 // ===================== APP CHANGELOG =====================
 const CHANGELOG = {
-    '1.5.12-Beta.': [
+    '1.5.13-Beta.': [
         'Added an info button to update notifications to show what\'s new.',
         'Replaced all disruptive browser alerts with a new, professional toast notification system.',
         'Moved the bookmark button next to the question for easier access.'
     ]
 };
 // ===================== APP CONFIGURATION =====================
-const APP_VERSION = '1.5.12-Beta.'; // Increment this to show an update notification
+const APP_VERSION = '1.5.13-Beta.'; // Increment this to show an update notification
 
 // ===================== GLOBAL STATE VARIABLES =====================
 let currentSubject = '';
@@ -1607,4 +1607,5 @@ function removeBookmark(index) {
         displayBookmarkedQuestions();
     }
 }
+
 
