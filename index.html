@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -40,6 +41,17 @@
             <div class="modal-actions">
                 <button id="cancel-logout-btn" class="btn--secondary">Cancel</button>
                 <button id="confirm-logout-btn">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Locked Content Modal -->
+    <div id="locked-content-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h2>Coming Soon!</h2>
+            <p>This content is currently under development. We're working hard to bring you new quizzes and topics. Please check back later!</p>
+            <div class="modal-actions">
+                <button id="close-locked-modal-btn">Got it</button>
             </div>
         </div>
     </div>
@@ -285,6 +297,7 @@
 
             <div class="question-container">
                 <div class="question-header-flex">
+                    <span id="question-year-badge" class="question-year-badge"></span>
                     <h2 id="question-text">Question will appear here</h2>
                     <button id="bookmark-btn" class="bookmark-btn" title="Bookmark this question">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
@@ -378,3 +391,4 @@
 
 </body>
 </html>
+
