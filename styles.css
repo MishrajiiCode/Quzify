@@ -883,6 +883,14 @@ body {
   z-index: 2; /* Keep text above the leaves */
 }
 
+.daily-challenge-date-text {
+  color: var(--color-gray-400);
+  font-weight: var(--font-weight-medium);
+  margin-bottom: var(--space-12);
+  position: relative; /* This was a typo, should be z-index */
+  z-index: 2; /* Keep text above the leaves */
+}
+
 .leaves-container {
   position: absolute; /* Changed from fixed to absolute */
   top: 0;
