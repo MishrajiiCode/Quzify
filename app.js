@@ -11,7 +11,7 @@ const CHANGELOG = {
     ]
 };
 // ===================== APP CONFIGURATION =====================
-const APP_VERSION = '1.5.13-Beta.'; // Increment this to show an update notification
+const APP_VERSION = '1.5.12-Beta.'; // Increment this to show an update notification
 
 // ===================== GLOBAL STATE VARIABLES =====================
 let currentSubject = '';
@@ -1535,3 +1535,4 @@ function removeBookmark(index) {
         displayBookmarkedQuestions();
     }
 }
+
