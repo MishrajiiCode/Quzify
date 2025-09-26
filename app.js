@@ -11,7 +11,7 @@ const CHANGELOG = {
     ]
 };
 // ===================== APP CONFIGURATION =====================
-const APP_VERSION = '1.5.14-Beta.'; // Increment this to show an update notification
+const APP_VERSION = '1.5.13-Beta.'; // Increment this to show an update notification
 
 // ===================== GLOBAL STATE VARIABLES =====================
 let currentSubject = '';
@@ -1247,13 +1247,13 @@ function generateContentMap() {
     const contentMap = {};
 
     // Helper to process chapters
-    const processChapters = (chapters, prefix) => {
+    const processChapters = (chapters, subjectKey) => {
         if (!chapters) return;
         chapters.forEach(chapter => {
             if (chapter && chapter.name && chapter.sets) {
                 const nonEmptySets = chapter.sets.filter(set => set.length > 0).length;
                 if (nonEmptySets > 0) {
-                    const key = `${prefix}_${chapter.name}`;
+                    const key = `${subjectKey}_${chapter.name}`;
                     contentMap[key] = { name: chapter.name, count: nonEmptySets };
                 }
             }
@@ -1261,10 +1261,11 @@ function generateContentMap() {
     };
 
     // 1. Process competitive exams
-    Object.values(subjectData).forEach(subject => {
-        const subjectKey = Object.keys(subjectData).find(key => subjectData[key] === subject);
-        processChapters(subject?.chapters, subjectKey);
-    });
+    for (const subjectKey in subjectData) {
+        if (subjectData[subjectKey] && subjectData[subjectKey].chapters) {
+            processChapters(subjectData[subjectKey].chapters, subjectKey);
+        }
+    }
 
     // 2. Process academic classes
     if (classData) {
