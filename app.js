@@ -11,7 +11,7 @@ const CHANGELOG = {
     ]
 };
 // ===================== APP CONFIGURATION =====================
-const APP_VERSION = '1.5.13-Beta.'; // Increment this to show an update notification
+const APP_VERSION = '1.5.14-Beta.'; // Increment this to show an update notification
 
 // ===================== GLOBAL STATE VARIABLES =====================
 let currentSubject = '';
@@ -56,6 +56,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeSideMenu(); // New function to handle menu logic
     initializeUpdateDetailsModal(); // Initialize the new update details modal
     initializeHomepageSearch(); // Initialize the new homepage search
+    initializeLockedContentModal(); // Initialize the locked content modal
     initializeLogoutConfirmation(); // Initialize the new logout modal
 });
 
@@ -229,6 +230,8 @@ function displayChapters(subject) {
                 displayChapterInfo();
                 showPage('chapter-page');
             };
+        } else {
+            chapterCard.onclick = showLockedContentMessage;
         }
         chaptersGrid.appendChild(chapterCard);
     });
@@ -306,6 +309,8 @@ function displaySubjectsForClass() {
             card.onclick = function() { 
                 selectClassSubject(subject); 
             };
+        } else {
+            card.onclick = showLockedContentMessage;
         }
         grid.appendChild(card);
     });
@@ -384,6 +389,8 @@ function displayChaptersForClass() {
                 displayChapterInfo();
                 showPage('chapter-page');
             };
+        } else {
+            chapterCard.onclick = showLockedContentMessage;
         }
         grid.appendChild(chapterCard);
     });
@@ -473,6 +480,8 @@ function displayPracticeSets(chapterData) {
         let setStatus = 'Not Started';
         let cardClass = '';
         
+        const hasQuestions = chapterData && chapterData.sets && chapterData.sets[i] && chapterData.sets[i].length > 0;
+
         if (progress) {
             if (progress.score >= 40) { // FIX: Use 40% as the passing criteria
                 setStatus = `Passed (${progress.score}%)`;
@@ -489,12 +498,11 @@ function displayPracticeSets(chapterData) {
             const prevProgress = userProgress[prevProgressKey];
             if (!prevProgress || prevProgress.score < 40) { // FIX: Use 40% to unlock the next set
                 setStatus = 'Locked';
-                cardClass = 'locked';
+                cardClass = 'locked locked-progress'; // Add a specific class for progress-locked sets
             }
         }
         
         // Check if questions are available
-        const hasQuestions = chapterData && chapterData.sets && chapterData.sets[i] && chapterData.sets[i].length > 0;
         if (!hasQuestions) {
             setStatus = 'Coming Soon';
             cardClass = 'locked';
@@ -506,7 +514,11 @@ function displayPracticeSets(chapterData) {
             <div class="set-status">${setStatus}</div>
         `;
         
-        if (cardClass !== 'locked' && hasQuestions) {
+        if (setStatus === 'Coming Soon') {
+            // Only 'Coming Soon' cards should show the modal
+            setCard.onclick = showLockedContentMessage;
+        } else if (!cardClass.includes('locked')) {
+            // Clickable only if not locked at all
             setCard.onclick = function() {
                 startQuiz(i);
             };
@@ -1138,6 +1150,29 @@ function logout() {
     closeSideMenu();
     // Show the custom confirmation modal instead of the browser's confirm dialog
     document.getElementById('logout-confirm-modal').classList.add('visible');
+}
+
+// ===================== NEW: LOCKED CONTENT MODAL =====================
+function initializeLockedContentModal() {
+    const modal = document.getElementById('locked-content-modal');
+    const closeBtn = document.getElementById('close-locked-modal-btn');
+
+    if (!modal || !closeBtn) return;
+
+    const closeModal = () => {
+        modal.classList.remove('visible');
+    };
+
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            closeModal();
+        }
+    });
+}
+
+function showLockedContentMessage() {
+    document.getElementById('locked-content-modal').classList.add('visible');
 }
 
 // ===================== NEW: LOGOUT CONFIRMATION MODAL =====================
