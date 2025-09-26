@@ -455,7 +455,7 @@ function displayPracticeSets(chapterData) {
         if (i > 0) {
             const prevProgressKey = `${currentSubject}_${currentChapter}_${i-1}`;
             const prevProgress = userProgress[prevProgressKey];
-            if (!prevProgress || prevProgress.score < 98) {
+            if (!prevProgress || prevProgress.score < 40) {
                 setStatus = 'Locked';
                 cardClass = 'locked';
             }
@@ -1392,3 +1392,4 @@ function removeBookmark(index) {
         displayBookmarkedQuestions();
     }
 }
+
