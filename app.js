@@ -411,7 +411,7 @@ function displayChapterInfo() {
     
     for (let i = 0; i < 5; i++) {
         const progressKey = `${currentSubject}_${currentChapter}_${i}`;
-        if (userProgress[progressKey] && userProgress[progressKey].score >= 98) {
+        if (userProgress[progressKey] && userProgress[progressKey].score >= 40) { // FIX: Use 40% to correctly count completed sets
             completedSets++;
             totalScore += userProgress[progressKey].score;
         }
@@ -442,7 +442,7 @@ function displayPracticeSets(chapterData) {
         let cardClass = '';
         
         if (progress) {
-            if (progress.score >= 98) {
+            if (progress.score >= 40) { // FIX: Use 40% 
                 setStatus = `Passed (${progress.score}%)`;
                 cardClass = 'completed';
             } else {
@@ -1392,5 +1392,6 @@ function removeBookmark(index) {
         displayBookmarkedQuestions();
     }
 }
+
 
 
