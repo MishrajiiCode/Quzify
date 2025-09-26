@@ -1157,7 +1157,7 @@ body {
 .chapter-card.locked {
   background: var(--color-secondary);
   border-color: var(--color-border);
-  cursor: not-allowed;
+  cursor: pointer;
   opacity: 0.6;
   transform: none; /* Disable hover effect */
 }
@@ -1244,8 +1244,12 @@ body {
 .set-card.locked {
   background: var(--color-secondary);
   border-color: var(--color-border);
-  cursor: not-allowed;
+  cursor: pointer; /* Default for locked cards, like 'Coming Soon' */
   opacity: 0.6;
+}
+
+.set-card.locked-progress {
+  cursor: not-allowed; /* Specific cursor for sets locked by progress */
 }
 
 .set-title {
