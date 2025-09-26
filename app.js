@@ -11,7 +11,7 @@ const CHANGELOG = {
     ]
 };
 // ===================== APP CONFIGURATION =====================
-const APP_VERSION = '1.5.12-Beta.'; // Increment this to show an update notification
+const APP_VERSION = '1.5.14-Beta.'; // Increment this to show an update notification
 
 // ===================== GLOBAL STATE VARIABLES =====================
 let currentSubject = '';
@@ -166,6 +166,16 @@ function goToResults() {
     showPage('results-page');
 }
 
+/**
+ * Checks if a chapter object contains any questions.
+ * @param {object} chapter The chapter object from the data file.
+ * @returns {boolean} True if the chapter has at least one question, false otherwise.
+ */
+function chapterHasQuestions(chapter) {
+    if (!chapter || !chapter.sets || !Array.isArray(chapter.sets)) return false;
+    return chapter.sets.some(set => Array.isArray(set) && set.length > 0);
+}
+
 // ===================== COMPETITIVE EXAM FUNCTIONS (ORIGINAL) =====================
 function selectSubject(subject) {
     dailyChallengeMode = false;
@@ -204,17 +214,22 @@ function displayChapters(subject) {
     }
     
     data.chapters.forEach((chapter, index) => {
+        const hasQuestions = chapterHasQuestions(chapter);
         const chapterCard = document.createElement('div');
-        chapterCard.className = 'chapter-card';
+        chapterCard.className = `chapter-card ${!hasQuestions ? 'locked' : ''}`;
         chapterCard.innerHTML = `
             <h3>${chapter.name}</h3>
             <p>${chapter.description || 'Practice questions on ' + chapter.name}</p>
+            ${!hasQuestions ? '<div class="set-status">Coming Soon</div>' : ''}
         `;
-        chapterCard.onclick = function() {
-            currentChapter = chapter.name;
-            displayChapterInfo();
-            showPage('chapter-page');
-        };
+
+        if (hasQuestions) {
+            chapterCard.onclick = function() {
+                currentChapter = chapter.name;
+                displayChapterInfo();
+                showPage('chapter-page');
+            };
+        }
         chaptersGrid.appendChild(chapterCard);
     });
 }
@@ -260,18 +275,22 @@ function displaySubjectsForClass() {
         subjects = classData[currentClass]?.streams?.[currentStream] || [];
     }
     
-    if (subjects.length === 0) {
+    if (!subjects || subjects.length === 0) {
         grid.innerHTML = '<p>No subjects available for this class.</p>';
         return;
     }
     
     subjects.forEach(subject => {
+        const subjectChapters = classData[currentClass]?.chapters?.[subject] || [];
+        const hasContent = subjectChapters && subjectChapters.some(chapterHasQuestions);
+
         const card = document.createElement('div');
-        card.className = 'subject-card';
+        card.className = `subject-card ${!hasContent ? 'locked' : ''}`;
         
         // Add icons for subjects
         const iconMap = {
             math: 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png',
+            science: 'https://cdn-icons-png.flaticon.com/512/2921/2921222.png',
             physics: 'https://cdn-icons-png.flaticon.com/512/2921/2921222.png',
             chemistry: 'https://cdn-icons-png.flaticon.com/512/2784/2784428.png',
             biology: 'https://cdn-icons-png.flaticon.com/512/2921/2921073.png'
@@ -281,10 +300,13 @@ function displaySubjectsForClass() {
             <img src="${iconMap[subject] || 'https://cdn-icons-png.flaticon.com/512/3131/3131636.png'}" alt="${subject} Icon" class="card-icon">
             <h2>${getSubjectTitle(subject)}</h2>
             <p>Practice ${getSubjectTitle(subject)} for Class ${currentClass}</p>
+            ${!hasContent ? '<div class="set-status">Coming Soon</div>' : ''}
         `;
-        card.onclick = function() { 
-            selectClassSubject(subject); 
-        };
+        if (hasContent) {
+            card.onclick = function() { 
+                selectClassSubject(subject); 
+            };
+        }
         grid.appendChild(card);
     });
 }
@@ -348,17 +370,21 @@ function displayChaptersForClass() {
     }
     
     chapters.forEach((chapter, index) => {
+        const hasQuestions = chapterHasQuestions(chapter);
         const chapterCard = document.createElement('div');
-        chapterCard.className = 'chapter-card';
+        chapterCard.className = `chapter-card ${!hasQuestions ? 'locked' : ''}`;
         chapterCard.innerHTML = `
             <h3>${chapter.name}</h3>
             <p>Practice questions on ${chapter.name}</p>
+            ${!hasQuestions ? '<div class="set-status">Coming Soon</div>' : ''}
         `;
-        chapterCard.onclick = function() {
-            currentChapter = chapter.name;
-            displayChapterInfo();
-            showPage('chapter-page');
-        };
+        if (hasQuestions) {
+            chapterCard.onclick = function() {
+                currentChapter = chapter.name;
+                displayChapterInfo();
+                showPage('chapter-page');
+            };
+        }
         grid.appendChild(chapterCard);
     });
 }
@@ -547,6 +573,15 @@ function displayQuestion() {
     // Update current set display
     document.getElementById('current-set').textContent = currentSet + 1;
     
+    // Handle question year badge
+    const yearBadge = document.getElementById('question-year-badge');
+    if (question.year) {
+        yearBadge.textContent = question.year;
+        yearBadge.style.display = 'inline-block';
+    } else {
+        yearBadge.style.display = 'none';
+    }
+
     // Display question
     document.getElementById('question-text').textContent = question.question;
     
@@ -801,6 +836,7 @@ function displayReview() {
         
         let reviewHTML = `
             <h3>Question ${index + 1}</h3>
+            ${question.year ? `<p class="review-year">Asked in: <strong>${question.year}</strong></p>` : ''}
             <p><strong>${question.question}</strong></p>
             <div class="review-options">
         `;
@@ -1535,4 +1571,3 @@ function removeBookmark(index) {
         displayBookmarkedQuestions();
     }
 }
-
