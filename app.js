@@ -2,8 +2,16 @@
 // app.js - Complete Quiz Platform with Class and Competitive Exam functionality
 // Only business logic - questions stored in separate data files
 
+// ===================== APP CHANGELOG =====================
+const CHANGELOG = {
+    '1.5.12-Beta.': [
+        'Added an info button to update notifications to show what\'s new.',
+        'Replaced all disruptive browser alerts with a new, professional toast notification system.',
+        'Moved the bookmark button next to the question for easier access.'
+    ]
+};
 // ===================== APP CONFIGURATION =====================
-const APP_VERSION = '1.5.11-Beta.'; // Increment this to show an update notification
+const APP_VERSION = '1.5.12-Beta.'; // Increment this to show an update notification
 
 // ===================== GLOBAL STATE VARIABLES =====================
 let currentSubject = '';
@@ -23,7 +31,6 @@ let currentClass = '';
 let currentStream = '';
 let classMode = false; // true if user is in class (academic) mode
 
-let cameFromHomepageSearch = false; // NEW: Tracks if navigation is from homepage search
 // NEW: Daily Challenge state
 let dailyChallengeMode = false;
 
@@ -47,6 +54,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeTheme();
     checkForUpdates();
     initializeSideMenu(); // New function to handle menu logic
+    initializeUpdateDetailsModal(); // Initialize the new update details modal
     initializeHomepageSearch(); // Initialize the new homepage search
     initializeLogoutConfirmation(); // Initialize the new logout modal
 });
@@ -73,6 +81,7 @@ function goToHome() {
     currentClass = '';
     currentStream = '';
     currentSubject = '';
+    dailyChallengeMode = false; // Ensure daily challenge mode is reset
     currentChapter = '';
     showPage('home-page');
 }
@@ -130,16 +139,10 @@ function goToClass() {
 }
 
 function goToSubject() {
-    // NEW: If user came from homepage search, go directly home
-    if (cameFromHomepageSearch) {
-        cameFromHomepageSearch = false; // Reset the flag
-        goToHome();
-        return;
-    }
-
     if (dailyChallengeMode) {
         goToHome();
     } else if (classMode) {
+        // In class mode, going "back" from a chapter page should land on the subject list
         displaySubjectsForClass();
         showPage('class-page');
     } else {
@@ -223,7 +226,7 @@ function selectClass(cls) {
     currentStream = '';
     
     if (!classData) {
-        alert('Class data not available. Please ensure class data files are loaded.');
+        showNotification('Class data not available. Please ensure data files are loaded.', 'error');
         return;
     }
     
@@ -495,10 +498,6 @@ function displayProgressInfo(completedSets, averageScore) {
 
 // ===================== QUIZ FUNCTIONALITY (PRESERVED) =====================
 function startQuiz(setIndex) {
-    // Reset the homepage search flag when a quiz starts
-    if (cameFromHomepageSearch) {
-        cameFromHomepageSearch = false;
-    }
     dailyChallengeMode = false;
     currentSet = setIndex;
     currentQuestionIndex = 0;
@@ -514,7 +513,7 @@ function startQuiz(setIndex) {
     }
     
     if (!chapterData || !chapterData.sets[setIndex] || chapterData.sets[setIndex].length === 0) {
-        alert('This set is not available yet. Please check back later.');
+        showNotification('This set is not available yet. Please check back later.', 'warning');
         return;
     }
     
@@ -668,6 +667,17 @@ function submitQuiz() {
     
     const timeTaken = totalTime - timeRemaining;
     const results = calculateResults();
+
+    // Special handling for Daily Challenge progress saving
+    if (dailyChallengeMode) {
+        const today = new Date().toISOString().split('T')[0];
+        const dailyProgressKey = `daily_challenge_${today}`;
+        userProgress[dailyProgressKey] = { score: results.percentage, timeTaken: timeTaken };
+        saveUserProgress();
+        displayResults(results, timeTaken);
+        showPage('results-page');
+        return; // Stop here for daily challenge
+    }
     
     // Save progress
     const progressKey = `${currentSubject}_${currentChapter}_${currentSet}`;
@@ -874,20 +884,34 @@ function initializeTheme() {
 // ===================== NEW: DAILY CHALLENGE =====================
 function checkDailyChallengeStatus() {
     const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
-    const dailyProgressKey = `daily_${today}`;
+    const dailyProgressKey = `daily_challenge_${today}`; // FIX: Use consistent key
     const progress = userProgress[dailyProgressKey];
     const statusEl = document.getElementById('daily-challenge-status');
+    const notificationDot = document.getElementById('daily-challenge-notification-dot');
+    const dailyChallengeCard = document.getElementById('daily-challenge-section');
+
+    if (!statusEl || !notificationDot || !dailyChallengeCard) return;
+
+    // Always show the card by default when this function is called
+    dailyChallengeCard.style.display = 'block';
 
     if (progress) {
+        // User has attempted the challenge today
+        notificationDot.style.display = 'none';
         if (progress.score >= 40) {
-            statusEl.textContent = `Completed Today! Score: ${progress.score}%`;
-            statusEl.style.color = 'var(--color-success)';
+            // User has passed, hide the card for the rest of the day
+            dailyChallengeCard.style.display = 'none';
         } else {
+            // User has failed, show status and allow retry
             statusEl.textContent = `Attempted Today. Score: ${progress.score}%. Try again!`;
             statusEl.style.color = 'var(--color-warning)';
         }
     } else {
+        // User has not attempted the challenge today
         statusEl.textContent = 'A new challenge awaits!';
+        statusEl.style.color = ''; // Reset color
+        notificationDot.style.display = 'block';
+        showNotification('A new Daily Challenge is available!', 'info');
     }
 }
 
@@ -897,17 +921,17 @@ function startDailyChallenge() {
     currentChapter = 'Mixed Questions';
     currentSet = 0;
     currentQuestionIndex = 0;
-    userAnswers = [];
+    userAnswers = []; // Reset answers
 
     quizData = generateDailyChallengeQuestions();
 
     if (!quizData || quizData.length < 20) {
-        alert('Not enough questions available for a Daily Challenge. Please add more content.');
+        showNotification('Not enough questions for a Daily Challenge. Please add more content.', 'error');
         goToHome();
         return;
     }
 
-    userAnswers = new Array(quizData.length).fill(null);
+    userAnswers = new Array(quizData.length).fill(null); // Ensure answers array is correct size
     timeRemaining = quizData.length * 60;
     totalTime = timeRemaining;
 
@@ -990,10 +1014,10 @@ function checkUserProfile() {
     const userFocus = localStorage.getItem('userFocus');
 
     if (!userName || !userFocus) {
-        document.getElementById('onboarding-modal').style.display = 'flex';
+        document.getElementById('onboarding-modal').classList.add('visible');
         document.getElementById('logout-btn').style.display = 'none';
     } else {
-        document.getElementById('onboarding-modal').style.display = 'none';
+        document.getElementById('onboarding-modal').classList.remove('visible');
         document.getElementById('logout-btn').style.display = 'inline-flex';
         personalizeHomepage(userName, userFocus);
     }
@@ -1006,7 +1030,7 @@ function saveUserPreferences(focus) {
     const userName = nameInput.value.trim();
 
     if (!userName) {
-        alert('Please enter your name.');
+        showNotification('Please enter your name.', 'error');
         nameInput.focus();
         return;
     }
@@ -1014,7 +1038,7 @@ function saveUserPreferences(focus) {
     localStorage.setItem('userName', userName);
     localStorage.setItem('userFocus', focus);
 
-    document.getElementById('onboarding-modal').style.display = 'none';
+    document.getElementById('onboarding-modal').classList.remove('visible');
     document.getElementById('logout-btn').style.display = 'inline-flex';
     personalizeHomepage(userName, focus);
 }
@@ -1062,7 +1086,7 @@ function logout() {
     // Close the side menu for a smoother experience
     closeSideMenu();
     // Show the custom confirmation modal instead of the browser's confirm dialog
-    document.getElementById('logout-confirm-modal').style.display = 'flex';
+    document.getElementById('logout-confirm-modal').classList.add('visible');
 }
 
 // ===================== NEW: LOGOUT CONFIRMATION MODAL =====================
@@ -1072,7 +1096,7 @@ function initializeLogoutConfirmation() {
     const cancelBtn = document.getElementById('cancel-logout-btn');
 
     const closeModal = () => {
-        modal.style.display = 'none';
+        modal.classList.remove('visible');
     };
 
     confirmBtn.addEventListener('click', () => {
@@ -1095,7 +1119,7 @@ function initializeLogoutConfirmation() {
 // ===================== ERROR HANDLING =====================
 window.addEventListener('error', function(event) {
     console.error('Application error:', event.error);
-    alert('An error occurred. Please refresh the page and try again.');
+    showNotification('An unexpected error occurred. Please refresh the page.', 'error');
 });
 
 // Check if required data is loaded
@@ -1110,12 +1134,15 @@ function checkDataAvailability() {
  * Checks for application and content updates on startup.
  */
 function checkForUpdates() {
-    // 1. Check for App Version Update (for UI/feature changes)
     const lastVersion = localStorage.getItem('appVersion');
+
+    // 1. Check for App Version Update (for UI/feature changes)
     if (!lastVersion) {
         localStorage.setItem('appVersion', APP_VERSION);
     } else if (lastVersion !== APP_VERSION) {
-        showNotification(`App updated to version ${APP_VERSION}! Enjoy the new features.`);
+        const updateDetails = CHANGELOG[APP_VERSION] || ['General improvements and bug fixes.'];
+        const modalTitle = `New Version Updated: ${APP_VERSION}`;
+        showUpdateDetails(updateDetails, modalTitle); // FIX: Show the modal directly on app update
         localStorage.setItem('appVersion', APP_VERSION);
         // Don't check for content on app version change to avoid multiple notifications
         localStorage.setItem('contentMap', JSON.stringify(generateContentMap()));
@@ -1138,7 +1165,6 @@ function checkForUpdates() {
     for (const chapterKey in currentContentMap) {
         const currentSetCount = currentContentMap[chapterKey].count;
         const lastSetCount = lastContentMap[chapterKey]?.count || 0;
-
         if (currentSetCount > lastSetCount) {
             updatedChapters.push(currentContentMap[chapterKey].name);
         }
@@ -1146,12 +1172,14 @@ function checkForUpdates() {
 
     if (updatedChapters.length > 0) {
         // Show notifications for new content
+        const details = updatedChapters.map(chapterName => `<li>New quiz in <strong>${chapterName}</strong></li>`).join('');
         if (updatedChapters.length <= 2) {
             updatedChapters.forEach(chapterName => {
-                showNotification(`New quiz available for ${chapterName}!`);
+                const singleDetail = [`<li>A new quiz set is available in <strong>${chapterName}</strong>.</li>`];
+                showNotification(`New quiz in ${chapterName}!`, 'info', singleDetail, 'New Content Added');
             });
         } else {
-            showNotification(`${updatedChapters.length} topics have new quizzes. Check them out!`);
+            showNotification(`${updatedChapters.length} topics have new quizzes.`, 'info', details);
         }
         // Update the stored map
         localStorage.setItem('contentMap', JSON.stringify(currentContentMap));
@@ -1208,13 +1236,75 @@ function generateContentMap() {
  * Displays a toast notification.
  * @param {string} message The message to display.
  */
-function showNotification(message) {
+function showNotification(message, type = 'info', details = null, modalTitle = 'What\'s New') {
     const toast = document.getElementById('notification-toast');
-    toast.textContent = message;
+    const toastMessage = document.getElementById('toast-message');
+    const toastIconContainer = document.getElementById('toast-icon-container');
+    const infoBtn = document.getElementById('toast-info-btn');
+
+    if (!toast || !toastMessage || !toastIconContainer || !infoBtn) return;
+
+    toastMessage.textContent = message;
+
+    // Clear previous classes and timeouts
+    toast.className = 'notification-toast';
+    toastIconContainer.innerHTML = ''; // Clear old icon
+    if (window.notificationTimeout) {
+        clearTimeout(window.notificationTimeout);
+    }
+
+    // Create and append the correct icon
+    const icon = document.createElement('div');
+    icon.id = 'toast-icon';
+    toastIconContainer.appendChild(icon);
+
+    // Add new classes for type and visibility
+    toast.classList.add(`toast--${type}`);
     toast.classList.add('show');
-    setTimeout(() => {
+
+    // Handle info button
+    if (details) {
+        infoBtn.style.display = 'block';
+        let title = modalTitle;
+        if (message.includes('App updated')) {
+            title = `New Version Updated: ${APP_VERSION}`;
+        }
+        infoBtn.onclick = () => showUpdateDetails(details, title);
+    } else {
+        infoBtn.style.display = 'none';
+    }
+
+    // FIX: Set a timeout to hide the toast for all notifications except app version updates.
+    // The app version update is handled by a direct modal pop-up now.
+    window.notificationTimeout = setTimeout(() => {
         toast.classList.remove('show');
     }, 6000); // Hide after 6 seconds
+}
+
+function initializeUpdateDetailsModal() {
+    const modal = document.getElementById('update-details-modal');
+    const closeBtn = document.getElementById('close-update-details-btn');
+
+    const closeModal = () => {
+        modal.classList.remove('visible');
+    };
+
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            closeModal();
+        }
+    });
+}
+
+function showUpdateDetails(details, title = 'Update Details') {
+    const modal = document.getElementById('update-details-modal');
+    const titleEl = document.getElementById('update-details-title');
+    const contentEl = document.getElementById('update-details-content');
+
+    titleEl.textContent = title;    
+    contentEl.innerHTML = `<ul>${Array.isArray(details) ? details.map(item => `<li>${item}</li>`).join('') : `<li>${details}</li>`}</ul>`;
+    modal.classList.add('visible');
 }
 
 function closeSideMenu() {
@@ -1333,7 +1423,6 @@ function displayHomepageSearchResults(results, query) {
             item.innerHTML = `${highlightedName} <span>${context}</span>`;
             
             item.onclick = () => {
-                cameFromHomepageSearch = true; // Set flag to true on click
                 currentChapter = result.chapterName;
                 currentSubject = result.subject;
                 classMode = result.type === 'academic';
@@ -1367,7 +1456,7 @@ function toggleBookmark() {
     if (existingIndex > -1) {
         // Already bookmarked, so remove it
         bookmarkedQuestions.splice(existingIndex, 1);
-        showNotification('Bookmark removed.');
+        showNotification('Bookmark removed.', 'success');
     } else {
         // Not bookmarked, so add it
         bookmarkedQuestions.push({
@@ -1378,7 +1467,7 @@ function toggleBookmark() {
                 chapter: currentChapter
             }
         });
-        showNotification('Bookmark added!');
+        showNotification('Bookmark added!', 'success');
     }
 
     saveBookmarkedQuestions();
@@ -1426,7 +1515,7 @@ function removeBookmark(index) {
     if (index > -1 && index < bookmarkedQuestions.length) {
         bookmarkedQuestions.splice(index, 1);
         saveBookmarkedQuestions();
-        showNotification('Bookmark removed.');
+        showNotification('Bookmark removed.', 'success');
         // Refresh the view
         displayBookmarkedQuestions();
     }
