@@ -3,7 +3,7 @@
 // Only business logic - questions stored in separate data files
 
 // ===================== APP CONFIGURATION =====================
-const APP_VERSION = '1.5.10-Beta.'; // Increment this to show an update notification
+const APP_VERSION = '1.5.11-Beta.'; // Increment this to show an update notification
 
 // ===================== GLOBAL STATE VARIABLES =====================
 let currentSubject = '';
@@ -442,7 +442,7 @@ function displayPracticeSets(chapterData) {
         let cardClass = '';
         
         if (progress) {
-            if (progress.score >= 40) { // FIX: Use 40% 
+            if (progress.score >= 40) { // FIX: Use 40% as the passing criteria
                 setStatus = `Passed (${progress.score}%)`;
                 cardClass = 'completed';
             } else {
@@ -455,7 +455,7 @@ function displayPracticeSets(chapterData) {
         if (i > 0) {
             const prevProgressKey = `${currentSubject}_${currentChapter}_${i-1}`;
             const prevProgress = userProgress[prevProgressKey];
-            if (!prevProgress || prevProgress.score < 40) {
+            if (!prevProgress || prevProgress.score < 40) { // FIX: Use 40% to unlock the next set
                 setStatus = 'Locked';
                 cardClass = 'locked';
             }
@@ -697,8 +697,8 @@ function calculateResults() {
     return {
         correctCount,
         incorrectCount: quizData.length - correctCount,
-        percentage, 
-        passed: percentage >= 40 // Changed passing criteria to 40%
+        percentage,
+        passed: percentage >= 40
     };
 }
 
@@ -740,14 +740,14 @@ function animateValue(id, start, end, duration, suffix = '') {
 
 function retakeQuiz() {
     // If failed, select a random set that hasn't been completed
-    if (!userProgress[`${currentSubject}_${currentChapter}_${currentSet}`] || 
-        userProgress[`${currentSubject}_${currentChapter}_${currentSet}`].score < 98) {
+    const currentProgress = userProgress[`${currentSubject}_${currentChapter}_${currentSet}`];
+    if (!currentProgress || currentProgress.score < 40) {
         
         // Find available sets
         const availableSets = [];
         for (let i = 0; i < 5; i++) {
             const progressKey = `${currentSubject}_${currentChapter}_${i}`;
-            if (!userProgress[progressKey] || userProgress[progressKey].score < 98) {
+            if (!userProgress[progressKey] || userProgress[progressKey].score < 40) {
                 availableSets.push(i);
             }
         }
@@ -879,7 +879,7 @@ function checkDailyChallengeStatus() {
     const statusEl = document.getElementById('daily-challenge-status');
 
     if (progress) {
-        if (progress.score >= 98) {
+        if (progress.score >= 40) {
             statusEl.textContent = `Completed Today! Score: ${progress.score}%`;
             statusEl.style.color = 'var(--color-success)';
         } else {
@@ -918,45 +918,70 @@ function startDailyChallenge() {
     showPage('quiz-page');
 }
 
-function generateDailyChallengeQuestions() {
-    const allQuestions = [];
-
-    // 1. Gather all non-empty questions from competitive exams
-    for (const key in subjectData) {
-        const subject = subjectData[key];
-        subject?.chapters?.forEach(chapter => {
-            chapter.sets?.forEach(set => {
-                if (Array.isArray(set) && set.length > 0) {
-                    allQuestions.push(...set);
-                }
-            });
-        });
-    }
-
-    if (allQuestions.length < 20) {
-        return null; // Not enough questions
-    }
-
-    // 3. Use today's date as a seed for a pseudo-random number generator
-    const today = new Date();
-    let seed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
+/**
+ * Shuffles an array in place using a seeded pseudo-random number generator.
+ * This ensures the shuffle is the same for a given seed (e.g., for a specific day).
+ * @param {Array} array The array to shuffle.
+ * @param {number} seed The seed for the random number generator.
+ * @returns {Array} The shuffled array.
+ */
+function seededShuffle(array, seed) {
+    let currentIndex = array.length, randomIndex;
     const pseudoRandom = () => {
         const x = Math.sin(seed++) * 10000;
         return x - Math.floor(x);
     };
-
-    // 4. Shuffle the array using the seeded random function (Fisher-Yates shuffle)
-    let currentIndex = allQuestions.length, randomIndex;
     while (currentIndex !== 0) {
         randomIndex = Math.floor(pseudoRandom() * currentIndex);
         currentIndex--;
-        [allQuestions[currentIndex], allQuestions[randomIndex]] = [
-            allQuestions[randomIndex], allQuestions[currentIndex]
-        ];
+        [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+    }
+    return array;
+}
+
+function generateDailyChallengeQuestions() {
+    const getQuestionsForSubject = (subjectKey) => {
+        const questions = [];
+        subjectData[subjectKey]?.chapters?.forEach(chapter => {
+            chapter.sets?.forEach(set => {
+                if (Array.isArray(set) && set.length > 0) questions.push(...set);
+            });
+        });
+        return questions;
+    };
+
+    const today = new Date();
+    let seed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
+
+    const quantQuestions = getQuestionsForSubject('quantitative');
+    const reasoningQuestions = getQuestionsForSubject('reasoning');
+    const englishQuestions = getQuestionsForSubject('english');
+
+    // Shuffle each subject's questions using the daily seed
+    seededShuffle(quantQuestions, seed);
+    seededShuffle(reasoningQuestions, seed + 1); // Use a slightly different seed for each
+    seededShuffle(englishQuestions, seed + 2);
+
+    let dailyQuestions = [];
+    const fallbackPool = [];
+
+    // Take 7 from Quantitative, or as many as available
+    dailyQuestions.push(...quantQuestions.splice(0, 7));
+    // Take 7 from Reasoning, or as many as available
+    dailyQuestions.push(...reasoningQuestions.splice(0, 7));
+    // Take 6 from English, or as many as available
+    dailyQuestions.push(...englishQuestions.splice(0, 6));
+
+    // If we still need more questions, create a fallback pool
+    if (dailyQuestions.length < 20) {
+        fallbackPool.push(...quantQuestions, ...reasoningQuestions, ...englishQuestions);
+        seededShuffle(fallbackPool, seed + 3); // Shuffle the fallback pool
+        const needed = 20 - dailyQuestions.length;
+        dailyQuestions.push(...fallbackPool.slice(0, needed));
     }
 
-    // 5. Return the first 20 questions
-    return allQuestions.slice(0, 20);
+    // Final shuffle of the 20 selected questions to mix them up
+    return seededShuffle(dailyQuestions, seed + 4).slice(0, 20);
 }
 
 // ===================== NEW: ONBOARDING & PERSONALIZATION =====================
@@ -1008,6 +1033,7 @@ function personalizeHomepage(userName, userFocus) {
         competitiveSection.style.display = 'block';
         dailyChallengeSection.style.display = 'block';
         academicSection.style.display = 'none';
+        setDailyChallengeDate(); // Set the date on the card
         checkDailyChallengeStatus(); // Check status only for competitive users
     } else if (userFocus === 'academic') {
         competitiveSection.style.display = 'none';
@@ -1017,6 +1043,19 @@ function personalizeHomepage(userName, userFocus) {
 
     // Initialize the app view
     initializeApp();
+}
+
+/**
+ * Sets the current date on the Daily Challenge card.
+ */
+function setDailyChallengeDate() {
+    const dateEl = document.getElementById('daily-challenge-date');
+    if (!dateEl) return;
+
+    const today = new Date();
+    // Formats the date as "26 Sep 2025"
+    const options = { day: 'numeric', month: 'short', year: 'numeric' };
+    dateEl.textContent = today.toLocaleDateString('en-GB', options);
 }
 
 function logout() {
@@ -1392,6 +1431,3 @@ function removeBookmark(index) {
         displayBookmarkedQuestions();
     }
 }
-
-
-
