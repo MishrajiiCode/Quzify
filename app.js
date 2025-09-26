@@ -3,7 +3,7 @@
 // Only business logic - questions stored in separate data files
 
 // ===================== APP CONFIGURATION =====================
-const APP_VERSION = '1.5.9-Beta.'; // Increment this to show an update notification
+const APP_VERSION = '1.5.10-Beta.'; // Increment this to show an update notification
 
 // ===================== GLOBAL STATE VARIABLES =====================
 let currentSubject = '';
@@ -1392,4 +1392,5 @@ function removeBookmark(index) {
         displayBookmarkedQuestions();
     }
 }
+
 
