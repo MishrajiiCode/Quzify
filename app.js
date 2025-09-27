@@ -333,13 +333,13 @@ function displaySubjectsForClass() {
         const card = document.createElement('div');
         card.className = `subject-card ${!hasContent ? 'locked' : ''}`;
         
-        // Add icons for subjects
+        // Add icons for Academic subjects like class 9, 10, 11, 12
         const iconMap = {
-            math: 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png',
-            science: 'https://cdn-icons-png.flaticon.com/512/2921/2921222.png',
-            physics: 'https://cdn-icons-png.flaticon.com/512/2921/2921222.png',
-            chemistry: 'https://cdn-icons-png.flaticon.com/512/2784/2784428.png',
-            biology: 'https://cdn-icons-png.flaticon.com/512/2921/2921073.png'
+            math: 'https://cdn-icons-png.flaticon.com/512/2283/2283349.png',
+            science: 'https://cdn-icons-png.flaticon.com/512/3000/3000774.png',
+            physics: 'https://cdn-icons-png.flaticon.com/512/3000/3000774.png',
+            chemistry: 'https://cdn-icons-png.flaticon.com/512/4341/4341094.png',
+            biology: 'https://cdn-icons-png.flaticon.com/512/2783/2783988.png'
         };
         
         card.innerHTML = `
@@ -1855,5 +1855,4 @@ function displayCommunityPosts() {
 
     showPage('community-page');
 }
-
 
