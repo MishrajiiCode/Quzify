@@ -3,17 +3,25 @@
 // Only business logic - questions stored in separate data files
 
 // ===================== APP CHANGELOG =====================
-const CHANGELOG = {
-    '1.6.0-Beta.': [
-        'Added class-specific Daily Challenges for academic students (Classes 9-12).',
-        'Fixed a bug where the back button would not work after clicking on an empty Daily Challenge.',
-        "Developer's Note: This is a beta version. Features and functionality may change in the final release."
-    ],
-    '1.5.13-Beta.': [
-        'Added an info button to update notifications to show what\'s new.',
-        'Replaced all disruptive browser alerts with a new, professional toast notification system.',
-        'Moved the bookmark button next to the question for easier access.'
-    ]
+const COMMUNITY_POSTS = {
+    '1.6.0-Beta.': {
+        date: 'Sep 27, 2024',
+        changes: [
+            'Added class-specific Daily Challenges for academic students (Classes 9-12).',
+            'Fixed a bug where the back button would not work after clicking on an empty Daily Challenge.',
+            'Added a Community page to view detailed updates.'
+         
+        ],
+        note: "This is a beta version. Features and functionality may change in the final release."
+    },
+    '1.5.13-Beta.': {
+        date: 'Sep 26, 2024',
+        changes: [
+            'Added an info button to update notifications to show what\'s new.',
+            'Replaced all disruptive browser alerts with a new, professional toast notification system.',
+            'Moved the bookmark button next to the question for easier access.'
+        ]
+    }
 };
 // ===================== APP CONFIGURATION =====================
 const APP_VERSION = '1.6.0-Beta.'; // Increment this to show an update notification
@@ -1344,14 +1352,18 @@ function checkForUpdates() {
     if (!lastVersion) {
         localStorage.setItem('appVersion', APP_VERSION);
     } else if (lastVersion !== APP_VERSION) {
-        const updateDetails = CHANGELOG[APP_VERSION] || ['General improvements and bug fixes.'];
+        const updateInfo = COMMUNITY_POSTS[APP_VERSION];
+        const updateDetails = updateInfo?.changes || ['General improvements and bug fixes.'];
+        const devNote = updateInfo?.note || null;
         const modalTitle = `New Version Updated: ${APP_VERSION}`;
-        showUpdateDetails(updateDetails, modalTitle); // FIX: Show the modal directly on app update
+        showUpdateDetails(updateDetails, modalTitle, devNote);
         localStorage.setItem('appVersion', APP_VERSION);
         // Don't check for content on app version change to avoid multiple notifications
         localStorage.setItem('contentMap', JSON.stringify(generateContentMap()));
         return;
     }
+
+    checkCommunityUpdates(); // Check for new community posts
 
     // 2. Check for New Content (specific topics)
     const currentContentMap = generateContentMap();
@@ -1502,13 +1514,20 @@ function initializeUpdateDetailsModal() {
     });
 }
 
-function showUpdateDetails(details, title = 'Update Details') {
+function showUpdateDetails(details, title = 'Update Details', note = null) {
     const modal = document.getElementById('update-details-modal');
     const titleEl = document.getElementById('update-details-title');
     const contentEl = document.getElementById('update-details-content');
 
     titleEl.textContent = title;    
-    contentEl.innerHTML = `<ul>${Array.isArray(details) ? details.map(item => `<li>${item}</li>`).join('') : `<li>${details}</li>`}</ul>`;
+    
+    let html = `<ul>${Array.isArray(details) ? details.map(item => `<li>${item}</li>`).join('') : `<li>${details}</li>`}</ul>`;
+    
+    if (note) {
+        html += `<p class="developer-note"><strong>Developer's Note:</strong> ${note}</p>`;
+    }
+
+    contentEl.innerHTML = html;
     modal.classList.add('visible');
 }
 
@@ -1528,12 +1547,14 @@ function initializeSideMenu() {
     const closeMenuBtn = document.getElementById('close-menu-btn');
     const menuHomeBtn = document.getElementById('menu-home-btn');
     const menuBookmarksBtn = document.getElementById('menu-bookmarks-btn');
+    const menuCommunityBtn = document.getElementById('menu-community-btn');
     const menuOverlay = document.getElementById('menu-overlay');
     
     const openMenu = () => {
         document.getElementById('side-menu').classList.add('open');
         document.getElementById('menu-overlay').classList.add('visible');
         document.getElementById('menu-toggle-btn').classList.add('is-active');
+        checkCommunityUpdates(); // Re-check to ensure dot is visible if menu was closed
     };
 
     menuToggleBtn.addEventListener('click', openMenu);
@@ -1544,6 +1565,10 @@ function initializeSideMenu() {
     });
     menuBookmarksBtn.addEventListener('click', () => {
         displayBookmarkedQuestions();
+        closeSideMenu();
+    });
+    menuCommunityBtn.addEventListener('click', () => {
+        displayCommunityPosts();
         closeSideMenu();
     });
     menuOverlay.addEventListener('click', closeSideMenu);
@@ -1724,5 +1749,74 @@ function removeBookmark(index) {
         // Refresh the view
         displayBookmarkedQuestions();
     }
+}
+
+// ===================== NEW: COMMUNITY PAGE FEATURE =====================
+function checkCommunityUpdates() {
+    const latestPostVersion = Object.keys(COMMUNITY_POSTS)[0];
+    const lastSeenVersion = localStorage.getItem('lastSeenVersion');
+    const menuDot = document.getElementById('menu-notification-dot');
+    const communityDot = document.getElementById('community-notification-dot');
+
+    // Always remove blinking class first to reset state
+    menuDot.classList.remove('blinking-dot');
+    communityDot.classList.remove('blinking-dot');
+
+    // Show dot if the user hasn't seen the latest post version
+    if (lastSeenVersion !== latestPostVersion) {
+        menuDot.style.display = 'block';
+        communityDot.style.display = 'block';
+        menuDot.classList.add('blinking-dot');
+        communityDot.classList.add('blinking-dot');
+
+        // Show a toast notification only once for the new post
+        const lastNotifiedVersion = localStorage.getItem('lastNotifiedCommunityVersion');
+        if (lastNotifiedVersion !== latestPostVersion) {
+            showNotification('You have a new community post!', 'info');
+            localStorage.setItem('lastNotifiedCommunityVersion', latestPostVersion);
+        }
+    } else {
+        menuDot.style.display = 'none';
+        communityDot.style.display = 'none';
+    }
+}
+
+function displayCommunityPosts() {
+    const container = document.getElementById('community-posts-container');
+    container.innerHTML = '';
+
+    const latestPostVersion = Object.keys(COMMUNITY_POSTS)[0];
+    // Mark posts as read by storing the latest version key
+    localStorage.setItem('lastSeenVersion', latestPostVersion);
+    checkCommunityUpdates(); // This will hide the dots
+
+    const versions = Object.keys(COMMUNITY_POSTS); // Keys are already in newest-to-oldest order
+
+    versions.forEach(version => {
+        const post = COMMUNITY_POSTS[version];
+        const postCard = document.createElement('div');
+        postCard.className = 'community-post-card';
+
+        let bodyHtml = '<ul>';
+        post.changes.forEach(change => {
+            bodyHtml += `<li>${change}</li>`;
+        });
+        bodyHtml += '</ul>';
+
+        if (post.note) {
+            bodyHtml += `<p class="developer-note"><strong>Developer's Note:</strong> ${post.note}</p>`;
+        }
+
+        postCard.innerHTML = `
+            <div class="community-post-header">
+                <h3>Version ${version}</h3>
+                <span class="post-date">${post.date || 'N/A'}</span>
+            </div>
+            <div class="community-post-body">${bodyHtml}</div>
+        `;
+        container.appendChild(postCard);
+    });
+
+    showPage('community-page');
 }
 
