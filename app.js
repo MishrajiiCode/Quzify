@@ -23,7 +23,7 @@ const COMMUNITY_POSTS = {
     }
 };
 // ===================== APP CONFIGURATION =====================
-const APP_VERSION = '1.6.0-Beta.'; // Increment this to show an update notification
+const APP_VERSION = '1.6.1-Beta.'; // Increment this to show an update notification
 
 // ===================== GLOBAL STATE VARIABLES =====================
 let currentSubject = '';
@@ -102,6 +102,8 @@ function goToHome() {
     academicDailyChallenge = false;
     currentChapter = '';
     showPage('home-page');
+    // Re-check status when returning home
+    checkDailyChallengeStatus();
 }
 
 function goBack() {
@@ -111,21 +113,18 @@ function goBack() {
     } else if (classMode && currentClass) {
         if (currentClass === '11' || currentClass === '12') {
             if (currentStream && currentSubject) {
-                // From academic subject page back to class subjects grid
+                // We are on a chapter list page, go back to the subject list for the current stream.
                 currentSubject = '';
                 currentChapter = '';
-                currentStream = ''; // Go back to stream selection
                 displaySubjectsForClass();
-                showPage('stream-page');
+                showPage('class-page');
             } else if (currentStream) {
-                // From stream selection back to class selection
+                // We are on the subject list page, go back to the stream selection.
                 currentStream = '';
                 showPage('stream-page');
             } else {
-                // From stream selection back to combined home page
-                classMode = false;
-                currentClass = ''; 
-                showPage('home-page');
+                // We are on the stream selection page, go back to the main home page.
+                goToHome();
             }
         } else {
             if (currentSubject) {
@@ -151,6 +150,8 @@ function goToClass() {
     if (classMode && currentClass) {
         displaySubjectsForClass();
         showPage('class-page');
+        // Re-check status when returning to class page
+        checkAcademicDailyChallengeStatus();
     } else {
         showPage('home-page');
     }
@@ -159,10 +160,7 @@ function goToClass() {
 function goToSubject() {
     if (dailyChallengeMode) {
         goToHome();
-    } else if (classMode) {
-        // In class mode, going "back" from a chapter page should land on the subject list
-        displaySubjectsForClass();
-        showPage('class-page');
+        return;
     } else {
         showPage('subject-page');
     }
@@ -170,8 +168,17 @@ function goToSubject() {
 
 function goToChapter() {
     if (dailyChallengeMode) {
-        goToHome();
-        return;
+        // After a daily challenge, go back to the appropriate home/class screen
+        if (academicDailyChallenge) {
+            dailyChallengeMode = false;
+            academicDailyChallenge = false;
+            currentSubject = ''; // Reset subject after academic daily challenge
+            goToClass();
+        } else {
+            dailyChallengeMode = false;
+            goToHome();
+        }
+        return; // Stop further execution
     }
     displayChapterInfo(); // This will handle both class and competitive modes
     showPage('chapter-page');
@@ -847,31 +854,52 @@ function animateValue(id, start, end, duration, suffix = '') {
 }
 
 function retakeQuiz() {
-    // If failed, select a random set that hasn't been completed
-    const currentProgress = userProgress[`${currentSubject}_${currentChapter}_${currentSet}`];
-    if (!currentProgress || currentProgress.score < 40) {
-        
-        // Find available sets
-        const availableSets = [];
-        for (let i = 0; i < 5; i++) {
+    if (dailyChallengeMode) {
+        // Daily challenges have a fixed set of questions for the day, so just restart it.
+        if (academicDailyChallenge) {
+            startAcademicDailyChallenge();
+        } else {
+            startDailyChallenge();
+        }
+        return;
+    }
+
+    // --- NEW LOGIC FOR REGULAR QUIZZES ---
+    // Find other available (un-passed) sets in the same chapter to avoid repetition.
+    let chapterData;
+    if (classMode) {
+        chapterData = classData[currentClass]?.chapters?.[currentSubject]?.find(ch => ch.name === currentChapter);
+    } else {
+        chapterData = subjectData[currentSubject]?.chapters?.find(ch => ch.name === currentChapter);
+    }
+
+    if (!chapterData || !chapterData.sets) {
+        startQuiz(currentSet); // Fallback to restarting the same quiz
+        return;
+    }
+
+    const totalSets = chapterData.sets.length;
+    const availableSets = [];
+
+    for (let i = 0; i < totalSets; i++) {
+        if (chapterData.sets[i] && chapterData.sets[i].length > 0) {
             const progressKey = `${currentSubject}_${currentChapter}_${i}`;
-            if (!userProgress[progressKey] || userProgress[progressKey].score < 40) {
+            const progress = userProgress[progressKey];
+            if (!progress || progress.score < 40) {
                 availableSets.push(i);
             }
         }
-        
-        if (availableSets.length > 0) {
-            // Remove current set from available sets to avoid repetition
-            const filteredSets = availableSets.filter(set => set !== currentSet);
-            if (filteredSets.length > 0) {
-                currentSet = filteredSets[Math.floor(Math.random() * filteredSets.length)];
-            } else {
-                currentSet = availableSets[Math.floor(Math.random() * availableSets.length)];
-            }
-        }
     }
-    
-    startQuiz(currentSet);
+
+    const otherAvailableSets = availableSets.filter(set => set !== currentSet);
+
+    if (otherAvailableSets.length > 0) {
+        const nextSet = otherAvailableSets[Math.floor(Math.random() * otherAvailableSets.length)];
+        startQuiz(nextSet);
+    } else {
+        showNotification("You've passed all other sets! Retaking the current one.", 'info');
+        startQuiz(currentSet);
+    }
 }
 
 function reviewAnswers() {
@@ -993,13 +1021,11 @@ function checkDailyChallengeStatus() {
     if (!statusEl || !notificationDot || !dailyChallengeCard) return;
 
     // Always show the card by default when this function is called
-    dailyChallengeCard.style.display = 'block';
 
     if (progress) {
         // User has attempted the challenge today
         notificationDot.style.display = 'none';
         if (progress.score >= 40) {
-            // User has passed, hide the card for the rest of the day
             dailyChallengeCard.style.display = 'none';
         } else {
             // User has failed, show status and allow retry
@@ -1008,6 +1034,7 @@ function checkDailyChallengeStatus() {
         }
     } else {
         // User has not attempted the challenge today.
+        dailyChallengeCard.style.display = 'block';
         statusEl.textContent = 'A new challenge awaits!';
         statusEl.style.color = ''; // Reset color
         notificationDot.style.display = 'block';
@@ -1154,6 +1181,7 @@ function startAcademicDailyChallenge() {
         // Reset flags since the challenge did not start
         dailyChallengeMode = false;
         academicDailyChallenge = false;
+        currentSubject = ''; // Reset the subject to fix back navigation
         goToClass();
         return;
     }
