@@ -1150,15 +1150,24 @@ function checkAcademicDailyChallengeStatus() {
     const dailyProgressKey = `daily_challenge_class${currentClass}_${today}`;
     const progress = userProgress[dailyProgressKey];
     const statusEl = document.getElementById('academic-daily-challenge-status');
+    const cardEl = document.getElementById(`academic-daily-challenge-card-${currentClass}`);
     const notificationDot = document.getElementById('academic-daily-challenge-notification-dot');
 
-    if (!statusEl || !notificationDot) return;
+    if (!statusEl || !notificationDot || !cardEl) return;
 
     if (progress) {
         notificationDot.style.display = 'none';
-        statusEl.textContent = `Attempted. Score: ${progress.score}%.`;
-        statusEl.style.color = progress.score >= 40 ? 'var(--color-success)' : 'var(--color-warning)';
+        if (progress.score >= 40) {
+            // User has passed, hide the card for the rest of the day
+            cardEl.style.display = 'none';
+        } else {
+            // User has failed, show status and allow retry
+            cardEl.style.display = 'block';
+            statusEl.textContent = `Attempted. Score: ${progress.score}%. Try again!`;
+            statusEl.style.color = 'var(--color-warning)';
+        }
     } else {
+        cardEl.style.display = 'block';
         statusEl.textContent = 'A new challenge awaits!';
         statusEl.style.color = '';
         notificationDot.style.display = 'block';
