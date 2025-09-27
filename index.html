@@ -1,5 +1,6 @@
 
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -84,6 +85,7 @@
         <header class="app-header">
             <!-- Hamburger Menu Button -->
             <button id="menu-toggle-btn" class="menu-toggle-btn" aria-label="Open menu">
+                <span id="menu-notification-dot" class="notification-dot" style="display: none;"></span>
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="3" y1="6" x2="21" y2="6"></line>
                     <line x1="3" y1="12" x2="21" y2="12"></line>
@@ -110,6 +112,11 @@
                 <button id="menu-bookmarks-btn" class="side-menu-item">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
                     <span>Bookmarks</span>
+                </button>
+                <button id="menu-community-btn" class="side-menu-item">
+                    <span id="community-notification-dot" class="notification-dot side-menu-dot" style="display: none;"></span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                    <span>Community</span>
                 </button>
                 <div class="theme-switcher">
                     <label for="theme-toggle" class="theme-toggle-label">Dark Mode</label>
@@ -364,6 +371,15 @@
             <h1>Bookmarked Questions</h1>
             <div id="bookmarks-container" class="review-container">
                 <!-- Bookmarked questions will be populated by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Community Page -->
+        <div id="community-page" class="page">
+            <button class="back-btn" onclick="goToHome()">← Back to Home</button>
+            <h1>Community Updates</h1>
+            <div id="community-posts-container" class="community-posts-container">
+                <!-- Community posts will be populated by JavaScript -->
             </div>
         </div>
     </div>
