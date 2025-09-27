@@ -4,6 +4,11 @@
 
 // ===================== APP CHANGELOG =====================
 const CHANGELOG = {
+    '1.6.0-Beta.': [
+        'Added class-specific Daily Challenges for academic students (Classes 9-12).',
+        'Fixed a bug where the back button would not work after clicking on an empty Daily Challenge.',
+        "Developer's Note: This is a beta version. Features and functionality may change in the final release."
+    ],
     '1.5.13-Beta.': [
         'Added an info button to update notifications to show what\'s new.',
         'Replaced all disruptive browser alerts with a new, professional toast notification system.',
@@ -11,7 +16,7 @@ const CHANGELOG = {
     ]
 };
 // ===================== APP CONFIGURATION =====================
-const APP_VERSION = '1.5.13-Beta.'; // Increment this to show an update notification
+const APP_VERSION = '1.6.0-Beta.'; // Increment this to show an update notification
 
 // ===================== GLOBAL STATE VARIABLES =====================
 let currentSubject = '';
@@ -29,6 +34,7 @@ let userProgress = {};
 // NEW: Class-related state variables
 let currentClass = '';
 let currentStream = '';
+let academicDailyChallenge = false; // NEW: To distinguish academic vs competitive daily challenge
 let classMode = false; // true if user is in class (academic) mode
 
 // NEW: Daily Challenge state
@@ -86,6 +92,7 @@ function goToHome() {
     currentStream = '';
     currentSubject = '';
     dailyChallengeMode = false; // Ensure daily challenge mode is reset
+    academicDailyChallenge = false;
     currentChapter = '';
     showPage('home-page');
 }
@@ -93,18 +100,18 @@ function goToHome() {
 function goBack() {
     if (dailyChallengeMode) {
         // From daily challenge subject page back to home
-        goToHome();
-    }
-    else if (classMode && currentClass) {
+        classMode ? goToClass() : goToHome();
+    } else if (classMode && currentClass) {
         if (currentClass === '11' || currentClass === '12') {
             if (currentStream && currentSubject) {
                 // From academic subject page back to class subjects grid
                 currentSubject = '';
                 currentChapter = '';
+                currentStream = ''; // Go back to stream selection
                 displaySubjectsForClass();
-                showPage('class-page');
+                showPage('stream-page');
             } else if (currentStream) {
-                // From class subjects grid back to stream selection
+                // From stream selection back to class selection
                 currentStream = '';
                 showPage('stream-page');
             } else {
@@ -270,6 +277,28 @@ function displaySubjectsForClass() {
     grid.innerHTML = '';
     grid.className = 'subjects-grid';
     
+    // NEW: Add Daily Challenge card for academic classes
+    const dailyChallengeCard = document.createElement('div');
+    dailyChallengeCard.id = `academic-daily-challenge-card-${currentClass}`;
+    dailyChallengeCard.className = 'subject-card daily-challenge-card';
+    const today = new Date();
+    const options = { day: 'numeric', month: 'short', year: 'numeric' };
+    const formattedDate = today.toLocaleDateString('en-GB', options);
+
+    dailyChallengeCard.innerHTML = `
+        <div class="daily-challenge-header">
+            <h2>Daily Challenge</h2>
+            <span id="academic-daily-challenge-notification-dot" class="notification-dot" style="display: none;"></span>
+        </div>
+        <p>A mix of 20 questions from all subjects for Class ${currentClass}.</p>
+        <div class="daily-challenge-footer">
+            <span id="academic-daily-challenge-date">${formattedDate}</span>
+            <span id="academic-daily-challenge-status">A new challenge awaits!</span>
+        </div>
+    `;
+    dailyChallengeCard.onclick = () => startAcademicDailyChallenge();
+    grid.appendChild(dailyChallengeCard);
+
     let subjects = [];
     if (currentClass === '9' || currentClass === '10') {
         subjects = classData[currentClass]?.subjects || [];
@@ -314,6 +343,8 @@ function displaySubjectsForClass() {
         }
         grid.appendChild(card);
     });
+
+    checkAcademicDailyChallengeStatus(); // NEW: Check status when displaying subjects
 }
 
 function displayStreamsForClass() {
@@ -547,6 +578,10 @@ function startQuiz(setIndex) {
     // Get quiz data based on mode
     let chapterData = null;
     if (classMode) {
+        if (academicDailyChallenge) {
+            // This path is for academic daily challenge, handled by startAcademicDailyChallenge
+            return;
+        }
         chapterData = classData[currentClass]?.chapters?.[currentSubject]?.find(ch => ch.name === currentChapter);
     } else {
         const data = subjectData[currentSubject];
@@ -721,27 +756,30 @@ function submitQuiz() {
     const timeTaken = totalTime - timeRemaining;
     const results = calculateResults();
 
-    // Special handling for Daily Challenge progress saving
-    if (dailyChallengeMode) {
+    // Handle progress saving based on the quiz mode
+    if (academicDailyChallenge) {
+        const today = new Date().toISOString().split('T')[0];
+        const dailyProgressKey = `daily_challenge_class${currentClass}_${today}`;
+        userProgress[dailyProgressKey] = { score: results.percentage, timeTaken: timeTaken };
+        saveUserProgress();
+    } else if (dailyChallengeMode) {
         const today = new Date().toISOString().split('T')[0];
         const dailyProgressKey = `daily_challenge_${today}`;
         userProgress[dailyProgressKey] = { score: results.percentage, timeTaken: timeTaken };
         saveUserProgress();
-        displayResults(results, timeTaken);
+    } else {
+        // Save progress for regular chapter sets
         showPage('results-page');
-        return; // Stop here for daily challenge
+        const progressKey = `${currentSubject}_${currentChapter}_${currentSet}`;
+        userProgress[progressKey] = {
+            score: results.percentage,
+            timeTaken: timeTaken,
+            date: new Date().toISOString(),
+            answers: userAnswers.slice()
+        };
+        saveUserProgress();
     }
-    
-    // Save progress
-    const progressKey = `${currentSubject}_${currentChapter}_${currentSet}`;
-    userProgress[progressKey] = {
-        score: results.percentage,
-        timeTaken: timeTaken,
-        date: new Date().toISOString(),
-        answers: userAnswers.slice()
-    };
-    
-    saveUserProgress();
+
     displayResults(results, timeTaken);
     showPage('results-page');
 }
@@ -937,6 +975,7 @@ function initializeTheme() {
 
 // ===================== NEW: DAILY CHALLENGE =====================
 function checkDailyChallengeStatus() {
+    if (classMode) return; // This is for competitive daily challenge
     const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
     const dailyProgressKey = `daily_challenge_${today}`; // FIX: Use consistent key
     const progress = userProgress[dailyProgressKey];
@@ -977,6 +1016,7 @@ function checkDailyChallengeStatus() {
 
 function startDailyChallenge() {
     dailyChallengeMode = true;
+    academicDailyChallenge = false;
     currentSubject = 'Daily Challenge';
     currentChapter = 'Mixed Questions';
     currentSet = 0;
@@ -1066,6 +1106,84 @@ function generateDailyChallengeQuestions() {
 
     // Final shuffle of the 20 selected questions to mix them up
     return seededShuffle(dailyQuestions, seed + 4).slice(0, 20);
+}
+
+// ===================== NEW: ACADEMIC DAILY CHALLENGE =====================
+function checkAcademicDailyChallengeStatus() {
+    if (!classMode || !currentClass) return;
+
+    const today = new Date().toISOString().split('T')[0];
+    const dailyProgressKey = `daily_challenge_class${currentClass}_${today}`;
+    const progress = userProgress[dailyProgressKey];
+    const statusEl = document.getElementById('academic-daily-challenge-status');
+    const notificationDot = document.getElementById('academic-daily-challenge-notification-dot');
+
+    if (!statusEl || !notificationDot) return;
+
+    if (progress) {
+        notificationDot.style.display = 'none';
+        statusEl.textContent = `Attempted. Score: ${progress.score}%.`;
+        statusEl.style.color = progress.score >= 40 ? 'var(--color-success)' : 'var(--color-warning)';
+    } else {
+        statusEl.textContent = 'A new challenge awaits!';
+        statusEl.style.color = '';
+        notificationDot.style.display = 'block';
+    }
+}
+
+function startAcademicDailyChallenge() {
+    dailyChallengeMode = true;
+    academicDailyChallenge = true;
+    currentSubject = `Class ${currentClass} Daily Challenge`;
+    currentChapter = 'Mixed Subjects';
+    currentSet = 0;
+    currentQuestionIndex = 0;
+    userAnswers = [];
+
+    quizData = generateAcademicDailyChallengeQuestions();
+
+    if (!quizData || quizData.length < 20) {
+        showNotification(`Not enough questions for a Class ${currentClass} Daily Challenge.`, 'error');
+        // Reset flags since the challenge did not start
+        dailyChallengeMode = false;
+        academicDailyChallenge = false;
+        goToClass();
+        return;
+    }
+
+    userAnswers = new Array(quizData.length).fill(null);
+    timeRemaining = quizData.length * 60;
+    totalTime = timeRemaining;
+
+    displayQuestion();
+    startTimer();
+    updateBookmarkButton();
+    setupQuestionNumbers();
+    showPage('quiz-page');
+}
+
+function generateAcademicDailyChallengeQuestions() {
+    const allQuestions = [];
+    const subjects = classData[currentClass]?.subjects || [];
+
+    subjects.forEach(subjectKey => {
+        classData[currentClass]?.chapters?.[subjectKey]?.forEach(chapter => {
+            chapter.sets?.forEach(set => {
+                if (Array.isArray(set) && set.length > 0) {
+                    allQuestions.push(...set);
+                }
+            });
+        });
+    });
+
+    if (allQuestions.length === 0) {
+        return [];
+    }
+
+    const today = new Date();
+    const seed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate() + parseInt(currentClass);
+
+    return seededShuffle(allQuestions, seed).slice(0, 20);
 }
 
 // ===================== NEW: ONBOARDING & PERSONALIZATION =====================
@@ -1607,5 +1725,4 @@ function removeBookmark(index) {
         displayBookmarkedQuestions();
     }
 }
-
 
