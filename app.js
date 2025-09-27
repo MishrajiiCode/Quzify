@@ -4,7 +4,7 @@
 
 // ===================== APP CHANGELOG =====================
 const COMMUNITY_POSTS = {
-    '1.6.1-Beta.': {
+    '1.6.0-Beta.': {
         date: 'Sep 27, 2024',
         changes: [
             'Added class-specific Daily Challenges for academic students (Classes 9-12).',
@@ -23,7 +23,7 @@ const COMMUNITY_POSTS = {
     }
 };
 // ===================== APP CONFIGURATION =====================
-const APP_VERSION = '1.6.1-Beta.'; // Increment this to show an update notification
+const APP_VERSION = '1.6.0-Beta.'; // Increment this to show an update notification
 
 // ===================== GLOBAL STATE VARIABLES =====================
 let currentSubject = '';
@@ -1358,11 +1358,11 @@ function checkForUpdates() {
         showUpdateDetails(updateDetails, modalTitle, devNote);
         localStorage.setItem('appVersion', APP_VERSION);
         // Don't check for content on app version change to avoid multiple notifications
-        localStorage.setItem('contentMap', JSON.stringify(generateContentMap()));
+        localStorage.setItem('lastSeenVersion', APP_VERSION); // Mark community post as seen
         return;
     }
 
-    checkCommunityUpdates(); // Check for new community posts
+    checkCommunityUpdates(); // Check for new community posts only if app version hasn't changed
 
     // 2. Check for New Content (specific topics)
     const currentContentMap = generateContentMap();
@@ -1818,6 +1818,4 @@ function displayCommunityPosts() {
 
     showPage('community-page');
 }
-
-
 
