@@ -10,7 +10,6 @@ const COMMUNITY_POSTS = {
             'Added class-specific Daily Challenges for academic students (Classes 9-12).',
             'Fixed a bug where the back button would not work after clicking on an empty Daily Challenge.',
             'Added a Community page to view detailed updates.'
-         
         ],
         note: "This is a beta version. Features and functionality may change in the final release."
     },
@@ -1819,5 +1818,6 @@ function displayCommunityPosts() {
 
     showPage('community-page');
 }
+
 
 
