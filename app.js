@@ -4,7 +4,7 @@
 
 // ===================== APP CHANGELOG =====================
 const COMMUNITY_POSTS = {
-    '1.6.0-Beta.': {
+    '1.6.1-Beta.': {
         date: 'Sep 27, 2024',
         changes: [
             'Added class-specific Daily Challenges for academic students (Classes 9-12).',
@@ -24,7 +24,7 @@ const COMMUNITY_POSTS = {
     }
 };
 // ===================== APP CONFIGURATION =====================
-const APP_VERSION = '1.6.0-Beta.'; // Increment this to show an update notification
+const APP_VERSION = '1.6.1-Beta.'; // Increment this to show an update notification
 
 // ===================== GLOBAL STATE VARIABLES =====================
 let currentSubject = '';
@@ -1819,4 +1819,5 @@ function displayCommunityPosts() {
 
     showPage('community-page');
 }
+
 
