@@ -23,7 +23,7 @@ const COMMUNITY_POSTS = {
     }
 };
 // ===================== APP CONFIGURATION =====================
-const APP_VERSION = '1.6.1-Beta.'; // Increment this to show an update notification
+const APP_VERSION = '1.6.2-Beta.'; // Increment this to show an update notification
 
 // ===================== GLOBAL STATE VARIABLES =====================
 let currentSubject = '';
@@ -98,7 +98,6 @@ function goToHome() {
     currentClass = '';
     currentStream = '';
     currentSubject = '';
-    dailyChallengeMode = false; // Ensure daily challenge mode is reset
     academicDailyChallenge = false;
     currentChapter = '';
     showPage('home-page');
@@ -108,12 +107,11 @@ function goToHome() {
 
 function goBack() {
     if (dailyChallengeMode) {
-        // From daily challenge subject page back to home
-        classMode ? goToClass() : goToHome();
-    } else if (classMode && currentClass) {
+        // From a daily challenge quiz, always go back to the appropriate home screen
+        academicDailyChallenge ? goToClass() : goToHome();
+    } else if (classMode) {
         if (currentClass === '11' || currentClass === '12') {
             if (currentStream && currentSubject) {
-                // We are on a chapter list page, go back to the subject list for the current stream.
                 currentSubject = '';
                 currentChapter = '';
                 displaySubjectsForClass();
@@ -128,16 +126,10 @@ function goBack() {
             }
         } else {
             if (currentSubject) {
-                // From academic subject page back to class subjects grid
-                currentSubject = '';
-                currentChapter = '';
                 displaySubjectsForClass();
                 showPage('class-page');
             } else {
-                // From class subjects grid back to combined home page
-                classMode = false;
-                currentClass = ''; 
-                showPage('home-page');
+                goToHome();
             }
         }
     } else {
@@ -158,12 +150,15 @@ function goToClass() {
 }
 
 function goToSubject() {
-    if (dailyChallengeMode) {
-        goToHome();
-        return;
+    // This function should always navigate back to the chapter list for the current subject
+    if (classMode) {
+        currentChapter = '';
+        displayChaptersForClass();
     } else {
-        showPage('subject-page');
+        currentChapter = '';
+        displayChapters(currentSubject);
     }
+    showPage('subject-page');
 }
 
 function goToChapter() {
