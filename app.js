@@ -1,10 +1,19 @@
 
-
 // app.js - Complete Quiz Platform with Class and Competitive Exam functionality
 // Only business logic - questions stored in separate data files
-
 // ===================== APP CHANGELOG =====================
 const COMMUNITY_POSTS = {
+    '1.6.2-Beta.': {
+        date: 'Sep 28, 2024',
+        changes: [
+            '<strong>Major Feature: Online Leaderboard!</strong> Your quiz scores are now saved online.',
+            'Added a dynamic Leaderboard to show the top 10 high scores across all quizzes.',
+            'The leaderboard now shows each user\'s single best score, making it fair and competitive.',
+            'Added a "Your Rank" feature to show your personal rank even if you are not in the top 10.',
+            'Fixed several navigation and display bugs for a smoother experience.'
+        ],
+        note: "This is a major update introducing online scoring. Your feedback is valuable!"
+    },
     '1.6.0-Beta.': {
         date: 'Sep 27, 2024',
         changes: [
@@ -24,7 +33,7 @@ const COMMUNITY_POSTS = {
     }
 };
 // ===================== APP CONFIGURATION =====================
-const APP_VERSION = '1.6.1-Beta.'; // Increment this to show an update notification
+const APP_VERSION = '1.6.2-Beta.'; // Increment this to show an update notification
 
 // ===================== GLOBAL STATE VARIABLES =====================
 let currentSubject = '';
@@ -60,6 +69,24 @@ const subjectData = {
 // Academic class data (loaded from classes folder)
 const classData = window.classesData || null;
 
+// ===================== FIREBASE SETUP =====================
+ // Your web app's Firebase configuration
+  const firebaseConfig = {
+    apiKey: "AIzaSyAy-7QGZ05wNf0fLG1-AY2FxJy_fdILdoM",
+    authDomain: "quizifyapp-4c5ca.firebaseapp.com",
+    projectId: "quizifyapp-4c5ca",
+    storageBucket: "quizifyapp-4c5ca.firebasestorage.app",
+    messagingSenderId: "948606346917",
+    appId: "1:948606346917:web:6fdfa4e16adefb5f710f4c"
+  };
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const resultsCollection = db.collection("quizResults");
+const leaderboardCollection = db.collection("leaderboard"); // NEW: Collection for best scores
+
+
 // ===================== INITIALIZATION =====================
 document.addEventListener('DOMContentLoaded', function() {
     loadBookmarkedQuestions();
@@ -71,6 +98,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeUpdateDetailsModal(); // Initialize the new update details modal
     initializeHomepageSearch(); // Initialize the new homepage search
     initializeLockedContentModal(); // Initialize the locked content modal
+    initializeLeaderboard(); // Initialize leaderboard functionality
     initializeLogoutConfirmation(); // Initialize the new logout modal
 });
 
@@ -94,53 +122,64 @@ function goToHome() {
     if (timer) {
         clearInterval(timer);
     }
+    const userFocus = localStorage.getItem('userFocus');
+
     dailyChallengeMode = false;
     classMode = false;
     currentClass = '';
     currentStream = '';
     currentSubject = '';
-    dailyChallengeMode = false; // Ensure daily challenge mode is reset
     academicDailyChallenge = false;
     currentChapter = '';
+
+    // Correctly show/hide sections based on user preference
+    document.getElementById('competitive-section').style.display = userFocus === 'competitive' ? 'block' : 'none';
+    document.getElementById('daily-challenge-section').style.display = userFocus === 'competitive' ? 'block' : 'none';
+    document.getElementById('academic-section').style.display = userFocus === 'academic' ? 'block' : 'none';
+
     showPage('home-page');
-    // Re-check status when returning home
-    checkDailyChallengeStatus();
+    // Re-check status only if the user is in competitive mode
+    if (userFocus === 'competitive') {
+        checkDailyChallengeStatus();
+    }
 }
 
 function goBack() {
     if (dailyChallengeMode) {
-        // From daily challenge subject page back to home
-        classMode ? goToClass() : goToHome();
-    } else if (classMode && currentClass) {
+        // From a daily challenge quiz, always go back to the appropriate home screen
+        if (academicDailyChallenge) {
+            goToClass();
+        } else {
+            goToHome();
+        }
+    } else if (classMode) {
         if (currentClass === '11' || currentClass === '12') {
             if (currentStream && currentSubject) {
-                // We are on a chapter list page, go back to the subject list for the current stream.
                 currentSubject = '';
                 currentChapter = '';
                 displaySubjectsForClass();
-                showPage('class-page');
             } else if (currentStream) {
                 // We are on the subject list page, go back to the stream selection.
                 currentStream = '';
                 showPage('stream-page');
             } else {
                 // We are on the stream selection page, go back to the main home page.
-                goToHome();
+                goToHome(); // This correctly resets all state
             }
         } else {
             if (currentSubject) {
-                // From academic subject page back to class subjects grid
+                // FIX: Reset subject and chapter when going back to the subject list
                 currentSubject = '';
                 currentChapter = '';
-                displaySubjectsForClass();
-                showPage('class-page');
+                goToClass(); // Call this AFTER resetting the state
             } else {
-                // From class subjects grid back to combined home page
-                classMode = false;
-                currentClass = ''; 
-                showPage('home-page');
+                goToHome();
             }
         }
+    } else if (currentSubject) {
+        // From competitive chapter list back to competitive subject list
+        currentSubject = '';
+        showPage('home-page');
     } else {
         // Default fallback to home
         showPage('home-page');
@@ -159,12 +198,15 @@ function goToClass() {
 }
 
 function goToSubject() {
-    if (dailyChallengeMode) {
-        goToHome();
-        return;
+    // This function should always navigate back to the chapter list for the current subject
+    if (classMode) {
+        currentChapter = '';
+        displayChaptersForClass();
     } else {
-        showPage('subject-page');
+        currentChapter = '';
+        displayChapters(currentSubject);
     }
+    showPage('subject-page');
 }
 
 function goToChapter() {
@@ -592,18 +634,14 @@ function startQuiz(setIndex) {
     
     // Get quiz data based on mode
     let chapterData = null;
-    if (classMode) {
-        if (academicDailyChallenge) {
-            // This path is for academic daily challenge, handled by startAcademicDailyChallenge
-            return;
-        }
+    if (classMode && !academicDailyChallenge) {
         chapterData = classData[currentClass]?.chapters?.[currentSubject]?.find(ch => ch.name === currentChapter);
-    } else {
+    } else if (!classMode && !dailyChallengeMode) {
         const data = subjectData[currentSubject];
         chapterData = data?.chapters?.find(ch => ch.name === currentChapter);
     }
     
-    if (!chapterData || !chapterData.sets[setIndex] || chapterData.sets[setIndex].length === 0) {
+    if (!dailyChallengeMode && (!chapterData || !chapterData.sets[setIndex] || chapterData.sets[setIndex].length === 0)) {
         showNotification('This set is not available yet. Please check back later.', 'warning');
         return;
     }
@@ -770,6 +808,17 @@ function submitQuiz() {
     
     const timeTaken = totalTime - timeRemaining;
     const results = calculateResults();
+
+    // Get user info for saving results
+    const userName = localStorage.getItem('userName') || 'Anonymous';
+    const userId = getOrCreateUserId(); // NEW: Get a unique ID for the user
+
+    saveResultToFirestore(
+        userName,
+        userId,
+        `${getSubjectTitle(currentSubject)} - ${currentChapter}`,
+        results.percentage
+    );
 
     // Handle progress saving based on the quiz mode
     if (academicDailyChallenge) {
@@ -1351,6 +1400,7 @@ function initializeLogoutConfirmation() {
     confirmBtn.addEventListener('click', () => {
         localStorage.removeItem('userName');
         localStorage.removeItem('userFocus');
+        // The quizifyUserId is now derived from the name, so no need to remove it.
         // Reload the page to reset the state and show the onboarding modal
         window.location.reload();
     });
@@ -1585,6 +1635,7 @@ function initializeSideMenu() {
     const menuHomeBtn = document.getElementById('menu-home-btn');
     const menuBookmarksBtn = document.getElementById('menu-bookmarks-btn');
     const menuCommunityBtn = document.getElementById('menu-community-btn');
+    const menuLeaderboardBtn = document.getElementById('menu-leaderboard-btn');
     const menuOverlay = document.getElementById('menu-overlay');
     
     const openMenu = () => {
@@ -1606,6 +1657,10 @@ function initializeSideMenu() {
     });
     menuCommunityBtn.addEventListener('click', () => {
         displayCommunityPosts();
+        closeSideMenu();
+    });
+    menuLeaderboardBtn.addEventListener('click', () => {
+        displayLeaderboard();
         closeSideMenu();
     });
     menuOverlay.addEventListener('click', closeSideMenu);
@@ -1855,5 +1910,138 @@ function displayCommunityPosts() {
     });
 
     showPage('community-page');
+}
+
+// ===================== NEW: FIREBASE & LEADERBOARD FUNCTIONS =====================
+
+/**
+ * Saves a quiz result to the Firestore database.
+ * Also updates the user's best score in a separate leaderboard collection.
+ * @param {string} name - The user's name.
+ * @param {string} userId - The unique ID for the user.
+ * @param {string} quizTitle - The combined subject and chapter title.
+ * @param {number} score - The user's score percentage.
+ */
+async function saveResultToFirestore(name, userId, quizTitle, score) {
+    // 1. Save every individual result for historical data
+    try {
+        await resultsCollection.add({
+            name: name,
+            userId: userId,
+            quiz: quizTitle,
+            score: score,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        console.log("Quiz result saved successfully!");
+    } catch (error) {
+        console.error("Error saving result to Firestore: ", error);
+    }
+
+    // 2. Update the leaderboard collection with the user's BEST score
+    const userLeaderboardRef = leaderboardCollection.doc(userId);
+
+    try {
+        const doc = await userLeaderboardRef.get();
+        if (!doc.exists || score > doc.data().score) {
+            // If the user is not on the leaderboard OR this new score is higher
+            await userLeaderboardRef.set({
+                name: name,
+                score: score,
+                lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            console.log("Leaderboard updated with new high score!");
+        }
+    } catch (error) {
+        console.error("Error updating leaderboard:", error);
+        showNotification('Could not update your leaderboard score.', 'error');
+    }
+}
+
+/**
+ * Fetches and displays the top 10 leaderboard scores from Firestore.
+ */
+async function displayLeaderboard() {
+    const leaderboardList = document.getElementById('leaderboard-list');
+    const userRankContainer = document.getElementById('user-rank-container');
+    const userRankDetails = document.getElementById('user-rank-details');
+
+    leaderboardList.innerHTML = '<li>Loading leaderboard...</li>'; // Show a loading state
+    userRankContainer.style.display = 'none'; // Hide user rank initially
+    showPage('leaderboard-page');
+
+    try { // Fetch and display top 10
+        const snapshot = await leaderboardCollection.orderBy("score", "desc").limit(10).get();
+
+        if (snapshot.empty) {
+            leaderboardList.innerHTML = '<li>No scores recorded yet. Be the first!</li>';
+            return;
+        }
+
+        leaderboardList.innerHTML = ''; // Clear loading state
+        let rank = 1;
+        let userInTop10 = false;
+        const currentUserId = getOrCreateUserId();
+
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            const isCurrentUser = doc.id === currentUserId;
+            if (isCurrentUser) {
+                userInTop10 = true;
+            }
+            const listItem = `<li class="${isCurrentUser ? 'current-user-rank' : ''}"><span class="leaderboard-rank">${rank++}.</span> <span class="leaderboard-name">${data.name}</span> <span class="leaderboard-score">${data.score}%</span></li>`;
+            leaderboardList.innerHTML += listItem;
+        });
+
+        // If user is not in top 10, fetch their specific rank
+        if (!userInTop10) {
+            const userDocRef = leaderboardCollection.doc(currentUserId);
+            const userDoc = await userDocRef.get();
+
+            if (userDoc.exists) {
+                const userScore = userDoc.data().score;
+                const userName = userDoc.data().name;
+
+                // Count users with a higher score to determine rank
+                const higherRankSnapshot = await leaderboardCollection.where("score", ">", userScore).get();
+                const userRank = higherRankSnapshot.size + 1;
+
+                // Display user's rank
+                userRankDetails.innerHTML = `
+                    <span class="leaderboard-rank">${userRank}.</span>
+                    <span class="leaderboard-name">${userName} (You)</span>
+                    <span class="leaderboard-score">${userScore}%</span>
+                `;
+                userRankContainer.style.display = 'block';
+            }
+        }
+
+    } catch (error) {
+        console.error("Error fetching leaderboard: ", error);
+        leaderboardList.innerHTML = '<li>Could not load leaderboard. Please try again later.</li>';
+        showNotification('Failed to fetch leaderboard data.', 'error');
+    }
+}
+
+function initializeLeaderboard() {
+    // This function can be used for any specific leaderboard initializations if needed in the future.
+    // For now, the menu button handles the display.
+}
+
+/**
+ * Gets a unique ID for the current user from localStorage, or creates one if it doesn't exist.
+ * This version creates a consistent ID based on the user's name.
+ * This ensures each user's high score is tracked uniquely.
+ * @returns {string} The user's unique ID.
+ */
+function getOrCreateUserId() {
+    const userName = localStorage.getItem('userName');
+    if (!userName) {
+        // Fallback for anonymous or error states, though this shouldn't happen in normal flow.
+        return 'user_anonymous_' + Date.now();
+    }
+    // Create a consistent ID from the user's name.
+    // e.g., "Raj Mishra" -> "user_rajmishra"
+    const sanitizedName = userName.toLowerCase().replace(/[^a-z0-9]/g, '');
+    return `user_${sanitizedName}`;
 }
 
