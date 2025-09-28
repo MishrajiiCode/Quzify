@@ -1,4 +1,3 @@
-
 :root {
   /* Primitive Color Tokens */
   --color-white: rgba(255, 255, 255, 1);
@@ -2143,7 +2142,7 @@ footer a:hover svg {
   }
 
   .subjects-grid, #class-content, .chapters-grid, .stats {
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: 1fr;
   }
 
   .sets-grid {
@@ -2418,4 +2417,3 @@ input:checked + .slider:before { transform: translateX(24px); }
 .onboarding-choices button {
   flex: 1;
 }
-
