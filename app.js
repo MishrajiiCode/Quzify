@@ -93,6 +93,8 @@ function goToHome() {
     if (timer) {
         clearInterval(timer);
     }
+    const userFocus = localStorage.getItem('userFocus');
+
     dailyChallengeMode = false;
     classMode = false;
     currentClass = '';
@@ -100,22 +102,33 @@ function goToHome() {
     currentSubject = '';
     academicDailyChallenge = false;
     currentChapter = '';
+
+    // Correctly show/hide sections based on user preference
+    document.getElementById('competitive-section').style.display = userFocus === 'competitive' ? 'block' : 'none';
+    document.getElementById('daily-challenge-section').style.display = userFocus === 'competitive' ? 'block' : 'none';
+    document.getElementById('academic-section').style.display = userFocus === 'academic' ? 'block' : 'none';
+
     showPage('home-page');
-    // Re-check status when returning home
-    checkDailyChallengeStatus();
+    // Re-check status only if the user is in competitive mode
+    if (userFocus === 'competitive') {
+        checkDailyChallengeStatus();
+    }
 }
 
 function goBack() {
     if (dailyChallengeMode) {
         // From a daily challenge quiz, always go back to the appropriate home screen
-        academicDailyChallenge ? goToClass() : goToHome();
+        if (academicDailyChallenge) {
+            goToClass();
+        } else {
+            goToHome();
+        }
     } else if (classMode) {
         if (currentClass === '11' || currentClass === '12') {
             if (currentStream && currentSubject) {
                 currentSubject = '';
                 currentChapter = '';
                 displaySubjectsForClass();
-                showPage('class-page');
             } else if (currentStream) {
                 // We are on the subject list page, go back to the stream selection.
                 currentStream = '';
@@ -126,12 +139,15 @@ function goBack() {
             }
         } else {
             if (currentSubject) {
-                displaySubjectsForClass();
-                showPage('class-page');
+                goToClass();
             } else {
                 goToHome();
             }
         }
+    } else if (currentSubject) {
+        // From competitive chapter list back to competitive subject list
+        currentSubject = '';
+        showPage('home-page');
     } else {
         // Default fallback to home
         showPage('home-page');
