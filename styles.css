@@ -1,3 +1,4 @@
+
 :root {
   /* Primitive Color Tokens */
   --color-white: rgba(255, 255, 255, 1);
@@ -1782,6 +1783,83 @@ button:focus-visible {
     transform: none; /* Prevent button hover effect from interfering */
 }
 
+/* Leaderboard Page */
+.leaderboard-container {
+    margin-top: var(--space-24);
+}
+
+#leaderboard-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+#leaderboard-list li {
+    display: flex;
+    align-items: center;
+    padding: var(--space-12) var(--space-16);
+    background-color: var(--color-secondary);
+    border-radius: var(--radius-base);
+    margin-bottom: var(--space-12);
+    font-size: var(--font-size-lg);
+    transition: background-color 0.2s ease;
+}
+
+#leaderboard-list li:hover {
+    background-color: var(--color-secondary-hover);
+}
+
+.leaderboard-rank {
+    font-weight: var(--font-weight-bold);
+    font-size: var(--font-size-xl);
+    width: 40px;
+    text-align: center;
+    color: var(--color-text-secondary);
+}
+
+.leaderboard-score {
+    margin-left: auto;
+    font-weight: var(--font-weight-bold);
+    color: var(--color-primary);
+}
+
+/* FIX: Ensure score text is visible on highlighted background */
+#leaderboard-list li.current-user-rank .leaderboard-score {
+    color: var(--color-btn-primary-text);
+}
+
+/* NEW: Highlight for current user in top 10 */
+#leaderboard-list li.current-user-rank {
+    background-color: var(--color-primary);
+    color: var(--color-btn-primary-text);
+}
+
+/* NEW: User Rank Display */
+.user-rank-container {
+    margin-top: var(--space-32);
+    padding-top: var(--space-24);
+    border-top: 1px solid var(--color-border);
+}
+
+#user-rank-details {
+    display: flex;
+    align-items: center;
+    padding: var(--space-12) var(--space-16);
+    background-color: var(--color-primary);
+    color: var(--color-btn-primary-text);
+    border-radius: var(--radius-base);
+    font-size: var(--font-size-lg);
+    margin-top: var(--space-12);
+    box-shadow: var(--shadow-md);
+}
+
+#user-rank-details .leaderboard-rank {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+/* FIX: Ensure score text is visible on the user rank details box */
+#user-rank-details .leaderboard-score {
+    color: var(--color-btn-primary-text);
+}
 /* Side Menu (Drawer) */
 .side-menu {
   position: fixed;
@@ -2142,7 +2220,7 @@ footer a:hover svg {
   }
 
   .subjects-grid, #class-content, .chapters-grid, .stats {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   }
 
   .sets-grid {
@@ -2417,3 +2495,4 @@ input:checked + .slider:before { transform: translateX(24px); }
 .onboarding-choices button {
   flex: 1;
 }
+
