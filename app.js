@@ -1,4 +1,5 @@
 
+
 // app.js - Complete Quiz Platform with Class and Competitive Exam functionality
 // Only business logic - questions stored in separate data files
 
@@ -23,7 +24,7 @@ const COMMUNITY_POSTS = {
     }
 };
 // ===================== APP CONFIGURATION =====================
-const APP_VERSION = '1.6.3-Beta.'; // Increment this to show an update notification
+const APP_VERSION = '1.6.1-Beta.'; // Increment this to show an update notification
 
 // ===================== GLOBAL STATE VARIABLES =====================
 let currentSubject = '';
@@ -93,42 +94,31 @@ function goToHome() {
     if (timer) {
         clearInterval(timer);
     }
-    const userFocus = localStorage.getItem('userFocus');
-
     dailyChallengeMode = false;
     classMode = false;
     currentClass = '';
     currentStream = '';
     currentSubject = '';
+    dailyChallengeMode = false; // Ensure daily challenge mode is reset
     academicDailyChallenge = false;
     currentChapter = '';
-
-    // Correctly show/hide sections based on user preference
-    document.getElementById('competitive-section').style.display = userFocus === 'competitive' ? 'block' : 'none';
-    document.getElementById('daily-challenge-section').style.display = userFocus === 'competitive' ? 'block' : 'none';
-    document.getElementById('academic-section').style.display = userFocus === 'academic' ? 'block' : 'none';
-
     showPage('home-page');
-    // Re-check status only if the user is in competitive mode
-    if (userFocus === 'competitive') {
-        checkDailyChallengeStatus();
-    }
+    // Re-check status when returning home
+    checkDailyChallengeStatus();
 }
 
 function goBack() {
     if (dailyChallengeMode) {
-        // From a daily challenge quiz, always go back to the appropriate home screen
-        if (academicDailyChallenge) {
-            goToClass();
-        } else {
-            goToHome();
-        }
-    } else if (classMode) {
+        // From daily challenge subject page back to home
+        classMode ? goToClass() : goToHome();
+    } else if (classMode && currentClass) {
         if (currentClass === '11' || currentClass === '12') {
             if (currentStream && currentSubject) {
+                // We are on a chapter list page, go back to the subject list for the current stream.
                 currentSubject = '';
                 currentChapter = '';
                 displaySubjectsForClass();
+                showPage('class-page');
             } else if (currentStream) {
                 // We are on the subject list page, go back to the stream selection.
                 currentStream = '';
@@ -139,15 +129,18 @@ function goBack() {
             }
         } else {
             if (currentSubject) {
-                goToClass();
+                // From academic subject page back to class subjects grid
+                currentSubject = '';
+                currentChapter = '';
+                displaySubjectsForClass();
+                showPage('class-page');
             } else {
-                goToHome();
+                // From class subjects grid back to combined home page
+                classMode = false;
+                currentClass = ''; 
+                showPage('home-page');
             }
         }
-    } else if (currentSubject) {
-        // From competitive chapter list back to competitive subject list
-        currentSubject = '';
-        showPage('home-page');
     } else {
         // Default fallback to home
         showPage('home-page');
@@ -166,15 +159,12 @@ function goToClass() {
 }
 
 function goToSubject() {
-    // This function should always navigate back to the chapter list for the current subject
-    if (classMode) {
-        currentChapter = '';
-        displayChaptersForClass();
+    if (dailyChallengeMode) {
+        goToHome();
+        return;
     } else {
-        currentChapter = '';
-        displayChapters(currentSubject);
+        showPage('subject-page');
     }
-    showPage('subject-page');
 }
 
 function goToChapter() {
@@ -1866,5 +1856,4 @@ function displayCommunityPosts() {
 
     showPage('community-page');
 }
-
 
