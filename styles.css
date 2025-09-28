@@ -1822,7 +1822,46 @@ button:focus-visible {
     color: var(--color-primary);
 }
 
+/* NEW: Top 3 Leaderboard Ranks */
+.leaderboard-medal {
+    width: 24px;
+    height: 24px;
+    margin-right: var(--space-8);
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    flex-shrink: 0;
+}
+
+/* Gold Medal */
+.rank-1 {
+    background-color: rgba(255, 215, 0, 0.1);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+}
+.rank-1 .leaderboard-medal {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='gold' stroke='%23B8860B' stroke-width='1' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='8' r='7'%3E%3C/circle%3E%3Cpolyline points='8.21 13.89 7 23 12 17 17 23 15.79 13.88'%3E%3C/polyline%3E%3C/svg%3E");
+}
+
+/* Silver Medal */
+.rank-2 {
+    background-color: rgba(192, 192, 192, 0.1);
+    border: 1px solid rgba(192, 192, 192, 0.3);
+}
+.rank-2 .leaderboard-medal {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='silver' stroke='%23A9A9A9' stroke-width='1' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='8' r='7'%3E%3C/circle%3E%3Cpolyline points='8.21 13.89 7 23 12 17 17 23 15.79 13.88'%3E%3C/polyline%3E%3C/svg%3E");
+}
+
+/* Bronze Medal */
+.rank-3 {
+    background-color: rgba(205, 127, 50, 0.1);
+    border: 1px solid rgba(205, 127, 50, 0.3);
+}
+.rank-3 .leaderboard-medal {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='%23CD7F32' stroke='%238B4513' stroke-width='1' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='8' r='7'%3E%3C/circle%3E%3Cpolyline points='8.21 13.89 7 23 12 17 17 23 15.79 13.88'%3E%3C/polyline%3E%3C/svg%3E");
+}
+
 /* FIX: Ensure score text is visible on highlighted background */
+#leaderboard-list li.current-user-rank .leaderboard-rank,
 #leaderboard-list li.current-user-rank .leaderboard-score {
     color: var(--color-btn-primary-text);
 }
@@ -1831,6 +1870,27 @@ button:focus-visible {
 #leaderboard-list li.current-user-rank {
     background-color: var(--color-primary);
     color: var(--color-btn-primary-text);
+}
+
+/* NEW: Spinner Styles */
+.spinner-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: var(--space-32);
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid var(--color-secondary);
+    border-top-color: var(--color-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
 }
 
 /* NEW: User Rank Display */
@@ -2495,4 +2555,3 @@ input:checked + .slider:before { transform: translateX(24px); }
 .onboarding-choices button {
   flex: 1;
 }
-
