@@ -117,6 +117,13 @@
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
                     <span>Community</span>
                 </button>
+                <button id="menu-leaderboard-btn" class="side-menu-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        <path d="m9 12 2 2 4-4"></path>
+                    </svg>
+                    <span>Leaderboard</span>
+                </button>
                 <div class="theme-switcher">
                     <label for="theme-toggle" class="theme-toggle-label">Dark Mode</label>
                     <label class="switch">
@@ -381,12 +388,35 @@
                 <!-- Community posts will be populated by JavaScript -->
             </div>
         </div>
+
+        <!-- Leaderboard Page -->
+        <div id="leaderboard-page" class="page">
+            <button class="back-btn" onclick="goToHome()">← Back to Home</button>
+            <h1>Leaderboard</h1>
+            <p>Top 10 scores across all quizzes.</p>
+            <div id="leaderboard-container" class="leaderboard-container">
+                <ul id="leaderboard-list">
+                    <!-- Leaderboard will be populated by JavaScript -->
+                </ul>
+            </div>
+            <!-- NEW: User's Personal Rank Display -->
+            <div id="user-rank-container" class="user-rank-container" style="display: none;">
+                <h3>Your Rank</h3>
+                <div id="user-rank-details">
+                    <!-- User's rank will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
     </div>
     
 
     <!-- Load data files -->
     <script src="classes.js"></script>
     <script src="quantitative.js"></script>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+
     <script src="english.js"></script>
     <script src="reasoning.js"></script>
     
@@ -405,6 +435,6 @@
   </footer>
 
 </body>
-</html>
 
+</html>
 
