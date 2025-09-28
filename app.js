@@ -1964,13 +1964,16 @@ async function displayLeaderboard() {
     const leaderboardList = document.getElementById('leaderboard-list');
     const userRankContainer = document.getElementById('user-rank-container');
     const userRankDetails = document.getElementById('user-rank-details');
+    const spinner = document.getElementById('leaderboard-spinner');
 
-    leaderboardList.innerHTML = '<li>Loading leaderboard...</li>'; // Show a loading state
+    leaderboardList.innerHTML = ''; // Clear previous list
+    spinner.style.display = 'flex'; // Show spinner
     userRankContainer.style.display = 'none'; // Hide user rank initially
     showPage('leaderboard-page');
 
     try { // Fetch and display top 10
         const snapshot = await leaderboardCollection.orderBy("score", "desc").limit(10).get();
+        spinner.style.display = 'none'; // Hide spinner after fetch
 
         if (snapshot.empty) {
             leaderboardList.innerHTML = '<li>No scores recorded yet. Be the first!</li>';
@@ -1988,8 +1991,13 @@ async function displayLeaderboard() {
             if (isCurrentUser) {
                 userInTop10 = true;
             }
-            const listItem = `<li class="${isCurrentUser ? 'current-user-rank' : ''}"><span class="leaderboard-rank">${rank++}.</span> <span class="leaderboard-name">${data.name}</span> <span class="leaderboard-score">${data.score}%</span></li>`;
+            
+            // Add medal classes for top 3
+            const rankClass = rank <= 3 ? `rank-${rank}` : '';
+            const medalIcon = rank <= 3 ? `<span class="leaderboard-medal"></span>` : '';
+            const listItem = `<li class="${isCurrentUser ? 'current-user-rank' : ''} ${rankClass}"><span class="leaderboard-rank">${rank}.</span> ${medalIcon} <span class="leaderboard-name">${data.name}</span> <span class="leaderboard-score">${data.score}%</span></li>`;
             leaderboardList.innerHTML += listItem;
+            rank++;
         });
 
         // If user is not in top 10, fetch their specific rank
@@ -2016,6 +2024,7 @@ async function displayLeaderboard() {
         }
 
     } catch (error) {
+        spinner.style.display = 'none'; // Hide spinner on error
         console.error("Error fetching leaderboard: ", error);
         leaderboardList.innerHTML = '<li>Could not load leaderboard. Please try again later.</li>';
         showNotification('Failed to fetch leaderboard data.', 'error');
@@ -2044,4 +2053,3 @@ function getOrCreateUserId() {
     const sanitizedName = userName.toLowerCase().replace(/[^a-z0-9]/g, '');
     return `user_${sanitizedName}`;
 }
-
