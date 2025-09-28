@@ -23,7 +23,7 @@ const COMMUNITY_POSTS = {
     }
 };
 // ===================== APP CONFIGURATION =====================
-const APP_VERSION = '1.6.2-Beta.'; // Increment this to show an update notification
+const APP_VERSION = '1.6.3-Beta.'; // Increment this to show an update notification
 
 // ===================== GLOBAL STATE VARIABLES =====================
 let currentSubject = '';
@@ -1866,4 +1866,5 @@ function displayCommunityPosts() {
 
     showPage('community-page');
 }
+
 
