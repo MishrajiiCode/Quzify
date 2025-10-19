@@ -1,5 +1,6 @@
 
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -68,6 +69,23 @@
         </div>
     </div>
 
+    <!-- NEW: Quiz Mode Selection Modal -->
+    <div id="quiz-mode-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Choose Your Mode</h2>
+                <button id="close-quiz-mode-btn" class="modal-close-btn" title="Close">&times;</button>
+            </div>
+            <p>How would you like to attempt this quiz set? </p>
+            <div class="quiz-mode-choices">
+                <button id="start-timed-quiz-btn">
+                    <strong>Timed Quiz</strong><span>(Standard mode with timer and results at the end)</span></button>
+                <button id="start-practice-quiz-btn">
+                    <strong>Practice Mode</strong><span>(No timer, instant feedback after each question)</span></button>
+            </div>
+        </div>
+    </div>
+
     <div class="container">
         <!-- Page-level Background Animation -->
         <div class="leaves-container">
@@ -117,6 +135,11 @@
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
                     <span>Community</span>
                 </button>
+                <!-- NEW: Settings Button -->
+                <button id="menu-settings-btn" class="side-menu-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                    <span>Settings</span>
+                </button>
                 <button id="menu-leaderboard-btn" class="side-menu-item">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
@@ -146,9 +169,11 @@
             <div class="home-header">
                 <!-- <div class="header-logo" onclick="goToHome()">
                     <img src="img.png" alt="Quiz Logo">
-                    <span>Quizify</span>
+                    <span>Quizify</span> 
                 </div> -->
-                <h1 id="welcome-heading">Welcome to Quizify!</h1>
+                <!-- NEW: Sparkle container for the welcome message -->
+                <div id="welcome-sparkles"></div>
+                <h1 id="welcome-heading">Welcome, <span id="user-name-display"></span>!</h1>
             </div>
 
             <!-- Homepage Search Bar -->
@@ -287,11 +312,7 @@
 
                 <div class="progress-section">
                     <h3>Progress Information</h3>
-                    <div id="progress-info" class="progress-info">
-                        <p><strong>Completed Sets:</strong> <span id="completed-sets">0/5</span></p>
-                        <p><strong>Average Score:</strong> <span id="average-score">0%</span></p>
-                        <p><strong>Time Taken:</strong> 0:00</p>
-                    </div>
+                    <div id="progress-info" class="progress-info"></div>
                 </div>
             </div>
         </div>
@@ -299,6 +320,9 @@
         <!-- Quiz Page -->
         <div id="quiz-page" class="page">
             <div class="quiz-header">
+                <div class="quiz-content-area">
+
+                </div>
                 <div>
                     <div id="current-question">Question 1 of 20</div>
                     <div>Set <span id="current-set">1</span></div>
@@ -320,6 +344,9 @@
                     <!-- Options will be populated by JavaScript -->
                 </div>
             </div>
+            
+            <!-- NEW: Instant Feedback for Practice Mode -->
+            <div id="practice-feedback" class="practice-feedback"></div>
 
             <div class="navigation-buttons">
                 <button id="prev-btn" onclick="previousQuestion()">Previous</button>
@@ -337,6 +364,8 @@
         <!-- Results Page -->
         <div id="results-page" class="page">
             <div class="results-container">
+                <!-- NEW: Confetti Container -->
+                <div id="confetti-container"></div>
                 <h1>Quiz Results</h1>
                 
                 <div class="score-display">
@@ -410,6 +439,23 @@
                 </div>
             </div>
         </div>
+
+        <!-- NEW: Settings Page -->
+        <div id="settings-page" class="page">
+            <button class="back-btn" onclick="goToHome()">← Back to Home</button>
+            <h1>Settings</h1>
+            <div class="settings-container">
+                <div class="setting-item">
+                    <label for="timer-duration-input" class="setting-label">Quiz Timer Duration</label>
+                    <p class="setting-description">Set the time allowed per question in seconds. (Default: 60)</p>
+                    <input type="number" id="timer-duration-input" class="form-control" min="10" max="180" step="5">
+                </div>
+                <div class="setting-actions">
+                    <button id="save-settings-btn">Save Settings</button>
+                </div>
+            </div>
+        </div>
+
     </div>
     
 
@@ -440,4 +486,3 @@
 </body>
 
 </html>
-
