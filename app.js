@@ -1,10 +1,21 @@
 
+
 // app.js - Complete Quiz Platform with Class and Competitive Exam functionality
 // Only business logic - questions stored in separate data files
 // ===================== APP CHANGELOG =====================
 const COMMUNITY_POSTS = {
+    '1.7.0-Beta.': {
+        date: 'Oct 19, 2025',
+        changes: [
+            '<strong>Critical Security Update!</strong> Your data is now more secure.',
+            'Implemented robust server-side security rules for Firestore to protect user scores and quiz history.',
+            'Integrated Firebase Anonymous Authentication for secure and unique user tracking on the leaderboard.',
+            'These changes prevent unauthorized access and ensure the integrity of your quiz progress.'
+        ],
+        note: "This backend security update is crucial for protecting your data. More features coming soon!"
+    },
     '1.6.2-Beta.': {
-        date: 'Sep 28, 2024',
+        date: 'Sep 28, 2025',
         changes: [
             '<strong>Major Feature: Online Leaderboard!</strong> Your quiz scores are now saved online.',
             'Added a dynamic Leaderboard to show the top 10 high scores across all quizzes.',
@@ -15,7 +26,7 @@ const COMMUNITY_POSTS = {
         note: "This is a major update introducing online scoring. Your feedback is valuable!"
     },
     '1.6.0-Beta.': {
-        date: 'Sep 27, 2024',
+        date: 'Sep 27, 2025',
         changes: [
             'Added class-specific Daily Challenges for academic students (Classes 9-12).',
             'Fixed a bug where the back button would not work after clicking on an empty Daily Challenge.',
@@ -24,7 +35,7 @@ const COMMUNITY_POSTS = {
         note: "This is a beta version. Features and functionality may change in the final release."
     },
     '1.5.13-Beta.': {
-        date: 'Sep 26, 2024',
+        date: 'Sep 26, 2025',
         changes: [
             'Added an info button to update notifications to show what\'s new.',
             'Replaced all disruptive browser alerts with a new, professional toast notification system.',
@@ -33,7 +44,7 @@ const COMMUNITY_POSTS = {
     }
 };
 // ===================== APP CONFIGURATION =====================
-const APP_VERSION = '1.6.2-Beta.'; // Increment this to show an update notification
+const APP_VERSION = '1.7.0-Beta.'; // Increment this to show an update notification
 
 // ===================== GLOBAL STATE VARIABLES =====================
 let currentSubject = '';
@@ -52,10 +63,13 @@ let userProgress = {};
 let currentClass = '';
 let currentStream = '';
 let academicDailyChallenge = false; // NEW: To distinguish academic vs competitive daily challenge
+let practiceMode = false; // NEW: To handle practice mode logic
+let pendingSetIndex = -1; // NEW: To hold the set index while the mode modal is open
 let classMode = false; // true if user is in class (academic) mode
 
 // NEW: Daily Challenge state
 let dailyChallengeMode = false;
+let quizTimerSetting = 60; // NEW: Default time per question in seconds
 
 
 // ===================== DATA MAPPING =====================
@@ -98,7 +112,10 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeUpdateDetailsModal(); // Initialize the new update details modal
     initializeHomepageSearch(); // Initialize the new homepage search
     initializeLockedContentModal(); // Initialize the locked content modal
+    initializeSettingsPage(); // NEW: Initialize settings functionality
+    initializeQuizModeModal(); // NEW: Initialize the quiz mode selection modal
     initializeLeaderboard(); // Initialize leaderboard functionality
+    initializeSparkles(); // NEW: Add festive sparkles
     initializeLogoutConfirmation(); // Initialize the new logout modal
 });
 
@@ -231,6 +248,43 @@ function goToResults() {
     showPage('results-page');
 }
 
+function goToPracticeResults() {
+    // In practice mode, "Finish" goes back to the chapter page.
+    goToChapter();
+}
+
+function goToSettings() {
+    document.getElementById('timer-duration-input').value = quizTimerSetting;
+    showPage('settings-page');
+}
+
+function initializeQuizModeModal() {
+    const modal = document.getElementById('quiz-mode-modal');
+    const timedBtn = document.getElementById('start-timed-quiz-btn');
+    const practiceBtn = document.getElementById('start-practice-quiz-btn');
+    const closeBtn = document.getElementById('close-quiz-mode-btn'); // NEW
+
+    const closeModal = () => {
+        modal.classList.remove('visible');
+    };
+
+    timedBtn.onclick = () => {
+        closeModal();
+        startQuiz(pendingSetIndex);
+    };
+    practiceBtn.onclick = () => {
+        closeModal();
+        startPracticeMode(pendingSetIndex);
+    };
+    closeBtn.onclick = closeModal; // NEW
+
+    // NEW: Close modal when clicking on the overlay
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            closeModal();
+        }
+    });
+}
 /**
  * Checks if a chapter object contains any questions.
  * @param {object} chapter The chapter object from the data file.
@@ -607,13 +661,19 @@ function displayPracticeSets(chapterData) {
             setCard.onclick = showLockedContentMessage;
         } else if (!cardClass.includes('locked')) {
             // Clickable only if not locked at all
-            setCard.onclick = function() {
-                startQuiz(i);
+            setCard.onclick = () => {
+                promptQuizMode(i);
             };
         }
         
         setsGrid.appendChild(setCard);
     }
+}
+
+function promptQuizMode(setIndex) {
+    pendingSetIndex = setIndex;
+    const modal = document.getElementById('quiz-mode-modal');
+    modal.classList.add('visible');
 }
 
 function displayProgressInfo(completedSets, averageScore) {
@@ -628,6 +688,7 @@ function displayProgressInfo(completedSets, averageScore) {
 // ===================== QUIZ FUNCTIONALITY (PRESERVED) =====================
 function startQuiz(setIndex) {
     dailyChallengeMode = false;
+    practiceMode = false; // Ensure practice mode is off
     currentSet = setIndex;
     currentQuestionIndex = 0;
     userAnswers = [];
@@ -641,22 +702,61 @@ function startQuiz(setIndex) {
         chapterData = data?.chapters?.find(ch => ch.name === currentChapter);
     }
     
-    if (!dailyChallengeMode && (!chapterData || !chapterData.sets[setIndex] || chapterData.sets[setIndex].length === 0)) {
+    // FIX: The quizData was not being assigned for regular quizzes, causing an error on submission.
+    // This was because the check was exiting before quizData could be set.
+    if (dailyChallengeMode) {
+        // Daily challenge data is already set, so we do nothing here.
+    } else if (chapterData && chapterData.sets[setIndex] && chapterData.sets[setIndex].length > 0) {
+        quizData = chapterData.sets[setIndex];
+    } else {
         showNotification('This set is not available yet. Please check back later.', 'warning');
         return;
     }
-    
-    quizData = chapterData.sets[setIndex];
-    
     // Initialize user answers array
     userAnswers = new Array(quizData.length).fill(null);
     
     // Setup timer
-    timeRemaining = quizData.length * 60; // 1 minute per question
+    timeRemaining = quizData.length * quizTimerSetting; // NEW: Use customizable timer setting
     totalTime = timeRemaining;
     
+    // FIX: Explicitly reset the 'Next' button's behavior for timed quizzes.
+    document.getElementById('next-btn').onclick = nextQuestion;
+
     displayQuestion();
     startTimer();
+    setupQuestionNumbers();
+    showPage('quiz-page');
+}
+
+function startPracticeMode(setIndex) {
+    practiceMode = true;
+    dailyChallengeMode = false;
+    currentSet = setIndex;
+    currentQuestionIndex = 0;
+    userAnswers = [];
+
+    // Get quiz data based on mode
+    let chapterData = null;
+    if (classMode) {
+        chapterData = classData[currentClass]?.chapters?.[currentSubject]?.find(ch => ch.name === currentChapter);
+    } else {
+        const data = subjectData[currentSubject];
+        chapterData = data?.chapters?.find(ch => ch.name === currentChapter);
+    }
+
+    if (!chapterData || !chapterData.sets[setIndex] || chapterData.sets[setIndex].length === 0) {
+        showNotification('This set is not available for practice yet.', 'warning');
+        return;
+    }
+
+    // Use questions from the selected set
+    quizData = chapterData.sets[setIndex];
+
+    // Initialize user answers array
+    userAnswers = new Array(quizData.length).fill(null);
+
+    displayQuestion();
+    // DO NOT start the timer for practice mode
     setupQuestionNumbers();
     showPage('quiz-page');
 }
@@ -671,7 +771,12 @@ function displayQuestion() {
         `Question ${currentQuestionIndex + 1} of ${quizData.length}`;
     
     // Update current set display
-    document.getElementById('current-set').textContent = currentSet + 1;
+    document.getElementById('current-set').textContent = practiceMode ? 'Practice' : currentSet + 1;
+
+    // Hide timer in practice mode
+    document.getElementById('timer').style.display = practiceMode ? 'none' : 'block';
+    // Hide previous button in practice mode
+    document.getElementById('prev-btn').style.display = practiceMode ? 'none' : 'inline-flex';
     
     // Handle question year badge
     const yearBadge = document.getElementById('question-year-badge');
@@ -702,6 +807,11 @@ function displayQuestion() {
         optionsContainer.appendChild(optionDiv);
     });
     
+    // Clear feedback and hide next button for new question in practice mode
+    document.getElementById('practice-feedback').innerHTML = '';
+    document.getElementById('next-btn').style.display = practiceMode ? 'none' : 'inline-flex';
+
+
     // Update navigation buttons
     document.getElementById('prev-btn').disabled = currentQuestionIndex === 0;
     document.getElementById('next-btn').textContent = 
@@ -714,13 +824,47 @@ function displayQuestion() {
 }
 
 function selectOption(optionIndex) {
+    if (practiceMode) {
+        // In practice mode, provide instant feedback
+        const question = quizData[currentQuestionIndex];
+        const isCorrect = optionIndex === question.answer;
+        const options = document.querySelectorAll('.option');
+        const feedbackEl = document.getElementById('practice-feedback');
+
+        // Disable all options after one is selected
+        options.forEach(opt => opt.classList.add('disabled'));
+
+        // Highlight the correct answer
+        options[question.answer].classList.add('correct-feedback');
+
+        if (isCorrect) {
+            feedbackEl.textContent = 'Correct!';
+            feedbackEl.className = 'practice-feedback feedback-correct';
+        } else {
+            // Highlight the user's wrong choice
+            options[optionIndex].classList.add('incorrect-feedback');
+            feedbackEl.textContent = 'Incorrect!';
+            feedbackEl.className = 'practice-feedback feedback-incorrect';
+        }
+
+        // Show the 'Next' or 'Finish' button
+        const nextBtn = document.getElementById('next-btn');
+        nextBtn.style.display = 'inline-flex';
+        if (currentQuestionIndex === quizData.length - 1) {
+            nextBtn.textContent = 'Finish Practice';
+            nextBtn.onclick = goToPracticeResults; // Go back to chapter page
+        } else {
+            nextBtn.textContent = 'Next Question';
+            nextBtn.onclick = nextQuestion;
+        }
+        return; // End execution for practice mode
+    }
+
+    // --- Original logic for timed quiz mode ---
     userAnswers[currentQuestionIndex] = optionIndex;
-    
-    // Update UI
     document.querySelectorAll('.option').forEach((option, index) => {
         option.classList.toggle('selected', index === optionIndex);
     });
-    
     updateQuestionNumbers();
 }
 
@@ -732,6 +876,12 @@ function previousQuestion() {
 }
 
 function nextQuestion() {
+    // In practice mode, this is only called after feedback is given.
+    // Reset the next button's onclick to the default nextQuestion function
+    if (practiceMode) {
+        document.getElementById('next-btn').onclick = nextQuestion;
+    }
+
     if (currentQuestionIndex < quizData.length - 1) {
         currentQuestionIndex++;
         displayQuestion();
@@ -805,6 +955,12 @@ function submitQuiz() {
     if (timer) {
         clearInterval(timer);
     }
+
+    if (practiceMode) {
+        // Practice mode doesn't have a results page, just goes back to chapter.
+        goToChapter();
+        return;
+    }
     
     const timeTaken = totalTime - timeRemaining;
     const results = calculateResults();
@@ -833,7 +989,7 @@ function submitQuiz() {
         saveUserProgress();
     } else {
         // Save progress for regular chapter sets
-        showPage('results-page');
+        // showPage('results-page'); // This call is redundant, moved outside the conditional
         const progressKey = `${currentSubject}_${currentChapter}_${currentSet}`;
         userProgress[progressKey] = {
             score: results.percentage,
@@ -844,8 +1000,9 @@ function submitQuiz() {
         saveUserProgress();
     }
 
+    // FIX: Always display results and show the results page for any timed quiz.
     displayResults(results, timeTaken);
-    showPage('results-page');
+    showPage('results-page'); 
 }
 
 function calculateResults() {
@@ -883,9 +1040,61 @@ function displayResults(results, timeTaken) {
     if (results.passed) {
         resultStatus.textContent = '🎉 Congratulations! You passed the quiz!';
         resultStatus.className = 'result-status passed';
+        triggerConfetti(); // NEW: Trigger confetti on pass
     } else {
         resultStatus.textContent = '❌ You need to score 40% or above to pass. Try again!';
         resultStatus.className = 'result-status failed';
+    }
+}
+
+/**
+ * NEW: Creates and animates confetti for a celebratory effect.
+ */
+function triggerConfetti() {
+    const container = document.getElementById('confetti-container');
+    if (!container) return;
+
+    container.innerHTML = ''; // Clear old confetti
+    const confettiCount = 100;
+    const colors = ['#3b82f6', '#22c55e', '#eab308', '#ef4444', '#8b5cf6'];
+
+    for (let i = 0; i < confettiCount; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        
+        confetti.style.left = `${Math.random() * 100}vw`;
+        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.animationDelay = `${Math.random() * 2}s`;
+        confetti.style.animationDuration = `${2 + Math.random() * 3}s`; // Duration between 2s and 5s
+        confetti.style.transform = `rotateZ(${Math.random() * 360}deg)`;
+
+        container.appendChild(confetti);
+    }
+}
+
+/**
+ * NEW: Creates and animates festive sparkles in the background.
+ */
+function initializeSparkles() {
+    const container = document.getElementById('welcome-sparkles');
+    if (!container) return;
+
+    const sparkleCount = 25; // Number of sparkles for the welcome message
+
+    for (let i = 0; i < sparkleCount; i++) {
+        const sparkle = document.createElement('div');
+        sparkle.className = 'welcome-sparkle';
+
+        sparkle.style.top = `${Math.random() * 100}%`;
+        sparkle.style.left = `${Math.random() * 100}%`;
+        
+        const duration = 1 + Math.random() * 1.5; // Random duration between 1s and 2.5s
+        const delay = Math.random() * 2; // Random delay up to 2s
+
+        sparkle.style.animationDuration = `${duration}s`;
+        sparkle.style.animationDelay = `${delay}s`;
+
+        container.appendChild(sparkle);
     }
 }
 
@@ -1024,6 +1233,23 @@ function loadUserProgress() {
     }
 }
 
+function saveQuizSettings() {
+    localStorage.setItem('quizSettings', JSON.stringify({ timer: quizTimerSetting }));
+}
+
+function loadQuizSettings() {
+    const saved = localStorage.getItem('quizSettings');
+    if (saved) {
+        try {
+            const settings = JSON.parse(saved);
+            quizTimerSetting = settings.timer || 60; // Fallback to 60 if not set
+        } catch (error) {
+            console.error('Error loading quiz settings:', error);
+            quizTimerSetting = 60;
+        }
+    }
+}
+
 function loadBookmarkedQuestions() {
     const saved = localStorage.getItem('bookmarkedQuestions');
     if (saved) {
@@ -1037,6 +1263,33 @@ function loadBookmarkedQuestions() {
 }
 
 // ===================== UTILITY FUNCTIONS =====================
+/**
+ * Applies a staggered animation to a list of elements.
+ * @param {string} selector The CSS selector for the elements to animate.
+ */
+function applyStaggeredAnimation(selector) {
+  const elements = document.querySelectorAll(selector);
+  elements.forEach((el, index) => {
+    // Reset animation to allow re-triggering
+    el.style.animation = 'none';
+    // Reflow
+    el.offsetHeight; 
+    // Re-apply animation
+    el.style.animation = ''; 
+    el.style.animationDelay = `${index * 75}ms`; // 75ms delay between each card
+  });
+}
+
+/**
+ * Animates a number from a start to an end value.
+ * @param {string} id The ID of the element to update.
+ * @param {number} start The starting number.
+ * @param {number} end The ending number.
+ * @param {number} duration The duration of the animation in ms.
+ * @param {string} suffix A suffix to append to the number (e.g., '%').
+ */
+
+
 function formatTime(seconds) {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
@@ -1044,6 +1297,32 @@ function formatTime(seconds) {
 }
 
 // ===================== NEW: THEME SWITCHER =====================
+function initializeSettingsPage() {
+    loadQuizSettings(); // Load settings on startup
+
+    const saveBtn = document.getElementById('save-settings-btn');
+    const durationInput = document.getElementById('timer-duration-input');
+
+    if (!saveBtn || !durationInput) return;
+
+    // Set initial value
+    durationInput.value = quizTimerSetting;
+
+    saveBtn.addEventListener('click', () => {
+        const newDuration = parseInt(durationInput.value, 10);
+
+        if (isNaN(newDuration) || newDuration < 10 || newDuration > 180) {
+            showNotification('Please enter a duration between 10 and 180 seconds.', 'error');
+            return;
+        }
+
+        quizTimerSetting = newDuration;
+        saveQuizSettings();
+        showNotification('Settings saved successfully!', 'success');
+        goToHome();
+    });
+}
+
 function initializeTheme() {
     const themeToggle = document.getElementById('theme-toggle');
     const savedTheme = localStorage.getItem('theme') || 'light';
@@ -1070,15 +1349,16 @@ function checkDailyChallengeStatus() {
 
     if (!statusEl || !notificationDot || !dailyChallengeCard) return;
 
-    // Always show the card by default when this function is called
-
     if (progress) {
         // User has attempted the challenge today
-        notificationDot.style.display = 'none';
         if (progress.score >= 40) {
+            // FIX: If passed, always hide the card for the day.
             dailyChallengeCard.style.display = 'none';
+            notificationDot.style.display = 'none';
         } else {
             // User has failed, show status and allow retry
+            dailyChallengeCard.style.display = 'block'; // Ensure it's visible on failure
+            notificationDot.style.display = 'none'; // Hide dot on failed attempt
             statusEl.textContent = `Attempted Today. Score: ${progress.score}%. Try again!`;
             statusEl.style.color = 'var(--color-warning)';
         }
@@ -1316,8 +1596,18 @@ function saveUserPreferences(focus) {
 }
 
 function personalizeHomepage(userName, userFocus) {
-    // Personalize welcome message
-    document.getElementById('welcome-heading').textContent = `Welcome, ${userName}!`;
+    // NEW: Animate the welcome message
+    const nameDisplay = document.getElementById('user-name-display');
+    if (nameDisplay) {
+        nameDisplay.innerHTML = userName
+            .split('')
+            .map((char, i) => `<span style="animation-delay: ${i * 50}ms">${char === ' ' ? '&nbsp;' : char}</span>`)
+            .join('');
+    } else {
+        // Fallback for older structure
+        const welcomeHeading = document.getElementById('welcome-heading');
+        if (welcomeHeading) welcomeHeading.textContent = `Welcome, ${userName}!`;
+    }
 
     // Get section elements
     const competitiveSection = document.getElementById('competitive-section');
@@ -1635,6 +1925,7 @@ function initializeSideMenu() {
     const menuHomeBtn = document.getElementById('menu-home-btn');
     const menuBookmarksBtn = document.getElementById('menu-bookmarks-btn');
     const menuCommunityBtn = document.getElementById('menu-community-btn');
+    const menuSettingsBtn = document.getElementById('menu-settings-btn'); // NEW
     const menuLeaderboardBtn = document.getElementById('menu-leaderboard-btn');
     const menuOverlay = document.getElementById('menu-overlay');
     
@@ -1657,6 +1948,10 @@ function initializeSideMenu() {
     });
     menuCommunityBtn.addEventListener('click', () => {
         displayCommunityPosts();
+        closeSideMenu();
+    });
+    menuSettingsBtn.addEventListener('click', () => { // NEW
+        goToSettings();
         closeSideMenu();
     });
     menuLeaderboardBtn.addEventListener('click', () => {
@@ -2053,3 +2348,4 @@ function getOrCreateUserId() {
     const sanitizedName = userName.toLowerCase().replace(/[^a-z0-9]/g, '');
     return `user_${sanitizedName}`;
 }
+
