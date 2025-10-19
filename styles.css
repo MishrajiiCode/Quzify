@@ -800,9 +800,64 @@ body {
   margin-top: var(--space-32);
 }
 
+/* NEW: Welcome Name Animation */
+#user-name-display span {
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(20px) scale(0.8);
+    animation: wave-in 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes wave-in {
+    0% {
+        opacity: 0;
+        transform: translateY(20px) scale(0.8);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
 .home-header {
   text-align: center;
+  position: relative; /* Needed for positioning sparkles */
   margin-bottom: var(--space-32);
+}
+
+/* NEW: Welcome Message Sparkles */
+#welcome-sparkles {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 150%; /* Make it wider than the text */
+    height: 150%; /* Make it taller than the text */
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 0; /* Behind the h1 text */
+    overflow: hidden;
+}
+
+.welcome-sparkle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background-color: #FFD700; /* Gold color */
+    border-radius: 50%;
+    box-shadow: 0 0 10px 3px #FFD700, 0 0 15px 5px #FFA500;
+    animation: sparkle-animation 1.5s infinite;
+    opacity: 0;
+}
+
+@keyframes sparkle-animation {
+    0%, 100% {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.2);
+    }
 }
 
 /* Homepage Search Bar */
@@ -1372,6 +1427,44 @@ body {
   border-color: var(--color-primary);
 }
 
+/* NEW: Practice Mode Feedback Styles */
+.option.correct-feedback {
+    background-color: rgba(var(--color-success-rgb), 0.2);
+    border-color: var(--color-success);
+    color: var(--color-text);
+}
+
+.option.incorrect-feedback {
+    background-color: rgba(var(--color-error-rgb), 0.2);
+    border-color: var(--color-error);
+    color: var(--color-text);
+    animation: shake-error 0.4s ease-in-out;
+}
+
+.option.disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+    pointer-events: none; /* Prevents further clicks */
+}
+
+.practice-feedback {
+    text-align: center;
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-bold);
+    margin-bottom: var(--space-16);
+    height: 24px; /* Reserve space to prevent layout shift */
+}
+.feedback-correct { color: var(--color-success); }
+.feedback-incorrect { color: var(--color-error); }
+
+/* Shake animation for incorrect answers */
+@keyframes shake-error {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-6px); }
+  20%, 40%, 60%, 80% { transform: translateX(6px); }
+}
+
+
 /* Navigation Buttons */
 .navigation-buttons {
   display: flex;
@@ -1921,6 +2014,35 @@ button:focus-visible {
 #user-rank-details .leaderboard-score {
     color: var(--color-btn-primary-text);
 }
+
+/* NEW: Settings Page Styles */
+.settings-container {
+    max-width: 600px;
+    margin: var(--space-32) auto;
+    background-color: var(--color-secondary);
+    padding: var(--space-32);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
+}
+
+.setting-item {
+    margin-bottom: var(--space-24);
+}
+
+.setting-label {
+    display: block;
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-medium);
+    margin-bottom: var(--space-8);
+}
+
+.setting-description {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-16) !important; /* Override default p margin */
+}
+
+
 /* Side Menu (Drawer) */
 .side-menu {
   position: fixed;
@@ -1970,7 +2092,32 @@ button:focus-visible {
   padding: var(--space-24);
   display: flex;
   flex-direction: column;
+  overflow-y: auto; /* NEW: Add scrollbar if content overflows */
   gap: var(--space-24);
+}
+
+/* NEW: Custom Scrollbar for Side Menu */
+.side-menu-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.side-menu-content::-webkit-scrollbar-track {
+  background: transparent; /* Make track invisible */
+}
+
+.side-menu-content::-webkit-scrollbar-thumb {
+  background-color: var(--color-border);
+  border-radius: var(--radius-full);
+  border: 2px solid var(--color-surface); /* Creates padding around thumb */
+}
+
+.side-menu-content::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-text-secondary);
+}
+
+.side-menu-content {
+  scrollbar-width: thin; /* For Firefox */
+  scrollbar-color: var(--color-border) var(--color-surface); /* For Firefox */
 }
 
 .side-menu-item {
@@ -1988,6 +2135,15 @@ button:focus-visible {
   cursor: pointer;
   transition: background-color var(--duration-normal) var(--ease-standard);
   text-decoration: none; /* Ensure links don't have underlines */
+}
+/* NEW: Position notification dot inside a menu item */
+.side-menu-item {
+    position: relative; /* Needed for absolute positioning of the dot */
+}
+.side-menu-dot {
+    position: absolute;
+    top: 8px;
+    left: 8px;
 }
 
 .side-menu-item:hover {
@@ -2541,6 +2697,32 @@ input:checked + .slider:before { transform: translateX(24px); }
   margin-bottom: var(--space-24);
 }
 
+/* NEW: Quiz Mode Modal Choices */
+.quiz-mode-choices {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-16);
+}
+
+.quiz-mode-choices button {
+    text-align: left;
+    padding: var(--space-16);
+    display: flex;
+    flex-direction: column;
+    background-color: var(--color-secondary);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+}
+.quiz-mode-choices button:hover {
+    border-color: var(--color-primary);
+    background-color: var(--color-secondary-hover);
+}
+.quiz-mode-choices button span {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    font-weight: var(--font-weight-normal);
+}
+
 #user-name-input {
   width: 100%;
   padding: var(--space-12);
@@ -2570,3 +2752,4 @@ input:checked + .slider:before { transform: translateX(24px); }
   transform: translateY(-var(--space-8)) scale(1.03);
   box-shadow: var(--shadow-lg);
 }
+
