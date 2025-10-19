@@ -1,4 +1,5 @@
 
+
 :root {
   /* Primitive Color Tokens */
   --color-white: rgba(255, 255, 255, 1);
@@ -2554,4 +2555,18 @@ input:checked + .slider:before { transform: translateX(24px); }
 }
 .onboarding-choices button {
   flex: 1;
+}
+.page {
+    display: none;
+    padding: var(--space-32);
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.subject-card:hover {
+  transform: translateY(-var(--space-8)) scale(1.03);
+  box-shadow: var(--shadow-lg);
 }
