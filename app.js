@@ -46,6 +46,20 @@ const COMMUNITY_POSTS = {
 // ===================== APP CONFIGURATION =====================
 const APP_VERSION = '1.7.0-Beta.'; // Increment this to show an update notification
 
+// NEW: Configuration for the informational/festive popup
+const INFO_POPUP_CONFIG = {
+    id: 'diwali_wish_2025', // Change this ID for a new message to make it reappear for users.
+    // NEW: Set a date range for the popup to appear. Format: YYYY-MM-DD.
+    // Set both to null or remove them to disable the popup.
+    startDate: '2024-01-01', // FIX: Changed to a past date to make it visible now for testing.
+    endDate: '2025-10-25',   // Example: End date for Diwali week
+    icon: '🪔',
+    title: 'Happy Diwali!',
+    message: 'Wishing you a festival of lights filled with joy, prosperity, and success. May you and your family have a sparkling celebration!',
+    subtext: 'Keep learning and shining bright!'
+};
+
+
 // ===================== GLOBAL STATE VARIABLES =====================
 let currentSubject = '';
 let currentChapter = '';
@@ -116,7 +130,9 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeQuizModeModal(); // NEW: Initialize the quiz mode selection modal
     initializeLeaderboard(); // Initialize leaderboard functionality
     initializeSparkles(); // NEW: Add festive sparkles
+    initializeEventListeners(); // NEW: Centralize all event listeners
     initializeLogoutConfirmation(); // Initialize the new logout modal
+    initializeInfoPopup(); // NEW: Initialize the date-based generic info popup
 });
 
 function initializeApp() {
@@ -125,6 +141,72 @@ function initializeApp() {
     currentClass = '';
     currentStream = '';
     dailyChallengeMode = false;
+}
+
+/**
+ * Centralizes all event listeners for the application, separating behavior from HTML.
+ */
+function initializeEventListeners() {
+    // --- Modals ---
+    document.querySelector('#onboarding-modal .onboarding-choices button:nth-child(1)').addEventListener('click', () => saveUserPreferences('competitive'));
+    document.querySelector('#onboarding-modal .onboarding-choices button:nth-child(2)').addEventListener('click', () => saveUserPreferences('academic'));
+
+    // --- Side Menu ---
+    document.getElementById('logout-btn').addEventListener('click', logout);
+
+    // --- Home Page ---
+    // Use event delegation for dynamically added cards if needed, but direct binding is fine here.
+    document.querySelector('.daily-challenge-card').addEventListener('click', startDailyChallenge);
+
+    // Competitive Section
+    document.querySelector('[data-subject="quantitative"]').addEventListener('click', () => selectSubject('quantitative'));
+    document.querySelector('[data-subject="english"]').addEventListener('click', () => selectSubject('english'));
+    document.querySelector('[data-subject="reasoning"]').addEventListener('click', () => selectSubject('reasoning'));
+
+    // Academic Section
+    document.querySelector('[data-class="9"]').addEventListener('click', () => selectClass('9'));
+    document.querySelector('[data-class="10"]').addEventListener('click', () => selectClass('10'));
+    document.querySelector('[data-class="11"]').addEventListener('click', () => selectClass('11'));
+    document.querySelector('[data-class="12"]').addEventListener('click', () => selectClass('12'));
+
+    // --- Page-Level Back Buttons ---
+    document.querySelector('#stream-page .back-btn').addEventListener('click', goToHome);
+    document.querySelector('#class-page .back-btn').addEventListener('click', goBack);
+    document.querySelector('#subject-page .back-btn').addEventListener('click', goBack);
+    document.querySelector('#chapter-page .back-btn').addEventListener('click', goToSubject);
+    document.querySelector('#results-page .action-buttons button:nth-child(3)').addEventListener('click', goToChapter);
+    document.querySelector('#review-page .back-btn').addEventListener('click', goToResults);
+    document.querySelector('#bookmarks-page .back-btn').addEventListener('click', goToHome);
+    document.querySelector('#community-page .back-btn').addEventListener('click', goToHome);
+    document.querySelector('#leaderboard-page .back-btn').addEventListener('click', goToHome);
+    document.querySelector('#settings-page .back-btn').addEventListener('click', goToHome);
+
+    // --- Search ---
+    document.getElementById('search-chapters').addEventListener('keyup', filterChapters);
+
+    // --- Quiz Navigation ---
+    document.getElementById('prev-btn').addEventListener('click', previousQuestion);
+    document.getElementById('next-btn').addEventListener('click', nextQuestion);
+
+    // --- Results Page Actions ---
+    document.querySelector('#results-page .action-buttons button:nth-child(1)').addEventListener('click', retakeQuiz);
+    document.getElementById('review-answers-btn').addEventListener('click', reviewAnswers);
+
+    // --- Dynamic Content Event Delegation ---
+    // For elements that are created dynamically (like stream cards), we use event delegation.
+    document.getElementById('streams-grid').addEventListener('click', (e) => {
+        const streamCard = e.target.closest('.stream-card');
+        if (streamCard && streamCard.dataset.stream) {
+            selectStream(streamCard.dataset.stream);
+        }
+    });
+
+    document.getElementById('class-content').addEventListener('click', (e) => {
+        const subjectCard = e.target.closest('.subject-card:not(.daily-challenge-card)');
+        if (subjectCard && subjectCard.dataset.subject) {
+            selectClassSubject(subjectCard.dataset.subject);
+        }
+    });
 }
 
 // ===================== NAVIGATION FUNCTIONS =====================
@@ -497,6 +579,13 @@ function displayStreamsForClass() {
     document.getElementById('stream-title').textContent = `Choose Your Stream (Class ${currentClass})`;
 }
 
+function selectStream(stream) {
+    currentStream = stream;
+    displaySubjectsForClass();
+    document.getElementById('class-title').textContent = `Class ${currentClass} - ${stream.toUpperCase()} Stream`;
+    showPage('class-page');
+}
+
 function selectClassSubject(subject) {
     currentSubject = subject;
     document.getElementById('search-chapters').value = ''; // Clear search bar
@@ -719,9 +808,6 @@ function startQuiz(setIndex) {
     timeRemaining = quizData.length * quizTimerSetting; // NEW: Use customizable timer setting
     totalTime = timeRemaining;
     
-    // FIX: Explicitly reset the 'Next' button's behavior for timed quizzes.
-    document.getElementById('next-btn').onclick = nextQuestion;
-
     displayQuestion();
     startTimer();
     setupQuestionNumbers();
@@ -851,11 +937,9 @@ function selectOption(optionIndex) {
         const nextBtn = document.getElementById('next-btn');
         nextBtn.style.display = 'inline-flex';
         if (currentQuestionIndex === quizData.length - 1) {
-            nextBtn.textContent = 'Finish Practice';
-            nextBtn.onclick = goToPracticeResults; // Go back to chapter page
+            nextBtn.textContent = 'Finish Practice'; // The main event listener will handle the click
         } else {
-            nextBtn.textContent = 'Next Question';
-            nextBtn.onclick = nextQuestion;
+            nextBtn.textContent = 'Next Question'; // The main event listener will handle the click
         }
         return; // End execution for practice mode
     }
@@ -876,10 +960,11 @@ function previousQuestion() {
 }
 
 function nextQuestion() {
-    // In practice mode, this is only called after feedback is given.
-    // Reset the next button's onclick to the default nextQuestion function
-    if (practiceMode) {
-        document.getElementById('next-btn').onclick = nextQuestion;
+    // In practice mode, if it's the last question, the "Finish" button should
+    // take the user back to the chapter, not try to submit a quiz.
+    if (practiceMode && currentQuestionIndex === quizData.length - 1) {
+        goToPracticeResults();
+        return;
     }
 
     if (currentQuestionIndex < quizData.length - 1) {
@@ -1705,6 +1790,60 @@ function initializeLogoutConfirmation() {
     });
 }
 
+/**
+ * NEW: Initializes and displays a generic informational or festive popup.
+ * The content is controlled by the INFO_POPUP_CONFIG object.
+ * It shows only once per unique message ID to avoid annoying users.
+ */
+function initializeInfoPopup() {
+    const config = INFO_POPUP_CONFIG;
+    // NEW: Date-based check
+    if (!config.startDate || !config.endDate) {
+        return; // Do nothing if dates are not set
+    }
+
+    const today = new Date();
+    const startDate = new Date(config.startDate);
+    const endDate = new Date(config.endDate);
+
+    // Set time to 00:00:00 to compare dates only
+    today.setHours(0, 0, 0, 0);
+    endDate.setHours(23, 59, 59, 999); // Ensure the end date is inclusive
+
+    if (today < startDate || today > endDate) {
+        return; // Do not show if outside the date range
+    }
+    const modal = document.getElementById('info-modal');
+    const closeBtn = document.getElementById('close-info-modal-btn');
+    const iconEl = modal.querySelector('.info-icon');
+    const titleEl = modal.querySelector('#info-modal-title');
+    const messageEl = modal.querySelector('#info-modal-message');
+    const subtextEl = modal.querySelector('#info-modal-subtext');
+
+    if (!modal || !closeBtn || !iconEl || !titleEl || !messageEl || !subtextEl) return;
+
+    const lastSeenId = sessionStorage.getItem('seenInfoPopupId');
+
+    if (lastSeenId !== config.id) {
+        // Populate the modal with content from the configuration
+        iconEl.textContent = config.icon;
+        titleEl.textContent = config.title;
+        messageEl.textContent = config.message;
+        subtextEl.textContent = config.subtext;
+
+        setTimeout(() => {
+            modal.classList.add('visible');
+            sessionStorage.setItem('seenInfoPopupId', config.id); // Save the ID of the shown popup
+        }, 1000);
+    }
+
+    const closeModal = () => modal.classList.remove('visible');
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+}
+
 // ===================== ERROR HANDLING =====================
 window.addEventListener('error', function(event) {
     console.error('Application error:', event.error);
@@ -2348,4 +2487,3 @@ function getOrCreateUserId() {
     const sanitizedName = userName.toLowerCase().replace(/[^a-z0-9]/g, '');
     return `user_${sanitizedName}`;
 }
-
