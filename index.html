@@ -28,8 +28,8 @@
             <input type="text" id="user-name-input" placeholder="Enter your name">
             <p>What are you preparing for?</p>
             <div class="onboarding-choices">
-                <button onclick="saveUserPreferences('competitive')">Competitive Exams</button>
-                <button onclick="saveUserPreferences('academic')">Academics</button>
+                <button>Competitive Exams</button>
+                <button>Academics</button>
             </div>
         </div>
     </div>
@@ -83,6 +83,21 @@
                 <button id="start-practice-quiz-btn">
                     <strong>Practice Mode</strong><span>(No timer, instant feedback after each question)</span></button>
             </div>
+        </div>
+    </div>
+
+    <!-- NEW: Generic Info/Festive Wish Modal -->
+    <div id="info-modal" class="modal-overlay">
+        <div class="modal-content info-modal-content">
+            <!-- NEW: Sparkle Animation Container -->
+            <div class="sparkle-fall-container">
+                <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+            </div>
+            <button id="close-info-modal-btn" class="modal-close-btn" title="Close">&times;</button>
+            <div class="info-icon"></div>
+            <h2 id="info-modal-title"></h2>
+            <p id="info-modal-message"></p>
+            <p id="info-modal-subtext" class="info-subtext"></p>
         </div>
     </div>
 
@@ -156,7 +171,7 @@
                 </div>
             </div>
             <div class="side-menu-bottom">
-                <button id="logout-btn" class="side-menu-logout-btn" onclick="logout()">Logout</button>
+                <button id="logout-btn" class="side-menu-logout-btn">Logout</button>
                 <div class="side-menu-footer">
                     <p>Quizify <span id="menu-app-version"></span></p>
                 </div>
@@ -184,7 +199,7 @@
 
             <!-- Daily Challenge Section -->
             <div id="daily-challenge-section">
-                <div class="daily-challenge-card" onclick="startDailyChallenge()">
+                <div class="daily-challenge-card">
                     <div id="daily-challenge-notification-dot" class="notification-dot" style="display: none;"></div>
                     <div class="rain-container">
                         <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
@@ -206,17 +221,17 @@
             <div id="competitive-section">
                 <h2>Competitive Exams</h2>
                 <div class="subjects-grid">
-                    <div class="subject-card" onclick="selectSubject('quantitative')">
+                    <div class="subject-card" data-subject="quantitative">
                         <img src="https://cdn-icons-png.flaticon.com/512/1048/1048925.png" alt="Math Icon" class="card-icon">
                         <h2>Quantitative Aptitude</h2>
                         <p>Mathematics and numerical ability</p>
                     </div>
-                    <div class="subject-card" onclick="selectSubject('english')">
+                    <div class="subject-card" data-subject="english">
                         <img src="https://cdn-icons-png.flaticon.com/512/201/201605.png" alt="English Icon" class="card-icon">
                         <h2>English</h2>
                         <p>Grammar, vocabulary, and comprehension</p>
                     </div>
-                    <div class="subject-card" onclick="selectSubject('reasoning')">
+                    <div class="subject-card" data-subject="reasoning">
                         <img src="https://cdn-icons-png.flaticon.com/512/3406/3406828.png" alt="Reasoning Icon" class="card-icon">
                         <h2>Reasoning</h2>
                         <p>Logical and analytical reasoning</p>
@@ -228,22 +243,22 @@
             <div id="academic-section">
                 <h2>Academic Classes</h2>
                 <div class="subjects-grid">
-                    <div class="subject-card" onclick="selectClass('9')">
+                    <div class="subject-card" data-class="9">
                         <img src="https://cdn-icons-png.flaticon.com/512/2232/2232688.png" alt="Class 9 Icon" class="card-icon">
                         <h2>Class 9</h2>
                         <p>Foundation level science and mathematics</p>
                     </div>
-                    <div class="subject-card" onclick="selectClass('10')">
+                    <div class="subject-card" data-class="10">
                         <img src="https://www.bing.com/th/id/OIP.GLmrK9nrSn8dySOsOJbYpgHaHa?w=203&h=211&c=8&rs=1&qlt=90&o=6&dpr=1.5&pid=3.1&rm=2" alt="Class 10 Icon" class="card-icon">
                         <h2>Class 10</h2>
                         <p>Board exam preparation</p>
                     </div>
-                    <div class="subject-card" onclick="selectClass('11')">
+                    <div class="subject-card" data-class="11">
                         <img src="https://cdn-icons-png.flaticon.com/512/2997/2997345.png" alt="Class 11 Icon" class="card-icon">
                         <h2>Class 11</h2>
                         <p>Higher secondary - Stream based</p>
                     </div>
-                    <div class="subject-card" onclick="selectClass('12')">
+                    <div class="subject-card" data-class="12">
                         <img src="https://cdn-icons-png.flaticon.com/512/3063/3063838.png" alt="Class 12 Icon" class="card-icon">
                         <h2>Class 12</h2>
                         <p>Board &amp; competitive exam prep</p>
@@ -254,7 +269,7 @@
 
         <!-- Stream Selection Page (for Class 11 & 12) -->
         <div id="stream-page" class="page">
-            <button class="back-btn" onclick="goToHome()">← Home</button>
+            <button class="back-btn">← Home</button>
             <h1 id="stream-title">Choose Your Stream</h1>
             <div id="streams-grid" class="subjects-grid">
                 <!-- Stream cards will be dynamically populated -->
@@ -263,7 +278,7 @@
 
         <!-- Class Subject Page -->
         <div id="class-page" class="page">
-            <button class="back-btn" onclick="goBack()">← Back</button>
+            <button class="back-btn">← Back</button>
             <h1 id="class-title">Class Subjects</h1>
             <div id="class-content">
                 <!-- Subject cards will be dynamically populated -->
@@ -272,10 +287,10 @@
 
         <!-- Subject Page -->
         <div id="subject-page" class="page">
-            <button class="back-btn" onclick="goBack()">← Back</button>
+            <button class="back-btn">← Back</button>
             <h1 id="subject-title">Subject Chapters</h1>
             <div class="search-container">
-                <input type="text" id="search-chapters" placeholder="Search for a chapter..." onkeyup="filterChapters()">
+                <input type="text" id="search-chapters" placeholder="Search for a chapter...">
             </div>
             <div id="chapters-grid" class="chapters-grid">
                 <!-- Chapters will be populated by JavaScript -->
@@ -284,7 +299,7 @@
 
         <!-- Chapter Page -->
         <div id="chapter-page" class="page">
-            <button class="back-btn" onclick="goToSubject()">← Back to Subjects</button>
+            <button class="back-btn">← Back to Subjects</button>
             <h1 id="chapter-title">Chapter</h1>
             
             <div class="chapter-info">
@@ -349,8 +364,8 @@
             <div id="practice-feedback" class="practice-feedback"></div>
 
             <div class="navigation-buttons">
-                <button id="prev-btn" onclick="previousQuestion()">Previous</button>
-                <button id="next-btn" onclick="nextQuestion()">Next</button>
+                <button id="prev-btn">Previous</button>
+                <button id="next-btn">Next</button>
             </div>
 
             <div class="question-grid">
@@ -384,16 +399,16 @@
                 </div>
 
                 <div class="action-buttons">
-                    <button onclick="retakeQuiz()">Retake Quiz</button>
-                    <button id="review-answers-btn" onclick="reviewAnswers()">Review Answers</button>
-                    <button onclick="goToChapter()">Back to Chapter</button>
+                    <button>Retake Quiz</button>
+                    <button id="review-answers-btn">Review Answers</button>
+                    <button>Back to Chapter</button>
                 </div>
             </div>
         </div>
 
         <!-- Review Page -->
         <div id="review-page" class="page">
-            <button class="back-btn" onclick="goToResults()">← Back to Results</button>
+            <button class="back-btn">← Back to Results</button>
             <h1>Review Your Answers</h1>
             <div id="review-container" class="review-container">
                 <!-- Review content will be populated by JavaScript -->
@@ -402,7 +417,7 @@
 
         <!-- Bookmarks Page -->
         <div id="bookmarks-page" class="page">
-            <button class="back-btn" onclick="goToHome()">← Back to Home</button>
+            <button class="back-btn">← Back to Home</button>
             <h1>Bookmarked Questions</h1>
             <div id="bookmarks-container" class="review-container">
                 <!-- Bookmarked questions will be populated by JavaScript -->
@@ -411,7 +426,7 @@
 
         <!-- Community Page -->
         <div id="community-page" class="page">
-            <button class="back-btn" onclick="goToHome()">← Back to Home</button>
+            <button class="back-btn">← Back to Home</button>
             <h1>Community Updates</h1>
             <div id="community-posts-container" class="community-posts-container">
                 <!-- Community posts will be populated by JavaScript -->
@@ -420,7 +435,7 @@
 
         <!-- Leaderboard Page -->
         <div id="leaderboard-page" class="page">
-            <button class="back-btn" onclick="goToHome()">← Back to Home</button>
+            <button class="back-btn">← Back to Home</button>
             <h1>Leaderboard</h1>
             <p>Top 10 scores across all quizzes.</p>
             <div id="leaderboard-container" class="leaderboard-container">
@@ -442,7 +457,7 @@
 
         <!-- NEW: Settings Page -->
         <div id="settings-page" class="page">
-            <button class="back-btn" onclick="goToHome()">← Back to Home</button>
+            <button class="back-btn">← Back to Home</button>
             <h1>Settings</h1>
             <div class="settings-container">
                 <div class="setting-item">
@@ -486,3 +501,4 @@
 </body>
 
 </html>
+
