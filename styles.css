@@ -1,6 +1,7 @@
 
 
 
+
 :root {
   /* Primitive Color Tokens */
   --color-white: rgba(255, 255, 255, 1);
@@ -2252,6 +2253,68 @@ button:focus-visible {
     box-shadow: var(--shadow-md);
     border: 1px solid var(--color-border);
     margin-top: var(--space-32);
+}
+
+/* NEW: Topic Strength Analysis Section */
+.topic-strength-section {
+    margin-top: var(--space-32);
+    padding-top: var(--space-32);
+    border-top: 1px solid var(--color-border);
+}
+
+.topic-strength-section h2 {
+    text-align: center;
+    font-size: var(--font-size-2xl);
+    margin-bottom: var(--space-8);
+}
+
+.topic-strength-section .section-description {
+    text-align: center;
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-24);
+    font-size: var(--font-size-sm);
+}
+
+.strength-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-24);
+}
+
+@media (min-width: 768px) {
+    .strength-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.strength-column h3 {
+    display: flex;
+    align-items: center;
+    gap: var(--space-8);
+    font-size: var(--font-size-lg);
+    margin-bottom: var(--space-16);
+    padding-bottom: var(--space-8);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.strength-column .strength-icon {
+    font-size: var(--font-size-xl);
+}
+
+.strength-column ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.strength-column li {
+    background-color: var(--color-secondary);
+    padding: var(--space-12) var(--space-16);
+    border-radius: var(--radius-base);
+    margin-bottom: var(--space-10);
+    font-weight: var(--font-weight-medium);
+    display: flex;
+    justify-content: space-between;
 }
 
 
