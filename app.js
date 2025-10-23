@@ -128,21 +128,25 @@ const userProgressCollection = db.collection("userProgress"); // NEW: Collection
 
 // ===================== INITIALIZATION =====================
 document.addEventListener('DOMContentLoaded', function() {
-    checkUserProfile();
-    // initializeTheme(); // Theme is now initialized after user profile is checked
-    checkForUpdates();
-    initializeSideMenu(); // New function to handle menu logic
-    initializeUpdateDetailsModal(); // Initialize the new update details modal
-    initializeHomepageSearch(); // Initialize the new homepage search
-    initializeLockedContentModal(); // Initialize the locked content modal
-    initializeSettingsPage(); // NEW: Initialize settings functionality
-    initializeQuizModeModal(); // NEW: Initialize the quiz mode selection modal
-    initializeLeaderboard(); // Initialize leaderboard functionality
-    initializeSparkles(); // NEW: Add festive sparkles
-    initializeEventListeners(); // NEW: Centralize all event listeners
-    initializeLogoutConfirmation(); // Initialize the new logout modal
-    initializeInfoPopup(); // NEW: Initialize the date-based generic info popup
-    checkAndShowPinReminder(); // NEW: Show PIN reminder on first login
+    // NEW: Make the initialization asynchronous to handle data loading properly
+    async function main() {
+        await checkUserProfile(); // This now waits for user data to load
+        checkForUpdates();
+        initializeSideMenu();
+        initializeUpdateDetailsModal();
+        initializeHomepageSearch();
+        initializeLockedContentModal();
+        initializeSettingsPage();
+        initializeQuizModeModal();
+        initializeLeaderboard();
+        initializeProfilePage();
+        initializeSparkles();
+        initializeEventListeners();
+        initializeLogoutConfirmation();
+        initializeInfoPopup();
+        checkAndShowPinReminder();
+    }
+    main();
 });
 
 function initializeApp() {
@@ -189,6 +193,7 @@ function initializeEventListeners() {
     document.querySelector('#review-page .back-btn').addEventListener('click', goToResults);
     document.querySelector('#bookmarks-page .back-btn').addEventListener('click', goToHome);
     document.querySelector('#community-page .back-btn').addEventListener('click', goToHome);
+    document.querySelector('#profile-page .back-btn').addEventListener('click', goToHome); // NEW
     document.querySelector('#leaderboard-page .back-btn').addEventListener('click', goToHome);
     document.querySelector('#settings-page .back-btn').addEventListener('click', goToHome);
 
@@ -1124,6 +1129,7 @@ function submitQuiz() {
     if (academicDailyChallenge) {
         const today = new Date().toISOString().split('T')[0];
         const dailyProgressKey = `daily_challenge_class${currentClass}_${today}`;
+        updateStreak(results.passed); // NEW: Update streak
         userProgress[dailyProgressKey] = { score: results.percentage, timeTaken: timeTaken };
         saveUserProgress();
     } else if (dailyChallengeMode) {
@@ -1131,6 +1137,7 @@ function submitQuiz() {
         const dailyProgressKey = `daily_challenge_${today}`;
         userProgress[dailyProgressKey] = { score: results.percentage, timeTaken: timeTaken };
         saveUserProgress();
+        updateStreak(results.passed); // NEW: Update streak
     } else {
         // Save progress for regular chapter sets
         const progressKey = `${currentSubject}_${currentChapter}_${currentSet}`;
@@ -1162,9 +1169,14 @@ function submitQuiz() {
         saveUserProgress(); // Save the updated progress with the full history
     }
 
+    // NEW: After any quiz, recalculate and save the overall profile stats.
+    // This ensures the user's profile data is always up-to-date in Firestore.
+    calculateOverallStats();
+
     // FIX: Always display results and show the results page for any timed quiz.
     displayResults(results, timeTaken);
     showPage('results-page'); 
+    updateStreakDisplay(); // NEW: Update streak display after a quiz
 }
 
 function calculateResults() {
@@ -1879,6 +1891,7 @@ function checkDailyChallengeStatus() {
         // User has not attempted the challenge today.
         dailyChallengeCard.style.display = 'block';
         statusEl.textContent = 'A new challenge awaits!';
+        checkAndResetStreak(); // NEW: Check if streak is broken when the card is shown
         statusEl.style.color = ''; // Reset color
         notificationDot.style.display = 'block';
 
@@ -2074,24 +2087,25 @@ function generateAcademicDailyChallengeQuestions() {
 }
 
 // ===================== NEW: ONBOARDING & PERSONALIZATION =====================
-function checkUserProfile() {
+async function checkUserProfile() { // NEW: Make this function async
     const userName = localStorage.getItem('userName');
     const userPin = localStorage.getItem('userPin'); // NEW: Check for PIN
     const userFocus = localStorage.getItem('userFocus');
 
-    // Initialize theme and info popup here after we know the user
-    initializeTheme();
-    initializeInfoPopup();
-
     if (!userName || !userFocus || !userPin) { // NEW: Check for PIN
         document.getElementById('onboarding-modal').classList.add('visible');
         document.getElementById('logout-btn').style.display = 'none';
+        initializeTheme(); // Initialize with default theme for new users
     } else {
         document.getElementById('onboarding-modal').classList.remove('visible');
         document.getElementById('logout-btn').style.display = 'inline-flex';
+        await loadUserProgress(); // NEW: Wait for progress to load from Firestore
         personalizeHomepage(userName, userFocus);
-        loadUserProgress(); // Load progress after user is identified
     }
+    // NEW: These are now called after user data is loaded, ensuring they have the correct data.
+    initializeTheme();
+    initializeInfoPopup();
+    updateStreakDisplay();
     document.getElementById('app-version').textContent = `v${APP_VERSION}`;
     document.getElementById('menu-app-version').textContent = `v${APP_VERSION}`;
 }
@@ -2152,6 +2166,8 @@ function personalizeHomepage(userName, userFocus) {
         dailyChallengeSection.style.display = 'block';
         academicSection.style.display = 'none';
         setDailyChallengeDate(); // Set the date on the card
+        checkAndResetStreak(); // NEW: Check if streak is broken
+        updateStreakDisplay(); // NEW: Display the current streak
         checkDailyChallengeStatus(); // Check status only for competitive users
     } else if (userFocus === 'academic') {
         competitiveSection.style.display = 'none';
@@ -2541,6 +2557,7 @@ function initializeSideMenu() {
     const menuBookmarksBtn = document.getElementById('menu-bookmarks-btn');
     const menuCommunityBtn = document.getElementById('menu-community-btn');
     const menuSettingsBtn = document.getElementById('menu-settings-btn'); // NEW
+    const menuProfileBtn = document.getElementById('menu-profile-btn'); // NEW
     const menuLeaderboardBtn = document.getElementById('menu-leaderboard-btn');
     const menuOverlay = document.getElementById('menu-overlay');
     
@@ -2567,6 +2584,10 @@ function initializeSideMenu() {
     });
     menuSettingsBtn.addEventListener('click', () => { // NEW
         goToSettings();
+        closeSideMenu();
+    });
+    menuProfileBtn.addEventListener('click', () => { // NEW
+        displayProfilePage();
         closeSideMenu();
     });
     menuLeaderboardBtn.addEventListener('click', () => {
@@ -2822,6 +2843,189 @@ function displayCommunityPosts() {
     });
 
     showPage('community-page');
+}
+
+// ===================== NEW: STREAK COUNTER FEATURE =====================
+
+/**
+ * Checks if the user's streak is broken and resets it if necessary.
+ * This should be called once when the app loads or when the daily challenge card is displayed.
+ */
+function checkAndResetStreak() {
+    const today = new Date();
+    const lastStreakDateStr = userProgress.lastStreakDate;
+
+    if (!lastStreakDateStr) {
+        // No streak history, nothing to reset.
+        return;
+    }
+
+    const lastStreakDate = new Date(lastStreakDateStr);
+    const yesterday = new Date(today);
+    yesterday.setDate(today.getDate() - 1);
+
+    // Normalize dates to compare them without time component
+    lastStreakDate.setHours(0, 0, 0, 0);
+    yesterday.setHours(0, 0, 0, 0);
+    today.setHours(0, 0, 0, 0);
+
+    // If the last streak date is not today and not yesterday, the streak is broken.
+    if (lastStreakDate.getTime() < yesterday.getTime()) {
+        userProgress.streak = 0;
+        showNotification('You missed a day! Your streak has been reset.', 'warning');
+        saveUserProgress(); // Save the reset streak
+    }
+}
+
+/**
+ * Updates the user's streak count after completing a daily challenge.
+ * @param {boolean} passed - Whether the user passed the daily challenge.
+ */
+function updateStreak(passed) {
+    if (!passed) return; // Streak only updates on passing
+
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
+
+    if (userProgress.lastStreakDate === todayStr) {
+        return; // Already completed today, do nothing.
+    }
+
+    const yesterday = new Date();
+    yesterday.setDate(today.getDate() - 1);
+    const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+    if (userProgress.lastStreakDate === yesterdayStr) {
+        userProgress.streak = (userProgress.streak || 0) + 1; // Continue streak
+        showNotification(`🔥 Streak extended to ${userProgress.streak} days!`, 'success');
+    } else {
+        userProgress.streak = 1; // Start a new streak
+        showNotification('🔥 New streak started! Keep it going!', 'success');
+    }
+
+    userProgress.lastStreakDate = todayStr;
+    saveUserProgress();
+}
+
+/**
+ * Updates the streak counter display on the homepage.
+ */
+function updateStreakDisplay() {
+    const streakCounter = document.getElementById('streak-counter');
+    const streakValueEl = document.getElementById('streak-value');
+    const userFocus = localStorage.getItem('userFocus');
+
+    if (!streakCounter || !streakValueEl) return;
+
+    const streak = userProgress.streak || 0;
+
+    if (streak > 0 && userFocus === 'competitive') {
+        streakValueEl.textContent = streak;
+        streakCounter.style.display = 'inline-flex';
+    } else {
+        streakCounter.style.display = 'none';
+    }
+}
+
+
+// ===================== NEW: PROFILE PAGE FEATURE =====================
+let profileChart = null; // To hold the chart instance
+
+function initializeProfilePage() {
+    // The menu button handles displaying the page.
+    // This function is for any one-time setup if needed.
+}
+
+function displayProfilePage() {
+    const userName = localStorage.getItem('userName') || 'Guest';
+    const userFocus = localStorage.getItem('userFocus') || 'Not Set';
+
+    document.getElementById('profile-user-name').textContent = userName;
+    document.getElementById('profile-user-focus').textContent = userFocus.charAt(0).toUpperCase() + userFocus.slice(1);
+
+    const stats = calculateOverallStats();
+
+    document.getElementById('profile-quizzes-taken').textContent = stats.totalQuizzes;
+    document.getElementById('profile-average-score').textContent = `${stats.averageScore.toFixed(0)}%`;
+    document.getElementById('profile-quizzes-passed').textContent = stats.quizzesPassed;
+
+    // Create or update the performance chart
+    createOrUpdatePerformanceChart(stats.subjectStats);
+
+    showPage('profile-page');
+}
+
+function calculateOverallStats() {
+    let totalQuizzes = 0;
+    let quizzesPassed = 0;
+    let totalScore = 0;
+    const subjectStats = {};
+
+    for (const key in userProgress) {
+        if (userProgress[key] && typeof userProgress[key].score === 'number') {
+            totalQuizzes++;
+            totalScore += userProgress[key].score;
+            if (userProgress[key].score >= 40) {
+                quizzesPassed++;
+            }
+
+            // Aggregate scores by subject
+            const subject = key.split('_')[0]; // e.g., 'quantitative' or 'class9'
+            if (!subjectStats[subject]) {
+                subjectStats[subject] = { totalScore: 0, count: 0 };
+            }
+            subjectStats[subject].totalScore += userProgress[key].score;
+            subjectStats[subject].count++;
+        }
+    }
+
+    const averageScore = totalQuizzes > 0 ? totalScore / totalQuizzes : 0;
+
+    // NEW: Save these calculated stats to the userProgress object so they get stored in Firestore.
+    saveProfileStats({ totalQuizzes, quizzesPassed, averageScore });
+
+    return { totalQuizzes, quizzesPassed, averageScore, subjectStats };
+}
+
+function saveProfileStats(stats) {
+    userProgress.totalQuizzes = stats.totalQuizzes;
+    userProgress.quizzesPassed = stats.quizzesPassed;
+    userProgress.averageScore = stats.averageScore;
+}
+
+function createOrUpdatePerformanceChart(subjectStats) {
+    const ctx = document.getElementById('profile-chart-container');
+    ctx.innerHTML = '<canvas id="performanceChart"></canvas>'; // Clear and add canvas
+    const canvas = document.getElementById('performanceChart');
+
+    const labels = Object.keys(subjectStats).map(getSubjectTitle);
+    const data = Object.values(subjectStats).map(stat => stat.totalScore / stat.count);
+
+    if (profileChart) {
+        profileChart.destroy(); // Destroy old chart instance
+    }
+
+    profileChart = new Chart(canvas, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Average Score by Subject',
+                data: data,
+                backgroundColor: ['#3b82f6', '#22c55e', '#eab308', '#ef4444', '#8b5cf6', '#f97316']
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    title: { display: true, text: 'Average Score (%)' }
+                }
+            }
+        }
+    });
 }
 
 // ===================== NEW: FIREBASE & LEADERBOARD FUNCTIONS =====================
