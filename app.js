@@ -4,6 +4,16 @@
 // Only business logic - questions stored in separate data files
 // ===================== APP CHANGELOG =====================
 const COMMUNITY_POSTS = {
+    '1.7.1-Beta.': {
+        date: 'Oct 20, 2025',
+        changes: [
+            '<strong>Major Content Overhaul!</strong> The English question bank has been fully reviewed and expanded.',
+            'Performed a deep-dive review of all existing English questions for 100% accuracy.',
+            'Completed all empty question sets in the English section, including Adverb, Preposition, Conjunction, and more.',
+            'Fixed various grammatical errors and incorrect answers across all English chapters.'
+        ],
+        note: "Your learning experience is our top priority. The English section is now more robust and reliable than ever!"
+    },
     '1.7.0-Beta.': {
         date: 'Oct 19, 2025',
         changes: [
@@ -44,14 +54,14 @@ const COMMUNITY_POSTS = {
     }
 };
 // ===================== APP CONFIGURATION =====================
-const APP_VERSION = '1.7.0-Beta.'; // Increment this to show an update notification
+const APP_VERSION = '1.7.1-Beta.'; // Increment this to show an update notification
 
 // NEW: Configuration for the informational/festive popup
 const INFO_POPUP_CONFIG = {
     id: 'diwali_wish_2025', // Change this ID for a new message to make it reappear for users.
     // NEW: Set a date range for the popup to appear. Format: YYYY-MM-DD.
-    // Set both to null or remove them to disable the popup.
-    startDate: '2024-01-01', // FIX: Changed to a past date to make it visible now for testing.
+    // Set both to null or remove them to disable the popup. It will only show once per session per ID.
+    startDate: '2024-01-01', // A past date to ensure it's active for testing.
     endDate: '2025-10-25',   // Example: End date for Diwali week
     icon: '🪔',
     title: 'Happy Diwali!',
@@ -70,7 +80,7 @@ let timer = null;
 let totalTime = 0;
 let timeRemaining = 1200; // 20 minutes for 20 questions
 let quizData = null;
-let bookmarkedQuestions = []; // NEW: For bookmarks
+let bookmarkedQuestions = []; // Will be loaded from userProgress
 let userProgress = {};
 
 // NEW: Class-related state variables
@@ -113,14 +123,13 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const resultsCollection = db.collection("quizResults");
 const leaderboardCollection = db.collection("leaderboard"); // NEW: Collection for best scores
+const userProgressCollection = db.collection("userProgress"); // NEW: Collection for user progress
 
 
 // ===================== INITIALIZATION =====================
 document.addEventListener('DOMContentLoaded', function() {
-    loadBookmarkedQuestions();
-    loadUserProgress();
     checkUserProfile();
-    initializeTheme();
+    // initializeTheme(); // Theme is now initialized after user profile is checked
     checkForUpdates();
     initializeSideMenu(); // New function to handle menu logic
     initializeUpdateDetailsModal(); // Initialize the new update details modal
@@ -133,6 +142,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeEventListeners(); // NEW: Centralize all event listeners
     initializeLogoutConfirmation(); // Initialize the new logout modal
     initializeInfoPopup(); // NEW: Initialize the date-based generic info popup
+    checkAndShowPinReminder(); // NEW: Show PIN reminder on first login
 });
 
 function initializeApp() {
@@ -155,6 +165,7 @@ function initializeEventListeners() {
     document.getElementById('logout-btn').addEventListener('click', logout);
 
     // --- Home Page ---
+    // Note: Event listeners for dynamically created cards are handled via event delegation below.
     // Use event delegation for dynamically added cards if needed, but direct binding is fine here.
     document.querySelector('.daily-challenge-card').addEventListener('click', startDailyChallenge);
 
@@ -191,6 +202,13 @@ function initializeEventListeners() {
     // --- Results Page Actions ---
     document.querySelector('#results-page .action-buttons button:nth-child(1)').addEventListener('click', retakeQuiz);
     document.getElementById('review-answers-btn').addEventListener('click', reviewAnswers);
+
+    // --- Retake Confirmation Modal ---
+    document.getElementById('confirm-retake-btn').addEventListener('click', () => {
+        // This now handles confirmation from both the results page and the chapter page.
+        handleRetakeConfirmation();
+    });
+    document.getElementById('cancel-retake-btn').addEventListener('click', () => document.getElementById('retake-confirm-modal').classList.remove('visible'));
 
     // --- Dynamic Content Event Delegation ---
     // For elements that are created dynamically (like stream cards), we use event delegation.
@@ -750,12 +768,51 @@ function displayPracticeSets(chapterData) {
             setCard.onclick = showLockedContentMessage;
         } else if (!cardClass.includes('locked')) {
             // Clickable only if not locked at all
-            setCard.onclick = () => {
-                promptQuizMode(i);
+            setCard.onclick = (e) => {
+                const card = e.currentTarget;
+                if (card.classList.contains('completed')) {
+                    // If the set is already passed, show confirmation modal
+                    showRetakeConfirmation(i);
+                } else {
+                    // Otherwise, show the quiz mode selection modal directly
+                    promptQuizMode(i);
+                }
             };
         }
         
         setsGrid.appendChild(setCard);
+    }
+}
+
+/**
+ * NEW: Shows the retake confirmation modal.
+ * Stores the set index that the user intends to retake.
+ * @param {number} setIndex - The index of the quiz set to be retaken.
+ */
+function showRetakeConfirmation(setIndex) {
+    // Store the set index in a global variable or a data attribute
+    // Using pendingSetIndex which is already available for this purpose.
+    pendingSetIndex = setIndex;
+    document.getElementById('retake-confirm-modal').classList.add('visible');
+}
+
+/**
+ * NEW: Handles the logic after the user confirms the retake.
+ * It determines whether to start the quiz directly or show the mode selection.
+ */
+function handleRetakeConfirmation() {
+    const modal = document.getElementById('retake-confirm-modal');
+    modal.classList.remove('visible');
+
+    // If currentSet is defined, it means we came from the results page.
+    // The 'retakeQuiz' function handles this, so we just start the quiz.
+    // If pendingSetIndex is defined, it means we came from the chapter page.
+    if (pendingSetIndex !== -1) {
+        // User clicked a 'Passed' set on the chapter page, so show the mode choice modal.
+        promptQuizMode(pendingSetIndex);
+    } else {
+        // User clicked 'Retake' on the results page.
+        startQuiz(currentSet);
     }
 }
 
@@ -857,7 +914,9 @@ function displayQuestion() {
         `Question ${currentQuestionIndex + 1} of ${quizData.length}`;
     
     // Update current set display
-    document.getElementById('current-set').textContent = practiceMode ? 'Practice' : currentSet + 1;
+    let setDisplay = practiceMode ? 'Practice' : (currentSet + 1);
+    document.getElementById('current-set').textContent = setDisplay;
+
 
     // Hide timer in practice mode
     document.getElementById('timer').style.display = practiceMode ? 'none' : 'block';
@@ -1046,7 +1105,7 @@ function submitQuiz() {
         goToChapter();
         return;
     }
-    
+
     const timeTaken = totalTime - timeRemaining;
     const results = calculateResults();
 
@@ -1074,15 +1133,33 @@ function submitQuiz() {
         saveUserProgress();
     } else {
         // Save progress for regular chapter sets
-        // showPage('results-page'); // This call is redundant, moved outside the conditional
         const progressKey = `${currentSubject}_${currentChapter}_${currentSet}`;
-        userProgress[progressKey] = {
+
+        // NEW: Instead of overwriting, we will store a history of attempts.
+        const newAttempt = {
             score: results.percentage,
             timeTaken: timeTaken,
             date: new Date().toISOString(),
-            answers: userAnswers.slice()
+            answers: userAnswers.slice() // Keep answers for review
         };
-        saveUserProgress();
+
+        if (!userProgress[progressKey] || !Array.isArray(userProgress[progressKey].attempts)) {
+            // If no history exists, create it.
+            userProgress[progressKey] = {
+                score: newAttempt.score, // Keep the best score at the top level for easy access
+                attempts: [newAttempt]
+            };
+            showNotification('Quiz result saved!', 'success');
+        } else {
+            // Add the new attempt to the history
+            userProgress[progressKey].attempts.push(newAttempt);
+            // Update the top-level score only if the new score is higher
+            if (newAttempt.score >= userProgress[progressKey].score) {
+                userProgress[progressKey].score = newAttempt.score;
+                showNotification('New high score saved!', 'success');
+            }
+        }
+        saveUserProgress(); // Save the updated progress with the full history
     }
 
     // FIX: Always display results and show the results page for any timed quiz.
@@ -1110,15 +1187,41 @@ function calculateResults() {
 }
 
 function displayResults(results, timeTaken) {
-    // Update score display
-    animateValue('score-percentage', 0, results.percentage, 1000, '%');
-    document.getElementById('correct-count').textContent = results.correctCount;
-    document.getElementById('incorrect-count').textContent = results.incorrectCount;
-    
+    const scorePercentageEl = document.getElementById('score-percentage');
+    const scoreRingCircle = document.getElementById('score-ring-circle');
+    const scoreDetailsGrid = document.getElementById('score-details-grid');
+    const timeTakenEl = document.getElementById('time-taken');
+
+    // Animate the score percentage text
+    animateValue(scorePercentageEl.id, 0, results.percentage, 1000, '%');
+
+    // Animate the SVG progress ring
+    const radius = scoreRingCircle.r.baseVal.value;
+    const circumference = 2 * Math.PI * radius;
+    const offset = circumference - (results.percentage / 100) * circumference;
+
+    scoreRingCircle.style.strokeDasharray = `${circumference} ${circumference}`;
+    scoreRingCircle.style.strokeDashoffset = circumference; // Start with the ring empty
+    // A small delay to allow the element to render before transitioning
+    setTimeout(() => {
+        scoreRingCircle.style.strokeDashoffset = offset;
+    }, 100);
+
+    // Set ring color based on pass/fail
+    scoreRingCircle.classList.toggle('passed', results.passed);
+    scoreRingCircle.classList.toggle('failed', !results.passed);
+
+    // Populate the score details grid
+    scoreDetailsGrid.innerHTML = `
+        <div class="score-detail-item correct"><strong>${results.correctCount}</strong><span>Correct</span></div>
+        <div class="score-detail-item incorrect"><strong>${results.incorrectCount}</strong><span>Incorrect</span></div>
+        <div class="score-detail-item time"><strong id="time-taken">0:00</strong><span>Time Taken</span></div>
+    `;
+
+    // Format and display time taken
     const minutes = Math.floor(timeTaken / 60);
     const seconds = timeTaken % 60;
-    document.getElementById('time-taken').textContent = 
-        `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    document.getElementById('time-taken').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
     
     // Update result status
     const resultStatus = document.getElementById('result-status');
@@ -1239,10 +1342,23 @@ function retakeQuiz() {
 
     if (otherAvailableSets.length > 0) {
         const nextSet = otherAvailableSets[Math.floor(Math.random() * otherAvailableSets.length)];
+        showNotification(`Starting another available set: Set ${nextSet + 1}`, 'info');
         startQuiz(nextSet);
     } else {
-        showNotification("You've passed all other sets! Retaking the current one.", 'info');
-        startQuiz(currentSet);
+        // All sets are passed, or this is the only set. Check if the current one is passed.
+        const progressKey = `${currentSubject}_${currentChapter}_${currentSet}`;
+        const progress = userProgress[progressKey];
+        if (progress && progress.score >= 40) {
+            // The user has passed this quiz before, so show confirmation.
+            // We set currentSet here because retake is from the results page.
+            // pendingSetIndex will be -1.
+            pendingSetIndex = -1; // Ensure this is reset
+            showRetakeConfirmation(currentSet);
+        } else {
+            // The user has not passed this quiz, so let them retake it directly.
+            showNotification("You haven't passed this set yet. Let's try again!", 'info');
+            startQuiz(currentSet);
+        }
     }
 }
 
@@ -1302,49 +1418,115 @@ function displayReview() {
 }
 
 // ===================== LOCAL STORAGE FUNCTIONS =====================
-function saveUserProgress() {
-    localStorage.setItem('quizProgress', JSON.stringify(userProgress));
-}
+/**
+ * Saves the user's entire progress object to their document in Firestore.
+ */
+async function saveUserProgress() {
+    const userId = getOrCreateUserId();
+    if (!userId || userId.startsWith('user_anonymous')) {
+        // Fallback to localStorage if user is not properly identified
+        localStorage.setItem('quizProgress', JSON.stringify(userProgress));
+        console.log("User not identified, saving progress to localStorage.");
+        return;
+    }
 
-function loadUserProgress() {
-    const saved = localStorage.getItem('quizProgress');
-    if (saved) {
-        try {
-            userProgress = JSON.parse(saved);
-        } catch (error) {
-            console.error('Error loading progress:', error);
-            userProgress = {};
-        }
+    try {
+        await userProgressCollection.doc(userId).set(userProgress);
+        console.log("User progress saved to Firestore.");
+    } catch (error) {
+        console.error("Error saving progress to Firestore: ", error);
+        // Fallback to localStorage on error
+        localStorage.setItem('quizProgress', JSON.stringify(userProgress));
     }
 }
 
-function saveQuizSettings() {
-    localStorage.setItem('quizSettings', JSON.stringify({ timer: quizTimerSetting }));
+/**
+ * Loads the user's progress from their document in Firestore.
+ * If not found, it checks localStorage for any previously saved progress.
+ */
+async function loadUserProgress() {
+    showNotification('Syncing your progress...', 'updating');
+    const userId = getOrCreateUserId();
+    if (!userId || userId.startsWith('user_anonymous')) {
+        const savedLocal = localStorage.getItem('quizProgress');
+        userProgress = savedLocal ? JSON.parse(savedLocal) : {};
+        console.log("User not identified, loading progress from localStorage.");
+        showNotification('Progress loaded locally.', 'info');
+        return;
+    }
+
+    try {
+        const doc = await userProgressCollection.doc(userId).get();
+        if (doc.exists) {
+            userProgress = doc.data();
+            // NEW: Load bookmarks and theme from the user's online profile
+            bookmarkedQuestions = userProgress.bookmarks || [];
+            initializeTheme(); // Re-initialize theme with data from Firestore
+        } else {
+            userProgress = {};
+            bookmarkedQuestions = [];
+        }
+        console.log("User progress loaded from Firestore.");
+        showNotification('Progress synced successfully!', 'success');
+    } catch (error) {
+        console.error("Error loading progress from Firestore: ", error);
+        showNotification('Could not sync progress. Using local data.', 'error');
+    }
+}
+
+/**
+ * NEW: Calculates and displays the user's single best score across all quizzes.
+ */
+function displayPersonalBest() {
+    const personalBestSection = document.getElementById('personal-best-section');
+    const scoreValueEl = document.getElementById('personal-best-score-value');
+    const quizNameEl = document.getElementById('personal-best-quiz-name');
+
+    if (!personalBestSection || !scoreValueEl || !quizNameEl) return;
+
+    let bestScore = 0;
+    let bestQuizName = 'N/A';
+
+    // Iterate over all progress entries to find the highest score
+    for (const key in userProgress) {
+        // Ensure we are looking at a quiz progress entry which has a score
+        if (userProgress[key] && typeof userProgress[key].score === 'number') {
+            if (userProgress[key].score > bestScore) {
+                bestScore = userProgress[key].score;
+                // Extract a readable name from the progress key
+                // e.g., "quantitative_Time and Work_0" -> "Time and Work"
+                const parts = key.split('_');
+                if (parts.length >= 2) {
+                    bestQuizName = parts[1]; // The chapter name
+                }
+            }
+        }
+    }
+
+    if (bestScore > 0) {
+        // Animate the score and display the card
+        animateValue(scoreValueEl.id, 0, bestScore, 1500);
+        quizNameEl.textContent = bestQuizName;
+        personalBestSection.style.display = 'block';
+    } else {
+        personalBestSection.style.display = 'none';
+    }
 }
 
 function loadQuizSettings() {
-    const saved = localStorage.getItem('quizSettings');
-    if (saved) {
-        try {
-            const settings = JSON.parse(saved);
-            quizTimerSetting = settings.timer || 60; // Fallback to 60 if not set
-        } catch (error) {
-            console.error('Error loading quiz settings:', error);
-            quizTimerSetting = 60;
-        }
-    }
+    // FIX: Load the quiz timer setting from the userProgress object,
+    // which is synced with Firestore. Default to 60 if not set.
+    quizTimerSetting = userProgress.quizTimer || 60;
 }
 
-function loadBookmarkedQuestions() {
-    const saved = localStorage.getItem('bookmarkedQuestions');
-    if (saved) {
-        try {
-            bookmarkedQuestions = JSON.parse(saved);
-        } catch (error) {
-            console.error('Error loading bookmarks:', error);
-            bookmarkedQuestions = [];
-        }
-    }
+/**
+ * NEW: Saves the quiz timer setting to the user's progress object.
+ * This will be synced to Firestore by saveUserProgress().
+ */
+function saveQuizSettings() {
+    userProgress.quizTimer = quizTimerSetting;
+    // NEW: Call the main save function to sync changes to Firestore.
+    saveUserProgress();
 }
 
 // ===================== UTILITY FUNCTIONS =====================
@@ -1353,16 +1535,6 @@ function loadBookmarkedQuestions() {
  * @param {string} selector The CSS selector for the elements to animate.
  */
 function applyStaggeredAnimation(selector) {
-  const elements = document.querySelectorAll(selector);
-  elements.forEach((el, index) => {
-    // Reset animation to allow re-triggering
-    el.style.animation = 'none';
-    // Reflow
-    el.offsetHeight; 
-    // Re-apply animation
-    el.style.animation = ''; 
-    el.style.animationDelay = `${index * 75}ms`; // 75ms delay between each card
-  });
 }
 
 /**
@@ -1383,42 +1555,298 @@ function formatTime(seconds) {
 
 // ===================== NEW: THEME SWITCHER =====================
 function initializeSettingsPage() {
-    loadQuizSettings(); // Load settings on startup
-
-    const saveBtn = document.getElementById('save-settings-btn');
+    const saveAccountBtn = document.getElementById('save-account-btn');
+    const saveQuizBtn = document.getElementById('save-quiz-settings-btn');
     const durationInput = document.getElementById('timer-duration-input');
+    const nameInput = document.getElementById('account-name-input');
+    const pinInput = document.getElementById('account-pin-input');
+    const deleteBtn = document.getElementById('delete-account-btn');
+    const editBtn = document.getElementById('edit-account-btn'); // NEW: Edit button
 
-    if (!saveBtn || !durationInput) return;
+    // FIX: Check for all required elements to prevent errors.
+    if (!saveAccountBtn || !saveQuizBtn || !durationInput || !nameInput || !pinInput || !deleteBtn || !editBtn) return;
 
-    // Set initial value
+    // Populate fields when settings page is opened
+    const menuSettingsBtn = document.getElementById('menu-settings-btn');
+    if (menuSettingsBtn) {
+        menuSettingsBtn.addEventListener('click', () => {
+            // NEW: Reset fields to disabled state when opening settings
+            nameInput.disabled = true;
+            pinInput.disabled = true;
+            editBtn.style.display = 'block';
+
+            loadQuizSettings(); // Load latest settings
+            durationInput.value = quizTimerSetting;
+            nameInput.value = localStorage.getItem('userName') || '';
+            pinInput.value = localStorage.getItem('userPin') || '';
+            goToSettings();
+            closeSideMenu();
+        });
+    }
+
+    // Set initial values on first load
+    nameInput.disabled = true; // NEW: Disable by default
+    pinInput.disabled = true;  // NEW: Disable by default
+    loadQuizSettings();
     durationInput.value = quizTimerSetting;
+    nameInput.value = localStorage.getItem('userName') || '';
+    pinInput.value = localStorage.getItem('userPin') || '';
 
-    saveBtn.addEventListener('click', () => {
+    // NEW: Event listener for saving ONLY quiz settings
+    saveQuizBtn.addEventListener('click', () => {
         const newDuration = parseInt(durationInput.value, 10);
-
         if (isNaN(newDuration) || newDuration < 10 || newDuration > 180) {
             showNotification('Please enter a duration between 10 and 180 seconds.', 'error');
             return;
         }
-
         quizTimerSetting = newDuration;
         saveQuizSettings();
-        showNotification('Settings saved successfully!', 'success');
-        goToHome();
+        showNotification('Quiz settings saved!', 'success');
     });
+
+    // NEW: Event listener for saving ONLY account settings
+    saveAccountBtn.addEventListener('click', () => {
+        saveAccountChanges();
+    });
+
+    // Add event listeners for delete and edit buttons
+    deleteBtn.addEventListener('click', confirmAccountDeletion);
+    editBtn.addEventListener('click', confirmAccountEdit);
 }
 
+/**
+ * NEW: Shows a confirmation modal before allowing the user to edit account details.
+ */
+function confirmAccountEdit() {
+    const modal = document.getElementById('edit-account-confirm-modal');
+    const proceedBtn = document.getElementById('proceed-edit-account-btn');
+    const cancelBtn = document.getElementById('cancel-edit-account-btn');
+    
+    modal.classList.add('visible');
+
+    const closeModal = () => modal.classList.remove('visible');
+
+    cancelBtn.onclick = closeModal;
+    proceedBtn.onclick = () => {
+        closeModal();
+        document.getElementById('account-name-input').disabled = false;
+        document.getElementById('account-pin-input').disabled = false;
+        document.getElementById('account-name-input').focus();
+    };
+}
+
+/**
+ * Handles updating user account details (name/PIN) and migrating their data in Firestore.
+ */
+async function saveAccountChanges() {
+    const newName = document.getElementById('account-name-input').value.trim();
+    const newPin = document.getElementById('account-pin-input').value.trim();
+    const oldName = localStorage.getItem('userName');
+    const oldPin = localStorage.getItem('userPin');
+
+    if (!newName || !newPin || newPin.length !== 4 || !/^\d{4}$/.test(newPin)) {
+        showNotification('To save, please enter a valid name and 4-digit PIN.', 'error');
+        return;
+    }
+
+    if (newName === oldName && newPin === oldPin) {
+        showNotification('No changes were made to your account details.', 'info');
+        // No need to reload or navigate away
+        return;
+    }
+
+    // NEW: Show the full-screen updating modal
+    const updateModal = document.getElementById('account-update-modal');
+    const titleEl = document.getElementById('account-update-title');
+    const messageEl = document.getElementById('account-update-message');
+    const spinnerContainer = document.getElementById('account-update-spinner-container');
+    const successContainer = document.getElementById('account-update-success-container');
+
+    if (updateModal) showUpdateModal(true);
+
+    const oldUserId = getOrCreateUserId(); // Gets ID based on old localStorage values
+    const newUserId = `user_${newName.toLowerCase().replace(/[^a-z0-9]/g, '')}_${newPin}`;
+
+    try {
+        // Migrate both userProgress and leaderboard data
+        await migrateFirestoreDocument(userProgressCollection, oldUserId, newUserId);
+        await migrateFirestoreDocument(leaderboardCollection, oldUserId, newUserId, { name: newName });
+
+        // Update localStorage with new details
+        localStorage.setItem('userName', newName);
+        localStorage.setItem('userPin', newPin);
+
+        // NEW: Show success state in the modal
+        if (updateModal) {
+            titleEl.textContent = 'Account Updated!';
+            messageEl.textContent = 'Your details have been saved. The app will now reload.';
+            spinnerContainer.style.display = 'none';
+            successContainer.innerHTML = `<svg class="success-checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52"><circle class="checkmark-circle" cx="26" cy="26" r="25" fill="none"/><path class="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/></svg>`;
+            successContainer.style.display = 'block';
+        }
+
+        setTimeout(() => window.location.reload(), 1500);
+    } catch (error) {
+        console.error("Error updating account:", error);
+        if (updateModal) showUpdateModal(false); // Hide modal on failure
+        showNotification('Failed to update account. Please try again.', 'error');
+    }
+}
+
+/**
+ * NEW: Helper function to show or hide the account update modal and reset its state.
+ * @param {boolean} show - True to show the modal, false to hide it.
+ */
+function showUpdateModal(show) {
+    const modal = document.getElementById('account-update-modal');
+    if (!modal) return;
+
+    if (show) {
+        // Reset to initial "updating" state before showing
+        document.getElementById('account-update-title').textContent = 'Updating Account...';
+        document.getElementById('account-update-message').textContent = 'Please wait while we migrate your data. This may take a moment.';
+        document.getElementById('account-update-spinner-container').style.display = 'block';
+        document.getElementById('account-update-success-container').style.display = 'none';
+        modal.classList.add('visible');
+    } else {
+        modal.classList.remove('visible');
+    }
+}
+
+/**
+ * NEW: Handles the account deletion process.
+ */
+function confirmAccountDeletion() {
+    const modal = document.getElementById('delete-confirm-modal');
+    const title = document.getElementById('delete-confirm-title');
+    const message = document.getElementById('delete-confirm-message');
+    const confirmBtn = document.getElementById('confirm-delete-btn');
+    const cancelBtn = document.getElementById('cancel-delete-btn');
+
+    // --- Step 1: Initial Warning ---
+    title.textContent = 'Delete Account';
+    message.textContent = 'This is a permanent action. Are you sure you want to proceed with deleting your account?';
+    confirmBtn.textContent = 'Proceed';
+    modal.classList.add('visible');
+
+    const closeInitialModal = () => modal.classList.remove('visible');
+    cancelBtn.onclick = closeInitialModal;
+
+    confirmBtn.onclick = () => {
+        closeInitialModal();
+        // --- Step 2: Show Credential Modal ---
+        const credentialModal = document.getElementById('delete-credential-modal');
+        credentialModal.classList.add('visible');
+
+        document.getElementById('cancel-credential-btn').onclick = () => credentialModal.classList.remove('visible');
+        document.getElementById('confirm-credential-btn').onclick = () => {
+            const enteredName = document.getElementById('delete-account-name-input').value.trim();
+            const enteredPin = document.getElementById('delete-account-pin-input').value.trim();
+            const storedName = localStorage.getItem('userName');
+            const storedPin = localStorage.getItem('userPin');
+
+            if (enteredName === storedName && enteredPin === storedPin) {
+                credentialModal.classList.remove('visible');
+                // --- Step 3: Final Confirmation ---
+                title.textContent = 'Final Confirmation';
+                message.textContent = 'This will permanently erase all your quiz progress and leaderboard scores. This action cannot be undone. Delete your account?';
+                confirmBtn.textContent = 'Delete Permanently';
+                modal.classList.add('visible');
+
+                confirmBtn.onclick = () => {
+                    modal.classList.remove('visible');
+                    deleteAccount(); // Proceed with deletion
+                };
+                cancelBtn.onclick = () => modal.classList.remove('visible');
+
+            } else {
+                showNotification('Invalid credentials. Please try again.', 'error');
+                // Clear inputs for re-entry
+                document.getElementById('delete-account-name-input').value = '';
+                document.getElementById('delete-account-pin-input').value = '';
+            }
+        };
+    }
+}
+
+async function deleteAccount() {
+    const userId = getOrCreateUserId();
+    
+    // Use the account update modal to show deletion progress
+    const updateModal = document.getElementById('account-update-modal');
+    const titleEl = document.getElementById('account-update-title');
+    const messageEl = document.getElementById('account-update-message');
+    if (updateModal && titleEl && messageEl) {
+        titleEl.textContent = 'Deleting Account...';
+        messageEl.textContent = 'Your data is being permanently removed. Please wait.';
+        showUpdateModal(true);
+    }
+
+    try {
+        // Delete data from Firestore
+        await userProgressCollection.doc(userId).delete();
+        await leaderboardCollection.doc(userId).delete();
+
+        // Clear local storage
+        localStorage.clear(); // Clears everything for a full reset
+
+        if (updateModal) showUpdateModal(false);
+        showNotification('Account deleted successfully. Reloading...', 'success');
+        setTimeout(() => window.location.reload(), 2000);
+    } catch (error) {
+        console.error("Error deleting account:", error);
+        if (updateModal) showUpdateModal(false);
+        showNotification('Failed to delete account. Please try again.', 'error');
+    }
+}
+
+/**
+ * Initializes the theme based on user preference (light, dark, or system).
+ * Defaults to 'system' for new users.
+ */
 function initializeTheme() {
-    const themeToggle = document.getElementById('theme-toggle');
-    const savedTheme = localStorage.getItem('theme') || 'light';
+    // This function is now called AFTER user profile is loaded.
+    const themeButtons = document.querySelectorAll('.theme-btn');
+    if (!themeButtons.length) return; // Guard against missing elements
 
-    document.documentElement.setAttribute('data-color-scheme', savedTheme);
-    themeToggle.checked = savedTheme === 'dark';
+    // Use theme from userProgress if available, otherwise default to 'system'.
+    const savedTheme = userProgress.theme || 'system';
 
-    themeToggle.addEventListener('change', function() {
-        const newTheme = this.checked ? 'dark' : 'light';
-        document.documentElement.setAttribute('data-color-scheme', newTheme);
-        localStorage.setItem('theme', newTheme);
+    const applyTheme = (theme) => {
+        if (theme === 'system') {
+            // Check OS preference and apply it
+            const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            document.documentElement.setAttribute('data-color-scheme', systemPrefersDark ? 'dark' : 'light');
+        } else {
+            document.documentElement.setAttribute('data-color-scheme', theme);
+        }
+
+        // Update the active state of the buttons
+        themeButtons.forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.theme === theme);
+        });
+    };
+
+    // Apply the initial theme on load
+    applyTheme(savedTheme);
+
+    // Add click listeners to each theme button
+    themeButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const newTheme = button.dataset.theme;
+            // NEW: Save theme to userProgress object and sync with Firestore
+            userProgress.theme = newTheme;
+            saveUserProgress();
+            applyTheme(newTheme);
+        });
+    });
+
+    // Add a listener to automatically change theme if OS preference changes and 'system' is selected
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+        if (localStorage.getItem('theme') === 'system' || !localStorage.getItem('theme')) {
+            const newColorScheme = event.matches ? "dark" : "light";
+            document.documentElement.setAttribute('data-color-scheme', newColorScheme);
+        }
     });
 }
 
@@ -1648,15 +2076,21 @@ function generateAcademicDailyChallengeQuestions() {
 // ===================== NEW: ONBOARDING & PERSONALIZATION =====================
 function checkUserProfile() {
     const userName = localStorage.getItem('userName');
+    const userPin = localStorage.getItem('userPin'); // NEW: Check for PIN
     const userFocus = localStorage.getItem('userFocus');
 
-    if (!userName || !userFocus) {
+    // Initialize theme and info popup here after we know the user
+    initializeTheme();
+    initializeInfoPopup();
+
+    if (!userName || !userFocus || !userPin) { // NEW: Check for PIN
         document.getElementById('onboarding-modal').classList.add('visible');
         document.getElementById('logout-btn').style.display = 'none';
     } else {
         document.getElementById('onboarding-modal').classList.remove('visible');
         document.getElementById('logout-btn').style.display = 'inline-flex';
         personalizeHomepage(userName, userFocus);
+        loadUserProgress(); // Load progress after user is identified
     }
     document.getElementById('app-version').textContent = `v${APP_VERSION}`;
     document.getElementById('menu-app-version').textContent = `v${APP_VERSION}`;
@@ -1664,20 +2098,33 @@ function checkUserProfile() {
 
 function saveUserPreferences(focus) {
     const nameInput = document.getElementById('user-name-input');
+    const pinInput = document.getElementById('user-pin-input'); // NEW: Get PIN input
     const userName = nameInput.value.trim();
+    const userPin = pinInput.value.trim(); // NEW: Get PIN value
 
     if (!userName) {
         showNotification('Please enter your name.', 'error');
         nameInput.focus();
         return;
     }
+    // NEW: Validate the PIN
+    if (!userPin || userPin.length !== 4 || !/^\d{4}$/.test(userPin)) {
+        showNotification('Please enter a valid 4-digit PIN.', 'error');
+        pinInput.focus();
+        return;
+    }
 
     localStorage.setItem('userName', userName);
+    localStorage.setItem('userPin', userPin); // NEW: Save PIN
     localStorage.setItem('userFocus', focus);
+
+    // NEW: Set a flag to show the PIN reminder after the page reloads.
+    sessionStorage.setItem('showPinReminder', 'true');
 
     document.getElementById('onboarding-modal').classList.remove('visible');
     document.getElementById('logout-btn').style.display = 'inline-flex';
     personalizeHomepage(userName, focus);
+    window.location.reload(); // Reload to re-initialize the app with the new user ID and load their progress
 }
 
 function personalizeHomepage(userName, userFocus) {
@@ -1716,6 +2163,33 @@ function personalizeHomepage(userName, userFocus) {
     initializeApp();
 }
 
+/**
+ * NEW: Checks if the PIN reminder should be shown (on first login of a session)
+ * and displays a modal with the user's PIN.
+ */
+function checkAndShowPinReminder() {
+    if (sessionStorage.getItem('showPinReminder') === 'true') {
+        const pin = localStorage.getItem('userPin');
+        if (pin) {
+            const modal = document.getElementById('pin-reminder-modal');
+            const pinDisplay = document.getElementById('reminder-pin-display');
+            const closeBtn = document.getElementById('close-pin-reminder-btn');
+
+            if (modal && pinDisplay && closeBtn) {
+                pinDisplay.textContent = pin;
+                modal.classList.add('visible');
+
+                const closeModal = () => {
+                    modal.classList.remove('visible');
+                    // Remove the flag so it doesn't show again in this session.
+                    sessionStorage.removeItem('showPinReminder');
+                };
+
+                closeBtn.addEventListener('click', closeModal);
+            }
+        }
+    }
+}
 /**
  * Sets the current date on the Daily Challenge card.
  */
@@ -1775,8 +2249,7 @@ function initializeLogoutConfirmation() {
     confirmBtn.addEventListener('click', () => {
         localStorage.removeItem('userName');
         localStorage.removeItem('userFocus');
-        // The quizifyUserId is now derived from the name, so no need to remove it.
-        // Reload the page to reset the state and show the onboarding modal
+        localStorage.removeItem('userPin'); // NEW: Clear PIN on logout
         window.location.reload();
     });
 
@@ -1904,15 +2377,10 @@ function checkForUpdates() {
 
     if (updatedChapters.length > 0) {
         // Show notifications for new content
-        const details = updatedChapters.map(chapterName => `<li>New quiz in <strong>${chapterName}</strong></li>`).join('');
-        if (updatedChapters.length <= 2) {
-            updatedChapters.forEach(chapterName => {
-                const singleDetail = [`<li>A new quiz set is available in <strong>${chapterName}</strong>.</li>`];
-                showNotification(`New quiz in ${chapterName}!`, 'info', singleDetail, 'New Content Added');
-            });
-        } else {
-            showNotification(`${updatedChapters.length} topics have new quizzes.`, 'info', details);
-        }
+        const details = updatedChapters.map(chapterName => `<li>New quiz sets are available in <strong>${chapterName}</strong>.</li>`);
+        const modalTitle = "New Quizzes Added!";
+        const devNote = "We're constantly adding new content to help you prepare. Happy quizzing!";
+        showUpdateDetails(details, modalTitle, devNote);
         // Update the stored map
         localStorage.setItem('contentMap', JSON.stringify(currentContentMap));
     }
@@ -1974,16 +2442,23 @@ function showNotification(message, type = 'info', details = null, modalTitle = '
     const toastMessage = document.getElementById('toast-message');
     const toastIconContainer = document.getElementById('toast-icon-container');
     const infoBtn = document.getElementById('toast-info-btn');
+    const toastSpinner = document.getElementById('toast-spinner');
 
-    if (!toast || !toastMessage || !toastIconContainer || !infoBtn) return;
+    if (!toast || !toastMessage || !toastIconContainer || !infoBtn || !toastSpinner) return;
 
     toastMessage.textContent = message;
 
     // Clear previous classes and timeouts
     toast.className = 'notification-toast';
     toastIconContainer.innerHTML = ''; // Clear old icon
+    toastSpinner.style.display = 'none'; // Hide spinner by default
     if (window.notificationTimeout) {
         clearTimeout(window.notificationTimeout);
+    }
+
+    // NEW: Show spinner for 'updating' type
+    if (type === 'updating') {
+        toastSpinner.style.display = 'block';
     }
 
     // Create and append the correct icon
@@ -2007,11 +2482,12 @@ function showNotification(message, type = 'info', details = null, modalTitle = '
         infoBtn.style.display = 'none';
     }
 
-    // FIX: Set a timeout to hide the toast for all notifications except app version updates.
-    // The app version update is handled by a direct modal pop-up now.
-    window.notificationTimeout = setTimeout(() => {
-        toast.classList.remove('show');
-    }, 6000); // Hide after 6 seconds
+    // Don't auto-hide 'updating' notifications
+    if (type !== 'updating') {
+        window.notificationTimeout = setTimeout(() => {
+            toast.classList.remove('show');
+        }, 6000); // Hide after 6 seconds
+    }
 }
 
 function initializeUpdateDetailsModal() {
@@ -2198,8 +2674,10 @@ function displayHomepageSearchResults(results, query) {
 }
 
 // ===================== NEW: BOOKMARKING FEATURE =====================
-function saveBookmarkedQuestions() {
-    localStorage.setItem('bookmarkedQuestions', JSON.stringify(bookmarkedQuestions));
+function syncBookmarks() {
+    // NEW: Update the userProgress object and save it to Firestore.
+    userProgress.bookmarks = bookmarkedQuestions;
+    saveUserProgress();
 }
 
 function toggleBookmark() {
@@ -2226,7 +2704,7 @@ function toggleBookmark() {
         showNotification('Bookmark added!', 'success');
     }
 
-    saveBookmarkedQuestions();
+    syncBookmarks(); // NEW: Sync bookmarks with Firestore
     updateBookmarkButton();
 }
 
@@ -2270,7 +2748,7 @@ function displayBookmarkedQuestions() {
 function removeBookmark(index) {
     if (index > -1 && index < bookmarkedQuestions.length) {
         bookmarkedQuestions.splice(index, 1);
-        saveBookmarkedQuestions();
+        syncBookmarks(); // NEW: Sync bookmarks with Firestore
         showNotification('Bookmark removed.', 'success');
         // Refresh the view
         displayBookmarkedQuestions();
@@ -2477,13 +2955,42 @@ function initializeLeaderboard() {
  * @returns {string} The user's unique ID.
  */
 function getOrCreateUserId() {
-    const userName = localStorage.getItem('userName');
-    if (!userName) {
+    const userName = localStorage.getItem('userName'); 
+    const userPin = localStorage.getItem('userPin'); // NEW: Get PIN
+
+    if (!userName || !userPin) {
         // Fallback for anonymous or error states, though this shouldn't happen in normal flow.
         return 'user_anonymous_' + Date.now();
     }
-    // Create a consistent ID from the user's name.
-    // e.g., "Raj Mishra" -> "user_rajmishra"
+
+    // NEW: Create a unique ID from the combination of the sanitized name and the PIN.
+    // e.g., "Raj Mishra" + "1234" -> "user_rajmishra_1234"
     const sanitizedName = userName.toLowerCase().replace(/[^a-z0-9]/g, '');
-    return `user_${sanitizedName}`;
+    return `user_${sanitizedName}_${userPin}`;
+}
+
+/**
+ * A generic function to migrate a document in Firestore from an old ID to a new ID.
+ * @param {firebase.firestore.CollectionReference} collection - The Firestore collection.
+ * @param {string} oldId - The old document ID.
+ * @param {string} newId - The new document ID.
+ * @param {object} [updateData={}] - Optional data to merge into the new document.
+ */
+async function migrateFirestoreDocument(collection, oldId, newId, updateData = {}) {
+    if (oldId === newId) return; // No migration needed
+
+    const oldDocRef = collection.doc(oldId);
+    const oldDoc = await oldDocRef.get();
+
+    if (oldDoc.exists) {
+        const data = { ...oldDoc.data(), ...updateData };
+        const newDocRef = collection.doc(newId);
+        await newDocRef.set(data); // Create new document with merged data
+        await oldDocRef.delete(); // Delete the old document
+    }
+}
+
+// Add a unique ID to each question when it's loaded to help with tracking
+function addIdToQuestion(question, subject, chapter, setIndex, qIndex) {
+    question.id = `${subject}_${chapter}_${setIndex}_${qIndex}`;
 }
