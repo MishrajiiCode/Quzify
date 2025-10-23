@@ -1,5 +1,6 @@
 
 
+
 // app.js - Complete Quiz Platform with Class and Competitive Exam functionality
 // Only business logic - questions stored in separate data files
 // ===================== APP CHANGELOG =====================
@@ -2952,6 +2953,12 @@ function displayProfilePage() {
     // Create or update the performance chart
     createOrUpdatePerformanceChart(stats.subjectStats);
 
+    // NEW: Analyze and display topic strengths
+    const topicAnalysis = analyzeTopicStrength();
+    displayTopicStrength(topicAnalysis);
+
+
+
     showPage('profile-page');
 }
 
@@ -3026,6 +3033,75 @@ function createOrUpdatePerformanceChart(subjectStats) {
             }
         }
     });
+}
+
+// ===================== NEW: TOPIC STRENGTH ANALYSIS =====================
+
+/**
+ * Analyzes user progress to determine strengths and areas for improvement.
+ * @returns {{strengths: Array, improvements: Array}}
+ */
+function analyzeTopicStrength() {
+    const chapterScores = {};
+
+    // 1. Aggregate scores for each chapter
+    for (const key in userProgress) {
+        // FIX: Ignore daily challenges and other non-chapter progress keys.
+        if (key.startsWith('daily_challenge') || !key.includes('_')) {
+            continue;
+        }
+        // A valid quiz progress key looks like 'subject_chapter_setIndex'
+        const parts = key.split('_');
+        if (parts.length >= 3 && userProgress[key] && typeof userProgress[key].score === 'number') {
+            const subject = parts[0];
+            const chapter = parts[1];
+            const chapterKey = `${subject}_${chapter}`;
+
+            if (!chapterScores[chapterKey]) {
+                chapterScores[chapterKey] = { scores: [], name: chapter, subject: getSubjectTitle(subject) };
+            }
+            chapterScores[chapterKey].scores.push(userProgress[key].score);
+        }
+    }
+
+    // 2. Calculate average scores and categorize
+    const strengths = [];
+    const improvements = [];
+
+    for (const key in chapterScores) {
+        const chapterData = chapterScores[key];
+        const avgScore = chapterData.scores.reduce((a, b) => a + b, 0) / chapterData.scores.length;
+
+        const topic = {
+            name: chapterData.name,
+            subject: chapterData.subject,
+            score: Math.round(avgScore)
+        };
+
+        if (avgScore >= 70) {
+            strengths.push(topic);
+        } else if (avgScore >= 40) {
+            improvements.push(topic);
+        }
+    }
+
+    // Sort by score (descending for strengths, ascending for improvements)
+    strengths.sort((a, b) => b.score - a.score);
+    improvements.sort((a, b) => a.score - b.score);
+
+    return { strengths, improvements };
+}
+
+/**
+ * Displays the topic strength analysis on the profile page.
+ * @param {{strengths: Array, improvements: Array}} analysisData
+ */
+function displayTopicStrength(analysisData) {
+    const strengthList = document.getElementById('strength-topics-list');
+    const improvementList = document.getElementById('improvement-topics-list');
+
+    strengthList.innerHTML = analysisData.strengths.length ? analysisData.strengths.map(t => `<li>${t.name} <span>${t.score}%</span></li>`).join('') : '<li>Complete more quizzes to identify your strengths!</li>';
+    improvementList.innerHTML = analysisData.improvements.length ? analysisData.improvements.map(t => `<li>${t.name} <span>${t.score}%</span></li>`).join('') : '<li>No specific areas for improvement found yet. Keep it up!</li>';
 }
 
 // ===================== NEW: FIREBASE & LEADERBOARD FUNCTIONS =====================
