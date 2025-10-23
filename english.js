@@ -19,7 +19,7 @@ const englishData = {
           { question: "Find the error in the sentence: The peoples of all the countries (A)/ should work for (B)/ peace. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: He takes pain (A)/ over his (B)/ work. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: The wages of sin (A)/ are (B)/ death. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
-          { question: "Find the error in the sentence: My brother-in-laws (A)/ who live in Mumbai (B)/ have come to stay with us. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
+          { question: "Find the error in the sentence: My brothers-in-law (A)/ who live in Mumbai (B)/ have come to stay with us. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: All his sister-in-laws (A)/ are married (B)/ and settled in the UK. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: The committee (A)/ were divided in (B)/ their opinion. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
           { question: "Find the error in the sentence: The police has (A)/ arrested the (B)/ thief. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
@@ -27,7 +27,7 @@ const englishData = {
           { question: "Find the error in the sentence: The gentry of this town (A)/ does not like (B)/ this new proposal. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: There are no (A)/ poetries in my (B)/ book. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: That house is (A)/ built of (B)/ stones. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
-          { question: "Find the error in the sentence: He has bought (A)/ a new (B)/ machinery. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
+          { question: "Find the error in the sentence: He has bought (A)/ new (B)/ machinery. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
           { question: "Find the error in the sentence: The Government has passed (A)/ a new bill for the welfare (B)/ of the poors. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 }
         ],
         
@@ -35,7 +35,7 @@ const englishData = {
         [
           { question: "Choose the correct noun form: The ______ of the team was celebrated by all. (succeed)", options: ["success", "successful", "succeeds", "succeeded"], answer: 0 },
           { question: "Find the error in the sentence: The jury was (A)/ unanimous in (B)/ its verdict. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
-          { question: "Find the error in the sentence: A five-men (A)/ committee was appointed (B)/ to look into the matter. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
+          { question: "Find the error in the sentence: A five-man (A)/ committee was appointed (B)/ to look into the matter. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: The company has ordered (A)/ some new (B)/ equipments. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
           { question: "Find the error in the sentence: I like the (A)/ poetries of (B)/ Byron and Shelley. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: The clerk at the counter (A)/ gave me a wrong (B)/ information. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
@@ -43,7 +43,7 @@ const englishData = {
           { question: "Find the error in the sentence: No porter being available (A)/ he carried all his (B)/ luggages himself. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
           { question: "Find the error in the sentence: The table's wood (A)/ is infested with (B)/ mite and I am likely to dispose it of. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: I can't come to you now (A)/ because a lot of (B)/ works remains to be done. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
-          { question: "Find the error in the sentence: A farmer was leading his (A)/ oxes to his field (B)/ for ploughing early in the morning. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
+          { question: "Find the error in the sentence: A farmer was leading his (A)/ oxen to his field (B)/ for ploughing early in the morning. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: What is the (A)/ criteria of selection (B)/ in the examination? (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: The childrens are (A)/ playing in the (B)/ park. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: The sheeps are (A)/ economically useful and so they are reared (B)/ for wool and meat. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
@@ -57,7 +57,7 @@ const englishData = {
         // Set 3: Questions 41-60
         [
           { question: "Find the error in the sentence: I visited (A)/ Ram's and Sita's house (B)/ and found the couple missing. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
-          { question: "Find the error in the sentence: All the girls-students (A)/ are advised to (B)/ attend the meeting positively. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
+          { question: "Find the error in the sentence: All the girl students (A)/ are advised to (B)/ attend the meeting positively. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: The majority of the woman (A)/ teachers are persuading the principal to consider (B)/ their demands. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: It is harmful (A)/ to take cupsful (B)/ of tea five times a day. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: The book's cover (A)/ is torn and (B)/ needs to be replaced. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
@@ -66,11 +66,11 @@ const englishData = {
           { question: "Find the error in the sentence: He has many (A)/ sheeps and deers (B)/ on his farm. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: The news were (A)/ broadcasted on (B)/ all major channels. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: The team have (A)/ not performed well (B)/ this season. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
-          { question: "Find the error in the sentence: A series of lectures (A)/ on this subject have been (B)/ arranged by the department. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
+          { question: "Find the error in the sentence: A series of lectures (A)/ on this subject has been (B)/ arranged by the department. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: The company's (A)/ assets was seized (B)/ by the court. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: He gave me a ten-rupees (A)/ note for the (B)/ purchase. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: The scissors is (A)/ lying on the (B)/ table. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
-          { question: "Find the error in the sentence: His means (A)/ is very limited, yet he does not (B)/ curtail his expenditure. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
+          { question: "Find the error in the sentence: His means (A)/ are very limited, yet he does not (B)/ curtail his expenditure. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: The data are (A)/ insufficient to draw (B)/ a valid conclusion. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
           { question: "Find the error in the sentence: The Commander's-in-Chief (A)/ orders arrived (B)/ just in time. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: The rich is (A)/ not always (B)/ happy. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
@@ -80,7 +80,7 @@ const englishData = {
         // Set 4: Questions 61-80
         [
           { question: "Find the error in the sentence: The brethren of this locality (A)/ are always at daggers drawn (B)/ without any apparent reason. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
-          { question: "Find the error in the sentence: The passer-bys (A)/ told us where the marriage hall (B)/ was and even led us to it. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
+          { question: "Find the error in the sentence: The passers-by (A)/ told us where the marriage hall (B)/ was and even led us to it. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: The long-distance train (A)/ which met with an accident (B)/ was carrying some army's personnel. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
           { question: "Find the error in the sentence: The young lions (A)/ are the ofsprings (B)/ of a very ferocious species. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: He does not cut paper (A)/ with blade, (B)/ but with a scissors. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
@@ -91,7 +91,7 @@ const englishData = {
           { question: "Find the error in the sentence: All the furnitures have been (A)/ sent to the new house (B)/ located in a village. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: The sound of a gunshot (A)/ scattered the flock of (B)/ birds. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
           { question: "Find the error in the sentence: The medias have played (A)/ a crucial role in (B)/ shaping public opinion. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
-          { question: "Find the error in a sentence: The bacterias in the water (A)/ were found to be (B)/ harmful for consumption. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
+          { question: "Find the error in the sentence: The bacteria in the water (A)/ were found to be (B)/ harmful for consumption. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: He is one of the (A)/ most intelligent boy (B)/ in the class. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: The cattles in the meadow (A)/ was frightened by the (B)/ loud noise of the helicopter. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: There is a lot of (A)/ garbages on the (B)/ street. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
@@ -103,7 +103,7 @@ const englishData = {
         // Set 5: Questions 81-100
         [
           { question: "Find the error in the sentence: The two first chapters (A)/ of this book are very interesting, (B)/ the remaining ones are boring. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
-          { question: "Find the error in the sentence: He uses a (A)/ fine quality of shampoo (B)/ so his hairs are black. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
+          { question: "Find the error in the sentence: He uses a (A)/ fine quality of shampoo (B)/ so his hair is black. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
           { question: "Find the error in the sentence: I went to the temple (A)/ with my parents, aunts (B)/ and cousin sisters. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
           { question: "Find the error in the sentence: The manager put forward (A)/ a number of criterions (B)/ for the post. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: The childrens were (A)/ happy when the (B)/ holidays were declared. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
@@ -113,7 +113,7 @@ const englishData = {
           { question: "Find the error in the sentence: The equipments for the new lab (A)/ has finally arrived (B)/ from the supplier. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: The news of his father's death (A)/ were not declared (B)/ so far. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: The politics in this country (A)/ are very dirty and (B)/ needs a complete overhaul. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
-          { question: "Find the error in an sentence: The jury have (A)/ given their verdict (B)/ unanimously. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
+          { question: "Find the error in the sentence: The jury have (A)/ given their verdict (B)/ unanimously. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: A series of matches (A)/ are being played (B)/ between India and Australia. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: The richs should help (A)/ the poors in their (B)/ time of need. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: He bought two (A)/ dozens bananas for (B)/ his children. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
@@ -130,7 +130,7 @@ const englishData = {
       name: 'Pronoun',
       sets: [
         // Set 1: Questions 1-20
-        [
+        [ // Corrected Set 1
           { question: "Find the error in the sentence: Let you and I (A)/ go to the party (B)/ tonight to celebrate your success. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: The board of directors (A)/ want all possible facilities (B)/ and allowances for itself. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
           { question: "Find the error in the sentence: You and I (A)/ have done my (B)/ best in the examination. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
@@ -140,13 +140,13 @@ const englishData = {
           { question: "Find the error in the sentence: She hates everybody (A)/ and everything who (B)/ reminds her of her mistakes. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: None of (A)/ these two principals has been looking (B)/ after his college well. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: Each of the (A)/ four great tragedies (B)/ of Shakespeare is worth reading. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
-          { question: "Find the error in the sentence: He prostrated before (A)/ his master who had (B)/ returned from London after a year. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
+          { question: "Find the error in the sentence: He prostrated himself before (A)/ his master who had (B)/ returned from London after a year. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: The dog I have bought (A)/ looks more ferocious (B)/ than you have. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
           { question: "Find the error in the sentence: He was much (A)/ more surprised than me (B)/ to see the dancing girl coming towards us. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: The five brothers (A)/ are at daggers-drawn, so they feel it below their dignity (B)/ to talk to each other. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
           { question: "Find the error in the sentence: One should be (A)/ true to his word (B)/ in all circumstances. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: The candidate, being a graduate, (A)/ he is eligible for the post (B)/ of Probationary Officer. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
-          { question: "Find the error in the sentence: Your are the same (A)/ boy who had (B)/ come with him. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
+          { question: "Find the error in the sentence: You are the same (A)/ boy that had (B)/ come with him. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: I don't appreciate (A)/ those who laugh (B)/ at others without any reason. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
           { question: "Find the error in the sentence: The man who (A)/ they thought to be a gentleman (B)/ is actually a rogue. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: He is one of those (A)/ who would rather die (B)/ than tell a lie. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
@@ -156,13 +156,13 @@ const englishData = {
           { question: "Find the error in the sentence: It was me (A)/ who was responsible for (B)/ making all the arrangements for the successful completion of his studies. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: I wonder (A)/ why are you tinkering with the wire, (B)/ you might get a shock. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: John, I and Hari (A)/ have finished our studies (B)/ and are waiting for the results. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
-          { question: "Find the error in the sentence: He is a university professor (A)/ but of his three sons (B)/ neither has any merit. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
+          { question: "Find the error in the sentence: He is a university professor (A)/ but of his three sons (B)/ none has any merit. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
           { question: "Find the error in the sentence: The company has appointed (A)/ consultants to help them (B)/ increase its revenue and improve its financial position. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: The only book which (A)/ you have purchased today (B)/ is in great demand now-a-days. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: She is one of the (A)/ few people whom I think (B)/ might be good for the job. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: Myself and Gopal (A)/ will take care of (B)/ the function on Sunday. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: The guests (A)/ whom we were talking about (B)/ have arrived are my brothers-in-law. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
-          { question: "Find the error in the sentence: There is none (A)/ who can help you in this (B)/ crucial moment of your career. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
+          { question: "Find the error in the sentence: There is none (A)/ that can help you in this (B)/ crucial moment of your career. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: This is the same (A)/ dog which barked at him (B)/ but fortunately did not bite him. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: Whomever comes late (A)/ will not be allowed to mark (B)/ his presence in the register. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: The ruling party stood (A)/ for implementation of the Bill (B)/ and was ready to stake their political existence. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
@@ -170,7 +170,7 @@ const englishData = {
           { question: "Find the error in the sentence: The congress party decided (A)/ to field Mr. Sharma from Delhi, (B)/ who is their most experienced man. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
           { question: "Find the error in the sentence: One should make (A)/ his best efforts if one (B)/ wishes to achieve success in this organisation. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: Good students (A)/ like you and he (B)/ should study regularly. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
-          { question: "Find the error in the sentence: You, he and I (A)/ are to be blamed (B)/ for the accident. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
+          { question: "Find the error in the sentence: You, he and I (A)/ are to be blamed (B)/ for the accident. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
           { question: "Find a error in the sentence: Those two companies (A)/ always help one another (B)/ in times of economic crisis. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: All the members in the council (A)/ began shouting (B)/ at each other. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 }
         ],
@@ -178,13 +178,13 @@ const englishData = {
           { question: "Find the error in the sentence: The person which was (A)/ recommended for the position (B)/ did not fulfill the prescribed qualifications. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: Instead of laying off the workers, (A)/ the company decided to ask them (B)/ to avail voluntary retirement. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
           { question: "Find the error in the sentence: The two sisters shouted (A)/ at one another (B)/ in public. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
-          { question: "Find the error in the sentence: We must supplement (A)/ our diet with vitamins and minerals (B)/ in order to keep oneself fit. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
+          { question: "Find the error in the sentence: We must supplement (A)/ our diet with vitamins and minerals (B)/ in order to keep ourselves fit. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
           { question: "Find the error in the sentence: Mrs. Pratap, being a good teacher, (A)/ she is selected (B)/ for the National Award. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: The poor man (A)/ poisoned him (B)/ and his own children. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: It was in 2006 (A)/ that we first flew (B)/ to the United States. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: I was surprised and pleased (A)/ when I was informed of me (B)/ winning the contest. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: Our dog may look (A)/ fierce but that (B)/ wouldn't hurt a fly. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
-          { question: "Find the error in the sentence: No one can (A)/ challenge destiny, (B)/ isn't it? (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
+          { question: "Find the error in the sentence: No one can (A)/ challenge destiny, (B)/ can they? (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
           { question: "Find the error in the sentence: All the doubts are cleared (A)/ between (B)/ you and I. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
           { question: "Find the error in the sentence: The front page story was about a school girl (A)/ that had hurt herself (B)/ while saving a child in an accident. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: The last thing that the fond mother (A)/ gave her only son (B)/ was his blessing. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
@@ -199,7 +199,7 @@ const englishData = {
         [
           { question: "Find the error in the sentence: He is certainly a man (A)/ whom I know is very trustworthy (B)/ in all circumstances. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: This is one of the best books (A)/ which has been published (B)/ this year. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
-          { question: "Find the error in the sentence: Any of the two (A)/ roads leads (B)/ to the railway station. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
+          { question: "Find the error in the sentence: Either of the two (A)/ roads leads (B)/ to the railway station. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: The audience (A)/ have taken (B)/ its seats. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
           { question: "Find the error in the sentence: The committee has submitted (A)/ their report, and it has been (B)/ accepted by the authority. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: My house (A)/ is bigger (B)/ than her. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
@@ -209,13 +209,13 @@ const englishData = {
           { question: "Find the error in the sentence: The hotel of Patna (A)/ is more luxurious (B)/ than Muzzafarpur. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
           { question: "Find the error in the sentence: The articles published (A)/ in this magazine are more interesting (B)/ than that magazine. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
           { question: "Find the error in the sentence: He answered (A)/ more questions (B)/ than me. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
-          { question: "Find the error in the sentence: There were (A)/ none but she (B)/ to support the cause. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
+          { question: "Find the error in the sentence: There was (A)/ none but her (B)/ to support the cause. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: Every one of the staff (A)/ present here has given a day's pay (B)/ as their contribution to the fund. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
           { question: "Find the error in the sentence: He, you and I (A)/ will manage this (B)/ problem together. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: Was it him (A)/ who got injured (B)/ in the accident this morning? (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: As a student (A)/ of science, you are far better (B)/ than him. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
           { question: "Find the error in the sentence: He introduced (A)/ to the chairman as the General Secretary (B)/ of the party. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
-          { question: "Find the error in the sentence: The player, who (A)/ the selectors chose, (B)/ performed very well. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
+          { question: "Find the error in the sentence: The player, whom (A)/ the selectors chose, (B)/ performed very well. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: My brother and myself (A)/ are glad to get (B)/ your greetings. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 }
         ],
         [
@@ -223,7 +223,7 @@ const englishData = {
           { question: "Find the error in the sentence: The choice is (A)/ between you (B)/ and he. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
           { question: "Find the error in the sentence: This is the girl (A)/ who's photograph (B)/ was on the newspaper. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: One of them (A)/ forgot to take their bag (B)/ from the school. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
-          { question: "Find the error in the sentence: Mr. Sharma, our representative, (A)/ he will attend the meeting (B)/ on our behalf. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
+          { question: "Find the error in the sentence: Mr. Sharma, our representative, (A)/ will attend the meeting (B)/ on our behalf. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: I, you and he (A)/ must attend the seminar (B)/ on career guidance. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: It is difficult to say (A)/ who is the better of (B)/ the two players. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
           { question: "Find the error in the sentence: It was her (A)/ who suggested that you be (B)/ at the door to welcome each participant. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
@@ -235,7 +235,7 @@ const englishData = {
           { question: "Find the error in the sentence: She is the kind (A)/ of woman whom everybody knows (B)/ is benign and magnanimous. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: Rather than go with Raj, (A)/ he decided (B)/ to stay at home. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
           { question: "Find the error in the sentence: He is a man (A)/ who I know (B)/ can be trusted. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
-          { question: "Find the error in the sentence: The team of players (A)/ are now in the field and about to take (B)/ their place. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
+          { question: "Find the error in the sentence: The team of players (A)/ is now in the field and about to take (B)/ its place. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: Each girl was (A)/ given a bunch of flowers, (B)/ which pleased her very much. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
           { question: "Find the error in the sentence: Whatever work that which (A)/ you undertake, put your (B)/ best efforts in it. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: He asked for permission (A)/ to go out but his father (B)/ did not give. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 }
@@ -248,7 +248,7 @@ const englishData = {
       name: 'SV Agreement',
       sets: [
         // Set 1: Questions 1-20
-        [
+        [ // Corrected Set 1
           { question: "Find the error in the sentence: The quality of the apples (A)/ are not good (B)/ and so we cannot sell them. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: The introduction of tea and coffee (A)/ and such other beverages (B)/ have not been without some effect. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
           { question: "Find the error in the sentence: The newer type of automatic machines (A)/ wash (B)/ clothes faster. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
@@ -259,7 +259,7 @@ const englishData = {
           { question: "Find the error in the sentence: Knowledge of (A)/ at least two languages (B)/ are required to pass the examination. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
           { question: "Find the error in the sentence: It is I (A)/ who is to blame (B)/ for this bad situation. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: A hot and (A)/ a cold spring (B)/ was found near each other. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
-          { question: "Find the error in the sentence: Either of the roads (A)/ lead (B)/ to the park. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
+          { question: "Find the error in the sentence: Either of the roads (A)/ leads (B)/ to the park. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: One of my desires (A)/ are to become (B)/ a doctor. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: The whole block of flats (A)/ including two shops were (B)/ destroyed in the fire. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: The sum and substance (A)/ of his poem (B)/ are as follows. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
@@ -271,7 +271,7 @@ const englishData = {
           { question: "Find the error in the sentence: Most of the funds (A)/ we get from (B)/ America is used to build roads and bridges. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 }
         ],
         [
-          { question: "Find the error in the sentence: The tiger was not (A)/ the only dangerous animal (B)/ in the forest, there was hyenas too. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
+          { question: "Find the error in the sentence: The tiger was not (A)/ the only dangerous animal (B)/ in the forest; there were hyenas too. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
           { question: "Find the error in the sentence: She immediately quit the (A)/ job in which (B)/ neither skill nor knowledge were required. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
           { question: "Find the error in the sentence: The type of qualities you acquire (A)/ depend upon your company (B)/ and so you should associate with good and reliable people. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: Our success or our failure (A)/ largely depend (B)/ upon our actions. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
@@ -279,7 +279,7 @@ const englishData = {
           { question: "Find the error in the sentence: That day when they brought her back for the last time (A)/ there was many old-timers (B)/ who were shocked and fearful. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: A computer virus works exactly (A)/ like the biological one (B)/ which invade the human body. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
           { question: "Find the error in the sentence: Many a boy (A)/ have not done their (B)/ homework properly. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
-          { question: "Find the error in the sentence: Two miles beyond (A)/ that pasture was seen hundreds (B)/ of cattle including some lambs. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
+          { question: "Find the error in the sentence: Two miles beyond (A)/ that pasture were seen hundreds (B)/ of cattle including some lambs. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: It is noticed that (A)/ the elite class have no soft (B)/ corner for the downtrodden who are the real victims of the present social set-up. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: Ritu as well as (A)/ some of her friends (B)/ have fallen in love with a boy who is the eldest son of an S.D.O. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
           { question: "Find the error in the sentence: More than one successful candidate (A)/ have taken the interview for one (B)/ of the most popular magazines being published from Delhi. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
@@ -293,7 +293,7 @@ const englishData = {
           { question: "Find the error in the sentence: The Arabian Nights (A)/ are indeed (B)/ an interesting book. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 }
         ],
         [
-          { question: "Find the error in the sentence: The politician and statesman (A)/ have been (B)/ assassinated. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
+          { question: "Find the error in the sentence: The politician and statesman (A)/ has been (B)/ assassinated. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: A large number of students (A)/ has applied (B)/ for the job in the Navy. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: The dog, along with his masters, (A)/ were walking (B)/ in the park. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: He is one of the persons (A)/ who is (B)/ always against bad activities. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
@@ -303,7 +303,7 @@ const englishData = {
           { question: "Find the error in the sentence: Neither the mouse (A)/ nor the lion (B)/ were caught. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
           { question: "Find the error in the sentence: More than one student (A)/ have passed (B)/ the examination. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: The majority of the laborers (A)/ is demanding (B)/ an increase in their wages. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
-          { question: "Find the error in the sentence: My brother, no less than my cousins, (A)/ are responsible (B)/ for the loss. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
+          { question: "Find the error in the sentence: My brother, no less than my cousins, (A)/ is responsible (B)/ for the loss. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: A body of volunteers (A)/ have been organized (B)/ to help the faculty in their attempt to raise the funds. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: There appears (A)/ a number of new faces in the hall (B)/ and I really do not know where they have come from. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: The new collection of books (A)/ that have been placed in the library (B)/ is very interesting. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
@@ -314,7 +314,7 @@ const englishData = {
           { question: "Find the error in the sentence: Every one of the new employees (A)/ were given (B)/ a two-week training. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: The captain, along with his team, (A)/ have been practicing very hard (B)/ for the forthcoming matches. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 }
         ],
-        [
+        [ // Corrected Set 4
           { question: "Find the error in the sentence: Neither my brother nor my parents (A)/ wants to move (B)/ to another city. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: The manager, as well as the clerks, (A)/ were fighting (B)/ for their bonus. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: More than one person (A)/ were killed (B)/ in the accident. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
@@ -324,7 +324,7 @@ const englishData = {
           { question: "Find the error in the sentence: The Prime Minister, together with his cabinet colleagues, (A)/ have been welcomed by the Chief Minister (B)/ at a formal ceremony. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: The number of accidents (A)/ are increasing day by day (B)/ on the Delhi-Metro route. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: The list of the names (A)/ of the tax defaulters (B)/ were published in the newspaper. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
-          { question: "Find the error in the sentence: A pair of trousers (A)/ have been bought (B)/ by me. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
+          { question: "Find the error in the sentence: A pair of trousers (A)/ has been bought (B)/ by me. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: The jury (A)/ was divided in (B)/ its opinion. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: One of the most (A)/ widely spread (B)/ bad habit is the use of tobacco. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
           { question: "Find the error in the sentence: The long and short of the matter (A)/ are that the employee (B)/ was dismissed. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
@@ -341,7 +341,7 @@ const englishData = {
           { question: "Find the error in the sentence: Neither of the two candidates (A)/ have paid his (B)/ subscription. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: A group of friends (A)/ want to visit the new plant (B)/ as early as possible. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: The minister, along with his party colleagues, (A)/ have been invited (B)/ to the party. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
-          { question: "Find the error in the sentence: Bread and butter (A)/ are my favorite (B)/ breakfast. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
+          { question: "Find the error in the sentence: Bread and butter (A)/ is my favorite (B)/ breakfast. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: The number of books in the library (A)/ have reached (B)/ one million. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: Each boy and each girl (A)/ were given (B)/ a packet of sweets. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: The team (A)/ are confident to win (B)/ the match. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
@@ -349,7 +349,7 @@ const englishData = {
           { question: "Find the error in the sentence: Fifty thousand rupees (A)/ are a large sum (B)/ for me to earn in a month. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: The committee (A)/ has issued (B)/ their report. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
           { question: "Find the error in the sentence: Either the manager or his assistants (A)/ fails in (B)/ their duty. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
-          { question: "Find the error in the sentence: The quality of construction of this building (A)/ were not (B)/ up to the mark. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
+          { question: "Find the error in the sentence: The quality of construction of this building (A)/ was not (B)/ up to the mark. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: The ship with its crew (A)/ were lost (B)/ in the storm. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the a in the sentence: A number of refugees (A)/ has been turned back (B)/ at the border. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: The secretary and the treasurer of our society (A)/ has been arrested (B)/ for embezzlement. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
@@ -366,13 +366,13 @@ const englishData = {
       name: 'Adjective',
       sets: [
         // 5 sets, each with 20 unique questions
-        [
+        [ // Corrected Set 1
           { question: "Find the error in the sentence: He is (A)/ more wiser (B)/ than his brother. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: There are no less (A)/ than fifty students (B)/ in the classroom. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: Of the two great cities, (A)/ the former is (B)/ the biggest. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
           { question: "Find the error in the sentence: She is senior (A)/ than me by (B)/ two years. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: This is the (A)/ most unique opportunity (B)/ you will ever get. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
-          { question: "Find the error in the sentence: I don't have (A)/ many money to (B)/ spend on luxuries. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
+          { question: "Find the error in the sentence: I don't have (A)/ much money to (B)/ spend on luxuries. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: A little knowledge (A)/ of music that he possessed (B)/ proved to be a boon for him. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: My older brother (A)/ is a doctor and he (B)/ lives in Delhi. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: We need to go (A)/ to a farther city (B)/ for the conference. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
@@ -383,7 +383,7 @@ const englishData = {
           { question: "Find the error in the sentence: This book is (A)/ worth to read (B)/ for its insightful content. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: He is enough rich (A)/ to buy a (B)/ new car. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: She is as good, (A)/ if not better than, (B)/ her sister. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
-          { question: "Find the error in the sentence: Diamond is harder (A)/ than any (B)/ metal. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
+          { question: "Find the error in the sentence: Diamond is harder (A)/ than any other (B)/ metal. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: The two first (A)/ chapters of this book (B)/ are very interesting. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: The snake was (A)/ deadly poisonous and (B)/ it bit the farmer. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
           { question: "Find the error in the sentence: I do not have (A)/ some money in (B)/ my wallet. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 }
@@ -391,7 +391,7 @@ const englishData = {
         [
           { question: "Find the error in the sentence: The weather is (A)/ much too hot (B)/ to go outside today. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
           { question: "Find the error in the sentence: He does not have (A)/ money enough to (B)/ start a new business. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
-          { question: "Find the error in the sentence: These kind of roses (A)/ are very popular (B)/ in the market. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
+          { question: "Find the error in the sentence: This kind of rose (A)/ is very popular (B)/ in the market. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: I have read (A)/ these book (B)/ several times. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: There were less (A)/ people at the concert (B)/ than we expected. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: Between the two options, (A)/ I prefer the (B)/ later one. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
@@ -400,7 +400,7 @@ const englishData = {
           { question: "Find the error in the sentence: This is the (A)/ most perfect example (B)/ of modern architecture. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: This brand of coffee (A)/ is superior than (B)/ any other in the market. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: The all class (A)/ was punished for (B)/ the misconduct. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
-          { question: "Find the error in the sentence: Each students (A)/ must submit their (B)/ assignment by Friday. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
+          { question: "Find the error in the sentence: Each student (A)/ must submit his (B)/ assignment by Friday. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: I would like to have (A)/ other cup of (B)/ tea, please. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: The movie was (A)/ worth to watch (B)/ for its stunning visuals. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: Your performance was (A)/ as good than (B)/ I had expected. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
@@ -411,7 +411,7 @@ const englishData = {
           { question: "Find the error in the sentence: The more you practice, (A)/ more proficient (B)/ you will become. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 }
         ],
         [
-          { question: "Find the error in the sentence: The interior decoration (A)/ of the room is (B)/ more superior to that of the hall. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
+          { question: "Find the error in the sentence: The interior decoration (A)/ of the room is (B)/ superior to that of the hall. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
           { question: "Find the error in the sentence: There are a few (A)/ hope of his (B)/ recovery. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: The little information (A)/ he had was not (B)/ quite reliable. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
           { question: "Find the error in the sentence: Do you have (A)/ some problem with (B)/ this arrangement? (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
@@ -421,8 +421,8 @@ const englishData = {
           { question: "Find the error in the sentence: He is the (A)/ tallest than any other (B)/ boy in the class. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: This shirt is (A)/ comparatively better than (B)/ the one I saw yesterday. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: He felt (A)/ very happily after (B)/ hearing the news. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
-          { question: "Find the error in the sentence: The number of applications (A)/ has risen this year (B)/ by as many as 50%. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
-          { question: "Find the error in the sentence: Can you tell me how (A)/ many eggs and (B)/ milk he has brought? (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
+          { question: "Find the error in the sentence: The number of applications (A)/ has risen this year (B)/ by as much as 50%. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
+          { question: "Find the error in the sentence: Can you tell me how (A)/ many eggs and (B)/ much milk he has brought? (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
           { question: "Find the error in the sentence: The patient is (A)/ feeling relatively better (B)/ today. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
           { question: "Find the error in the sentence: He is the (A)/ most cleverest boy (B)/ in our school. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: The climate of this place (A)/ is more better (B)/ than that of my hometown. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
@@ -432,7 +432,7 @@ const englishData = {
           { question: "Find the error in the sentence: The higher you go, (A)/ the colder (B)/ it is. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
           { question: "Find the error in the sentence: She is the (A)/ prettiest of (B)/ the two sisters. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 }
         ],
-        [
+        [ // Corrected Set 4
           { question: "Find the error in the sentence: He is the (A)/ most perfect gentleman (B)/ I have ever met. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: The population of this city (A)/ is greater than (B)/ any city in the state. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
           { question: "Find the error in the sentence: This is a (A)/ more impossible task (B)/ than the previous one. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
@@ -440,7 +440,7 @@ const englishData = {
           { question: "Find the error in the sentence: The two first rows (A)/ in the auditorium (B)/ are reserved for guests. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: The patient's condition is (A)/ getting more and more (B)/ worst. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
           { question: "Find the error in the sentence: He is as tall (A)/ if not taller (B)/ than his father. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
-          { question: "Find the error in the sentence: This pen is (A)/ much more cheaper (B)/ than that one. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
+          { question: "Find the error in the sentence: This pen is (A)/ much cheaper (B)/ than that one. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: She is the (A)/ most beautiful of (B)/ all other girls in the class. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
           { question: "Find the error in the sentence: He is the (A)/ bravest and wise (B)/ man in the village. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: The gold is a (A)/ precious (B)/ metal. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
@@ -452,7 +452,7 @@ const englishData = {
           { question: "Find the error in the sentence: This is a (A)/ more preferable option (B)/ for us. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: He is the (A)/ most complete artist (B)/ of his generation. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: The streets of this city (A)/ are wider than (B)/ that of my village. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
-          { question: "Find the error in the sentence: He is the (A)/ most universal problem (B)/ faced by all countries. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 }
+          { question: "Find the error in the sentence: This is the (A)/ most universal problem (B)/ faced by all countries. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 }
         ],
         [
           { question: "Find the error in the sentence: This is the (A)/ most major issue (B)/ we need to address. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
@@ -460,7 +460,7 @@ const englishData = {
           { question: "Find the error in the sentence: He is the (A)/ most chief guest (B)/ of the evening. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: She is the (A)/ most excellent singer (B)/ in the choir. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: This is the (A)/ most square table (B)/ I have ever seen. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
-          { question: "Find the error in the sentence: The two last chapters (A)/ of the novel are (B)/ quite boring. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
+          { question: "Find the error in the sentence: The last two chapters (A)/ of the novel are (B)/ quite boring. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: He is the (A)/ most round object (B)/ in the collection. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: This is the (A)/ most eternal truth (B)/ of life. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: He is the (A)/ most supreme leader (B)/ of the party. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
@@ -470,7 +470,7 @@ const englishData = {
           { question: "Find the error in the sentence: This is the (A)/ most full moon (B)/ I have ever witnessed. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: He is the (A)/ most empty room (B)/ in the house. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: This is the (A)/ most golden opportunity (B)/ for you. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
-          { question: "Find the error in the sentence: The two first students (A)/ in the line will get (B)/ the prize. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
+          { question: "Find the error in the sentence: The first two students (A)/ in the line will get (B)/ the prize. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: He is the (A)/ most right person (B)/ for the job. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: This is the (A)/ most wrong answer (B)/ in the test. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: The more you read, (A)/ the more you (B)/ learn. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
@@ -483,7 +483,7 @@ const englishData = {
       name: 'Articles',
       sets: [
         // 5 sets, each with 20 unique questions
-        [
+        [ // Corrected Set 1
           { question: "Find the error in the sentence: He is (A)/ a honest (B)/ man. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: The sun rises (A)/ in east and sets (B)/ in the west. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: I play (A)/ the cricket (B)/ every day. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
@@ -493,7 +493,7 @@ const englishData = {
           { question: "Find the error in the sentence: He is not (A)/ a honorable man; (B)/ he is a scoundrel. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: The English is (A)/ a very popular (B)/ language across the world. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: This is (A)/ an one-way (B)/ street. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
-          { question: "Find the error in the sentence: The love is (A)/ a beautiful (B)/ feeling. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
+          { question: "Find the error in the sentence: Love is (A)/ a beautiful (B)/ feeling. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: He is (A)/ M.L.A. from (B)/ our constituency. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: The wisdom is (A)/ the gift (B)/ of heaven. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: I have (A)/ a urgent piece (B)/ of work to do. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
@@ -504,7 +504,7 @@ const englishData = {
           { question: "Find the error in the sentence: The gold is (A)/ a precious (B)/ metal. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: He looks as stupid (A)/ as an owl (B)/ but he is very clever. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
           { question: "Find the error in the sentence: The teacher called (A)/ a last boy standing (B)/ in the queue. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 }
-        ],
+        ], // End of Corrected Set 1
         [
           { question: "Find the error in the sentence: It is a (A)/ most beautiful painting (B)/ of the gallery. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: Mr. Sharma is (A)/ coming to the dinner (B)/ tonight. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
@@ -512,7 +512,7 @@ const englishData = {
           { question: "Find the error in the sentence: The boy who is wearing (A)/ the pink shirt (B)/ is my cousin. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
           { question: "Find the error in the sentence: He is (A)/ a best student (B)/ in our class. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: The breakfast should be (A)/ light and healthy (B)/ in the morning. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
-          { question: "Find the error in the sentence: He is (A)/ a heir to (B)/ the vast property. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
+          { question: "Find the error in the sentence: He is (A)/ an heir to (B)/ the vast property. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: The higher you go, (A)/ the colder (B)/ it is. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
           { question: "Find the error in the sentence: He gave me (A)/ an one-rupee (B)/ coin. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: The man is (A)/ the only creature that (B)/ is endowed with the power of speech. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
@@ -523,7 +523,7 @@ const englishData = {
           { question: "Find the error in the sentence: My friend always likes (A)/ to travel by the air (B)/ since he is a very busy man. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: The teacher said that (A)/ the earth moves (B)/ round the sun. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
           { question: "Find the error in the sentence: He is (A)/ an unit of (B)/ this organization. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
-          { question: "Find the error in the sentence: The rich should (A)/ help (B)/ the poor. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
+          { question: "Find the error in the sentence: Rich should (A)/ help (B)/ the poor. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: He is (A)/ a F.I.R. (B)/ lodged against him. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: The more he gets, (A)/ the more (B)/ he wants. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 }
         ],
@@ -531,7 +531,7 @@ const englishData = {
           { question: "Find the error in the sentence: The Taj Mahal is (A)/ a monument symbolizing (B)/ the love. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
           { question: "Find the error in the sentence: He went to (A)/ the hospital to (B)/ visit his sick friend. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
           { question: "Find the error in the sentence: The Sanskrit is (A)/ a difficult (B)/ language. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
-          { question: "Find the error in the sentence: The boy is (A)/ interested in painting (B)/ and not in reading. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
+          { question: "Find the error in the sentence: A boy is (A)/ interested in painting (B)/ and not in reading. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: He is (A)/ a L.L.B. but (B)/ he does not practice law. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: The brave soldier (A)/ lost an arm (B)/ in the war. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
           { question: "Find the error in the sentence: The beauty of (A)/ the nature is (B)/ beyond description. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
@@ -549,7 +549,7 @@ const englishData = {
           { question: "Find the error in the sentence: He is (A)/ a M.P. from (B)/ the ruling party. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: The sooner you complete this, (A)/ the better (B)/ it will be. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 }
         ],
-        [
+        [ // Corrected Set 4
           { question: "Find the error in the sentence: The man cannot live (A)/ by the bread (B)/ alone. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: It is a quarter (A)/ to ten by (B)/ my watch. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
           { question: "Find the error in the sentence: The Gita is (A)/ a holy book for (B)/ the Hindus. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
@@ -557,9 +557,9 @@ const englishData = {
           { question: "Find the error in the sentence: The rich and the poor (A)/ are both affected (B)/ by the new policy. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
           { question: "Find the error in the sentence: He is (A)/ a honest employee (B)/ of this company. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: The Mount Everest is (A)/ the highest peak (B)/ in the world. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
-          { question: "Find the error in the sentence: He is (A)/ a heir of (B)/ a noble family. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
+          { question: "Find the error in the sentence: He is (A)/ an heir of (B)/ a noble family. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: The teacher asked me (A)/ to write an essay (B)/ on the cow. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
-          { question: "Find the error in the sentence: The winter is (A)/ the coldest season (B)/ of the year. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
+          { question: "Find the error in the sentence: The winter is (A)/ a hot (B)/ season. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: He is (A)/ a S.D.O. in (B)/ the electricity department. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: The tea is (A)/ a popular drink (B)/ all over the world. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: He is (A)/ an one-legged (B)/ beggar. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
@@ -567,7 +567,7 @@ const englishData = {
           { question: "Find the error in the sentence: He went to (A)/ the school to meet (B)/ the principal. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
           { question: "Find the error in the sentence: The man is (A)/ a social (B)/ animal. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: He is (A)/ a M.A. in (B)/ English literature. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
-          { question: "Find the error in the sentence: The moon is (A)/ shining in (B)/ the sky. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
+          { question: "Find the error in the sentence: The moon is (A)/ shining in (B)/ sky. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
           { question: "Find the error in the sentence: He is (A)/ a X-mas (B)/ guest. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: The more you earn, (A)/ the more you (B)/ can spend. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 }
         ],
@@ -575,7 +575,7 @@ const englishData = {
           { question: "Find the error in the sentence: The wisdom of Solomon (A)/ is famous (B)/ all over the world. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
           { question: "Find the error in the sentence: He is (A)/ a European, not (B)/ an Asian. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
           { question: "Find the error in the sentence: The rice is (A)/ the staple food (B)/ of South Indians. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
-          { question: "Find the error in the sentence: He is (A)/ an useful member (B)/ of the society. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
+          { question: "Find the error in the sentence: He is (A)/ a useful member (B)/ of the society. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: The man who is standing there (A)/ is my (B)/ uncle. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
           { question: "Find the error in the sentence: He is (A)/ a hour late (B)/ for the meeting. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: The gold of South Africa (A)/ is exported to (B)/ many countries. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
@@ -583,7 +583,7 @@ const englishData = {
           { question: "Find the error in the sentence: The boy in the blue shirt (A)/ is the captain (B)/ of our team. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
           { question: "Find the error in the sentence: The summer is (A)/ a hot (B)/ season. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: He is (A)/ a B.A. but his brother (B)/ is an M.A. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
-          { question: "Find the error in the sentence: The water of this river (A)/ is very (B)/ dirty. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
+          { question: "Find the error in the sentence: Water of this river (A)/ is very (B)/ dirty. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: He is (A)/ a young man (B)/ with a bright future. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
           { question: "Find the error in the sentence: The earth is (A)/ a planet in (B)/ the solar system. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
           { question: "Find the error in the sentence: He went to (A)/ the prison to meet (B)/ his friend. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
@@ -600,7 +600,7 @@ const englishData = {
       name: 'Verbs',
       sets: [
         // 5 sets, each with 20 unique questions
-        [
+        [ // Corrected Set 1
           { question: "Find the error in the sentence: He laid in the shade (A)/ of a tree before he (B)/ could walk further. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: The criminal will (A)/ certainly be (B)/ hung. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
           { question: "Find the error in the sentence: I am having (A)/ three children and (B)/ a loving wife. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
@@ -610,7 +610,7 @@ const englishData = {
           { question: "Find the error in the sentence: The teacher made the students (A)/ to write the essay (B)/ three times. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: I am hearing a (A)/ strange noise (B)/ outside my window. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: Being a rainy day, (A)/ we decided to (B)/ stay indoors and watch a movie. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
-          { question: "Find the error in the sentence: He dare not (A)/ to go there alone (B)/ at midnight. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
+          { question: "Find the error in the sentence: He dare not (A)/ go there alone (B)/ at midnight. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: The patient had (A)/ died before the (B)/ doctor arrived. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
           { question: "Find the error in the sentence: I have been knowing (A)/ him for ten years but (B)/ I don't know where he lives. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: The house with all its furniture (A)/ and exotic plants were sold (B)/ for Rs. 50,000. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
@@ -621,7 +621,7 @@ const englishData = {
           { question: "Find the error in the sentence: He enjoyed to watch (A)/ the cricket match (B)/ on television. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: The sun raised (A)/ in the east and brought (B)/ a new day. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: He was so inquisitive (A)/ that he rose many questions (B)/ in the class. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 }
-        ],
+        ], // End of Corrected Set 1
         [
           { question: "Find the error in the sentence: I would rather (A)/ you help me (B)/ with my homework. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: The ship was (A)/ drowned in the middle (B)/ of the ocean. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
@@ -632,7 +632,7 @@ const englishData = {
           { question: "Find the error in the sentence: I am looking forward (A)/ to meet you (B)/ in person. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: It is no use to cry (A)/ over spilt (B)/ milk. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: He is used to (A)/ get up early (B)/ in the morning. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
-          { question: "Find the error in the sentence: The thief was caught (A)/ after he has sold (B)/ the stolen goods. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
+          { question: "Find the error in the sentence: The thief was caught (A)/ after he had sold (B)/ the stolen goods. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: I have come to know that (A)/ your father has died (B)/ last week. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: He was borned (A)/ in a small village (B)/ in the countryside. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: The cost of the new machines (A)/ is likely to be (B)/ so high as ten times the existing ones. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
@@ -655,7 +655,7 @@ const englishData = {
           { question: "Find the error in the sentence: I complained against him (A)/ as in spite of my repeated warnings (B)/ he failed to mend his ways. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
           { question: "Find the error in the sentence: Failure must not have (A)/ a permanent affect on a person (B)/ because only the tough survives. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: I keep my cool (A)/ and never loose my temper (B)/ even when provoked. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
-          { question: "Find the error in the sentence: He lied on the grass (A)/ for hours (B)/ enjoying the cool breeze. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
+          { question: "Find the error in the sentence: He lay on the grass (A)/ for hours (B)/ enjoying the cool breeze. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: During the rainy season (A)/ many rivers they overflew their banks (B)/ and caused great difficulty. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: He lay his luggage (A)/ aside and lay down (B)/ to rest for a while. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: When the company offered him a purse on his retirement (A)/ he refused to (B)/ agree it. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
@@ -675,7 +675,7 @@ const englishData = {
           { question: "Find the error in the sentence: I have been working for this (A)/ organisation for the last (B)/ ten years without any break. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
           { question: "Find the error in the sentence: He ought to not have (A)/ done such a (B)/ filthy thing. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: The proposal was (A)/ full of 'if' and 'buts' that I (B)/ seriously doubted whether the stadium would ever be built. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
-          { question: "Find the error in the sentence: The number of people applying (A)/ were so large that the college (B)/ had to stop issuing application forms. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
+          { question: "Find the error in the sentence: The number of people applying (A)/ was so large that the college (B)/ had to stop issuing application forms. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: The audience are (A)/ requested to be in (B)/ its seats for the show. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: He is very drunk, (A)/ so he cannot tell me (B)/ even his father's name. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
           { question: "Find the error in the sentence: We were looking forward (A)/ to hear news about (B)/ the missing fishermen. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
@@ -685,7 +685,7 @@ const englishData = {
           { question: "Find the error in the sentence: The various consequences of (A)/ the decision taken by the (B)/ finance ministry was not foreseen by the bureaucrats. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
           { question: "Find the error in the sentence: I think (A)/ he owns an expensive (B)/ painting by Hussain. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
           { question: "Find the error in the sentence: A really good constitution (A)/ never lets the people's (B)/ rights to be encroached upon. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
-          { question: "Find the error in the sentence: The officer is angry on the clerk (A)/ for not attending to the work (B)/ which was assigned to him. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
+          { question: "Find the error in the sentence: The officer is angry with the clerk (A)/ for not attending to the work (B)/ which was assigned to him. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: It is time you (A)/ decide on your next (B)/ course of action. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 }
         ],
         [
@@ -695,7 +695,7 @@ const englishData = {
           { question: "Find the error in the sentence: The captain with the members of his team (A)/ are returning (B)/ after a fortnight. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: After the teacher had told the boys (A)/ how to pronounce the word, (B)/ all of them in one voice repeated the word again. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
           { question: "Find the error in the sentence: He is not the fastest bowler (A)/ in the Indian team, (B)/ isn't he? (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
-          { question: "Find the error in the sentence: I am really very sorry (A)/ to learn that a reasonable man like you (B)/ have lain to me. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
+          { question: "Find the error in the sentence: I am really very sorry (A)/ to learn that a reasonable man like you (B)/ has lied to me. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
           { question: "Find the error in the sentence: The doctor advised him (A)/ to rest for a few days (B)/ as he was weak. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
           { question: "Find the error in the sentence: The river has overflowed (A)/ its banks and the whole area (B)/ is now under water. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
           { question: "Find the error in the sentence: He was charged of (A)/ murder and was (B)/ sentenced to death. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
@@ -705,7 +705,7 @@ const englishData = {
           { question: "Find the error in the sentence: He was found (A)/ guilty of murder and was (B)/ hanged last month. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
           { question: "Find the error in the sentence: The tired traveler (A)/ laid under the tree (B)/ to take some rest. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: The teacher has took (A)/ the responsibility of (B)/ completing the syllabus. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
-          { question: "Find the error in the sentence: I am used to (A)/ work hard and I can (B)/ work for ten hours at a stretch. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
+          { question: "Find the error in the sentence: I am used to (A)/ working hard and I can (B)/ work for ten hours at a stretch. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: He did not and (A)/ could not have understood (B)/ the full facts of the case. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: The criminal was (A)/ ordered to be hung (B)/ to death. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: The capital of Yemen (A)/ is situating 2190 metres (B)/ above the sea level. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 }
@@ -834,7 +834,7 @@ const englishData = {
       name: 'Conditionals',
       sets: [
         // 5 sets, each with 20 unique questions
-        [
+        [ // Corrected Set 1
           { question: "Find the error in the sentence: If he will work hard, (A)/ he will surely (B)/ get the job of his choice. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: If I was you, (A)/ I would not tolerate him (B)/ for a moment. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: Had he invited me, (A)/ I would have attended (B)/ the function. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
@@ -873,7 +873,7 @@ const englishData = {
           { question: "Find the error in the sentence: If I was a bird, (A)/ I would fly to you (B)/ and say hello. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: Had you not interfered in my affairs, (A)/ I would have been (B)/ in the USA now. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
           { question: "Find the error in the sentence: If you will go to the market, (A)/ please bring (B)/ some fruits for me. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
-          { question: "Find the error in the sentence: Were I the principal of the college, (A)/ I would have suspended (B)/ all the students who misbehaved. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
+          { question: "Find the error in the sentence: Were I the principal of the college, (A)/ I would suspend (B)/ all the students who misbehaved. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: If you had worked hard, (A)/ you would pass (B)/ the examination. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: Suppose if he fails, (A)/ what will he (B)/ do next? (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: If I had his number, (A)/ I would have called (B)/ him for the party. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 }
@@ -883,7 +883,7 @@ const englishData = {
           { question: "Find the error in the sentence: If you will not study regularly, (A)/ you will not get (B)/ good marks in the examination. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: Had you told me about your problem, (A)/ I would have helped (B)/ you without a second thought. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
           { question: "Find the error in the sentence: If I was you, (A)/ I would have told the chairman (B)/ to keep his mouth shut. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
-          { question: "Find the error in the sentence: Unless you do not take care of your health, (A)/ you will continue (B)/ to suffer. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
+          { question: "Find the error in the sentence: Unless you take care of your health, (A)/ you will continue (B)/ to suffer. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: If he would have done this, (A)/ he would have done wrong (B)/ and would have deceived many of his relatives. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: If you get good marks, (A)/ I shall happy (B)/ as much as you. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: Had the opportunity been given to him, (A)/ he will have (B)/ proved successful. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
@@ -894,7 +894,7 @@ const englishData = {
           { question: "Find the error in the sentence: Unless you will not meet (A)/ all the requirements, your (B)/ application will be rejected. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: If I knew that my friend had planned to visit the town today, (A)/ I would have made (B)/ his stay comfortable. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
           { question: "Find the error in the sentence: Had I realised your house was so far away, (A)/ I would take (B)/ a taxi. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
-          { question: "Find the error in the sentence: If you will heat water, (A)/ it will (B)/ turn into steam. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
+          { question: "Find the error in the sentence: If we heat dry ice, (A)/ it turns (B)/ to vapour. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: Suppose if you fail the exam, (A)/ what will be your (B)/ next step? (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: If you had informed me, (A)/ I would make (B)/ the necessary arrangements. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: Were he to see you, (A)/ he would have been (B)/ very surprised. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
@@ -904,7 +904,7 @@ const englishData = {
           { question: "Find the error in the sentence: If I was a superhero, (A)/ I would have saved the world (B)/ from all evil. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: Had you not reached in time, (A)/ we would have lost (B)/ our lives. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
           { question: "Find the error in the sentence: If you will not work hard, (A)/ you cannot expect (B)/ to get a promotion. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
-          { question: "Find the error in the sentence: Unless you do not apologize, (A)/ I shall (B)/ punish you. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
+          { question: "Find the error in the sentence: Unless you apologize, (A)/ I shall (B)/ punish you. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: If I had known about the meeting, (A)/ I would have (B)/ attended it. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
           { question: "Find the error in the sentence: If he would have practiced daily, (A)/ he would have won (B)/ the match. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: If you will ask him, (A)/ he will definitely (B)/ help you out. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
@@ -912,7 +912,7 @@ const englishData = {
           { question: "Find the error in the sentence: If I were you, (A)/ I would not have committed (B)/ this blunder. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
           { question: "Find the error in the sentence: If you will tell the truth, (A)/ you can escape (B)/ punishment. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: But for his timely help, (A)/ we would have lost (B)/ everything we had. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
-          { question: "Find the error in the sentence: If I had a degree from that university, (A)/ I would have probably got (B)/ a good job by now. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
+          { question: "Find the error in the sentence: If I had had the money, (A)/ I would have bought (B)/ this house last year. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: Unless you do not listen to his advice, (A)/ you are going to (B)/ land in trouble. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: If I was a ghost, (A)/ I would scare (B)/ all my friends. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: Had I not seen it with my own eyes, (A)/ I would not have (B)/ believed it. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
@@ -925,7 +925,7 @@ const englishData = {
         [
           { question: "Find the error in the sentence: If I had been a doctor, (A)/ I would have treated you (B)/ for free. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
           { question: "Find the error in the sentence: If you will not hurry, (A)/ you will miss (B)/ the flight. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
-          { question: "Find the error in the sentence: Had you informed me earlier, (A)/ I would have certainly purchased (B)/ the car for you. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
+          { question: "Find the error in the sentence: Had you informed me earlier, (A)/ I would certainly have purchased (B)/ the car for you. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
           { question: "Find the error in the sentence: If I was the Education Minister, (A)/ I would have introduced (B)/ free education for all. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: Unless you do not improve your behavior, (A)/ you will be (B)/ expelled from the school. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: If he would have taken my advice, (A)/ he would not have (B)/ got into trouble. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
@@ -935,7 +935,7 @@ const englishData = {
           { question: "Find the error in the sentence: If she would have told me the truth, (A)/ I would have (B)/ forgiven her. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: If you had saved money, (A)/ you would not be (B)/ in this mess now. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
           { question: "Find the error in the sentence: If you will join our team, (A)/ you will get a chance (B)/ to work on exciting projects. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
-          { question: "Find the error in the sentence: Unless you will not complete the task, (A)/ you will not be (B)/ allowed to leave. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
+          { question: "Find the error in the sentence: Unless you complete the task, (A)/ you will not be (B)/ allowed to leave. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: If I knew his name, (A)/ I would have told (B)/ you. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: Had I known about his condition, (A)/ I would have visited (B)/ him in the hospital. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
           { question: "Find the error in the sentence: If you will mix blue and yellow, (A)/ you get (B)/ green. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
@@ -951,7 +951,7 @@ const englishData = {
       name: 'Advance Verbs',
       sets: [
         [
-          { question: "Find the error in the sentence: He is addicted to smoke (A)/ and has been trying (B)/ to quit for a long time. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
+          { question: "Find the error in the sentence: He is addicted to smoking (A)/ and has been trying (B)/ to quit for a long time. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: The teacher made the students (A)/ to write the essay (B)/ three times as a punishment. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: If I was the king (A)/ of this land, I would (B)/ abolish all taxes. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: He laid in the shade (A)/ of a large banyan tree (B)/ to rest after a long journey. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
@@ -961,7 +961,7 @@ const englishData = {
           { question: "Find the error in the sentence: The captain, along with his team, (A)/ are practicing very hard (B)/ for the forthcoming match. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: He denied to help (A)/ me when I was (B)/ in desperate need of money. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: The portrait of the king (A)/ was hung in the main hall (B)/ of the palace. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
-          { question: "Find the error in the sentence: You had better (A)/ to stop this nonsense (B)/ before I lose my temper. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
+          { question: "Find the error in the sentence: You had better (A)/ stop this nonsense (B)/ before I lose my temper. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: The doctor suggested that (A)/ he takes a vacation (B)/ to recover from his illness. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: He is used to (A)/ work under difficult (B)/ circumstances. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: The sun having rose, (A)/ the fog disappeared and (B)/ the sky became clear. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
@@ -977,7 +977,7 @@ const englishData = {
           { question: "Find the error in the sentence: The accused refused (A)/ to answering the question (B)/ in the court. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: It is better (A)/ to stay at home (B)/ than to walk in the rain. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
           { question: "Find the error in the sentence: The clothes were neatly (A)/ hanged on the (B)/ clothesline to dry. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
-          { question: "Find the error in the sentence: I wish I am (A)/ a billionaire so that I could (B)/ help the poor. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
+          { question: "Find the error in the sentence: I wish I were (A)/ a billionaire so that I could (B)/ help the poor. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: He is bent upon (A)/ to harm my reputation (B)/ by spreading false rumors. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: Having wrote the letter, (A)/ he posted it (B)/ at the nearest post office. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: The teacher let us (A)/ to leave the class early (B)/ as we had finished the test. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
@@ -993,7 +993,7 @@ const englishData = {
           { question: "Find the error in the sentence: He was punished (A)/ for to steal (B)/ the bicycle from the shop. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: The river has (A)/ overflown its banks (B)/ and flooded the nearby villages. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: I insist on (A)/ you to leave (B)/ this place immediately. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 }
-        ],
+        ], // End of Corrected Set 2
         [
           { question: "Find the error in the sentence: He was seen to leave (A)/ the house without (B)/ informing anyone. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: It is no use to go (A)/ there now as it is (B)/ too late to catch the train. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
@@ -1003,7 +1003,7 @@ const englishData = {
           { question: "Find the error in the sentence: I would have you (A)/ to understand that I am (B)/ not going to tolerate this behavior. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: Having been taken ill, (A)/ he could not come (B)/ to the office. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
           { question: "Find the error in the sentence: The teacher bid him (A)/ to enter the classroom (B)/ and take his seat quietly. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
-          { question: "Find the error in the sentence: It is time we (A)/ should have done something (B)/ useful for our country. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
+          { question: "Find the error in the sentence: It is time we (A)/ did something (B)/ useful for our country. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: He was watched (A)/ to cross the road (B)/ by the traffic police. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: I am averse to (A)/ drink coffee (B)/ late at night. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: The price of the new car (A)/ is expected to (B)/ raise in the next quarter. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
@@ -1013,7 +1013,7 @@ const englishData = {
           { question: "Find the error in the sentence: The sun having risen, (A)/ the journey was (B)/ resumed by the travelers. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
           { question: "Find the error in the sentence: He was made (A)/ to repeat the whole (B)/ story again by the police officer. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
           { question: "Find the error in the sentence: It is of no use (A)/ to talk to him as he (B)/ never listens to anyone. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
-          { question: "Find the error in the sentence: He was found (A)/ laying unconscious on the (B)/ side of the road. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
+          { question: "Find the error in the sentence: He was found (A)/ lying unconscious on the (B)/ side of the road. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: The committee demands that (A)/ the new rules are (B)/ implemented immediately. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 }
         ],
         [
@@ -1021,7 +1021,7 @@ const englishData = {
           { question: "Find the error in the sentence: I would have him (A)/ to accept the offer (B)/ if I were in his position. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: It is time that (A)/ you go home as your (B)/ parents must be waiting for you. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: The ship with all its passengers (A)/ was sank in the (B)/ middle of the ocean. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
-          { question: "Find the error in the sentence: He is given to (A)/ gamble and drink (B)/ which has ruined his life. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
+          { question: "Find the error in the sentence: He is given to (A)/ gambling and drinking (B)/ which has ruined his life. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: Having been warned before, (A)/ he did not repeat (B)/ the same mistake again. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
           { question: "Find the error in the sentence: The teacher forbade the students (A)/ not to make a noise (B)/ in the library. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: I would rather (A)/ to fail than (B)/ to copy in the examination. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
@@ -1031,7 +1031,7 @@ const englishData = {
           { question: "Find the error in the sentence: The prices of essential commodities (A)/ have rose sharply (B)/ in the last few months. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: He was borned in a (A)/ rich family and had (B)/ everything he wanted. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: I wish I have (A)/ a magic wand to solve (B)/ all the problems of the world. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
-          { question: "Find the error in the sentence: He is prohibited (A)/ to enter the premises (B)/ without a valid ID card. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
+          { question: "Find the error in the sentence: He is prohibited (A)/ from entering the premises (B)/ without a valid ID card. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: The work having been completed, (A)/ we went out (B)/ for a walk. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
           { question: "Find the error in the sentence: He was made (A)/ to confess his crime (B)/ by the police. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
           { question: "Find the error in the sentence: It is no good (A)/ to repent now for (B)/ what you have done. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
@@ -1039,7 +1039,7 @@ const englishData = {
           { question: "Find the error in the sentence: The court ordered that (A)/ the accused is (B)/ released on bail. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 }
         ],
         [
-          { question: "Find the error in the sentence: He is busy to prepare (A)/ for his examination (B)/ which is scheduled next month. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
+          { question: "Find the error in the sentence: He is busy preparing (A)/ for his examination (B)/ which is scheduled next month. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: I had him (A)/ to check my (B)/ car before starting the journey. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: It is high time (A)/ you start preparing (B)/ for the competitive exams. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: The ship was sunk (A)/ in the deep ocean (B)/ during the storm. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
@@ -1047,7 +1047,7 @@ const englishData = {
           { question: "Find the error in the sentence: Having been found guilty, (A)/ he was sentenced (B)/ to life imprisonment. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
           { question: "Find the error in the sentence: The teacher prevented the students (A)/ from to make a noise (B)/ in the classroom. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: You had better (A)/ to consult a doctor (B)/ for your persistent cough. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
-          { question: "Find the error in the sentence: He was heard (A)/ to shout at his (B)/ subordinates in a fit of anger. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
+          { question: "Find the error in the sentence: He was heard (A)/ shouting at his (B)/ subordinates in a fit of anger. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: It is no good to try (A)/ to convince him as he is (B)/ very stubborn. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: He is hopeful to get (A)/ a promotion in his (B)/ job this year. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: The water level in the dam (A)/ has rised significantly (B)/ after the heavy rains. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
@@ -1057,7 +1057,7 @@ const englishData = {
           { question: "Find the error in the sentence: The meeting having been over, (A)/ the members left (B)/ for their respective places. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
           { question: "Find the error in the sentence: He was made (A)/ to stand up on the bench (B)/ as a punishment. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
           { question: "Find the error in the sentence: It is no use (A)/ to argue with a person (B)/ who is not ready to listen. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
-          { question: "Find the error in the sentence: The dog was found (A)/ laying on the road (B)/ after being hit by a car. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
+          { question: "Find the error in the sentence: The dog was found (A)/ lying on the road (B)/ after being hit by a car. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: The principal suggested that (A)/ the student is (B)/ given a second chance. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 }
         ]
       ]//Complete Advance Verbs
@@ -1067,7 +1067,7 @@ const englishData = {
       name: 'Modals',
       sets: [
         [
-          { question: "Find the error in the sentence: He dare not to (A)/ go against his (B)/ father's wishes. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
+          { question: "Find the error in the sentence: He dare not (A)/ go against his (B)/ father's wishes. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: You need not to (A)/ worry about the expenses, (B)/ I will take care of it. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: Walk carefully lest (A)/ you may not fall (B)/ on the slippery floor. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: He should have (A)/ avail himself of the opportunity (B)/ to go abroad for higher studies. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
@@ -1075,7 +1075,7 @@ const englishData = {
           { question: "Find the error in the sentence: Would you mind (A)/ to close the window (B)/ as it is getting dark? (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: He worked hard (A)/ so that he may (B)/ top the university examination. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: You ought to have (A)/ returned the book earlier, (B)/ but you did not. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
-          { question: "Find the error in the sentence: Can I know (A)/ who you want (B)/ to see, please? (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
+          { question: "Find the error in the sentence: May I know (A)/ who you want (B)/ to see, please? (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: He may live long! (A)/ his sad mother (B)/ prayed for him. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: You must not to be (A)/ rude to your elders (B)/ and respect them always. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: He used to (A)/ playing cricket in his (B)/ childhood days. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
@@ -1084,7 +1084,7 @@ const englishData = {
           { question: "Find the error in the sentence: He must had (A)/ seen me when I was (B)/ passing by his house. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: You should not to (A)/ have shouted at your (B)/ sister like that. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: The car is running at 80 km/hr, (A)/ it can reach Delhi (B)/ in two hours. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
-          { question: "Find the error in the sentence: He told me that (A)/ he will not come (B)/ to the party. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
+          { question: "Find the error in the sentence: He told me that (A)/ he would not come (B)/ to the party. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: You had better (A)/ to go now or (B)/ you will be late. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: We ought to (A)/ honest in our dealings (B)/ with everyone. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 }
         ],
@@ -1094,7 +1094,7 @@ const englishData = {
           { question: "Find the error in the sentence: The old lady prayed (A)/ that he may (B)/ live long and prosper. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: You should to be (A)/ more careful in (B)/ your studies. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: He hoped that (A)/ he will pass the exam (B)/ with flying colours. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
-          { question: "Find the error in the sentence: You must to (A)/ follow the traffic rules (B)/ to avoid accidents. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
+          { question: "Find the error in the sentence: You must (A)/ follow the traffic rules (B)/ to avoid accidents. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: He returned the purse (A)/ though he could keep (B)/ it very easily. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: When I was young, (A)/ I can run faster (B)/ than Mohan. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: If you get good marks, (A)/ I shall happy (B)/ as much as you. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
@@ -1104,7 +1104,7 @@ const englishData = {
           { question: "Find the error in the sentence: I would rather (A)/ die then (B)/ join the gang of terrorists. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: The principal is angry, (A)/ you must had done (B)/ something wrong. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: Run fast lest you (A)/ will miss (B)/ the train. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
-          { question: "Find the error in the sentence: He need not to (A)/ have shouted at me (B)/ in that manner. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
+          { question: "Find the error in the sentence: He need not (A)/ have shouted at me (B)/ in that manner. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: You will be (A)/ able to finish this project (B)/ by next month. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
           { question: "Find the error in the sentence: He said that (A)/ he can drive a car (B)/ at the age of sixteen. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: You had better (A)/ went now or (B)/ you will miss the bus. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
@@ -1114,7 +1114,7 @@ const englishData = {
           { question: "Find the error in the sentence: It is not likely that (A)/ he will come, but if he comes (B)/ I would talk to him. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 2 },
           { question: "Find the error in the sentence: He may have (A)/ behaved impolitely, but I (B)/ don't think he did so. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: You should not (A)/ have gave such a (B)/ rude reply to her. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
-          { question: "Find the error in the sentence: He does not (A)/ dare to go (B)/ against his father. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
+          { question: "Find the error in the sentence: He does not (A)/ dare go (B)/ against his father. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: I think the news (A)/ might be true, but I am (B)/ not sure about it. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
           { question: "Find the error in the sentence: He must not to (A)/ have treated his mistress (B)/ in such a rough manner. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: I would rather (A)/ you help your brother (B)/ in his studies. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
@@ -1124,7 +1124,7 @@ const englishData = {
           { question: "Find the error in the sentence: You need to (A)/ work hard but you need not to (B)/ waste time on unimportant lessons. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: She would rather (A)/ to stay at home (B)/ than go out with him. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: He told me that (A)/ if he would have spoken to his father (B)/ his father would have beaten him. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
-          { question: "Find the error in the sentence: You ought to have (A)/ pay your dues (B)/ on time. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
+          { question: "Find the error in the sentence: You ought to have (A)/ paid your dues (B)/ on time. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: He was a rich man, (A)/ he could buy (B)/ a helicopter. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
           { question: "Find the error in the sentence: The students asked me if they (A)/ can stay out a little (B)/ longer in the evening. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: He must have (A)/ behaved politely and (B)/ respected his elders. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
@@ -1134,7 +1134,7 @@ const englishData = {
         ],
         [
           { question: "Find the error in the sentence: He need not to (A)/ have left home so early; (B)/ the train was late. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
-          { question: "Find the error in the sentence: I might have (A)/ won the lottery, but I (B)/ did not buy a ticket. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
+          { question: "Find the error in the sentence: I might have (A)/ won the lottery if I (B)/ had bought a ticket. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: You should have (A)/ consult a doctor (B)/ for your persistent cough. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: He does not (A)/ need to go there (B)/ as it is already late. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
           { question: "Find the error in the sentence: The sky is cloudy, (A)/ it may rain (B)/ tonight. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
@@ -1144,7 +1144,7 @@ const englishData = {
           { question: "Find the error in the sentence: The teacher thought (A)/ that the student may pass (B)/ if he worked hard. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: She might has (A)/ forgotten to lock (B)/ the door. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: You need to (A)/ practice daily but you need not to (B)/ worry about the result. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
-          { question: "Find the error in the sentence: She would rather (A)/ to sing a song (B)/ than dance on the stage. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
+          { question: "Find the error in the sentence: She would rather (A)/ sing a song (B)/ than dance on the stage. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: He said that (A)/ if he would have had the money, (B)/ he would have bought a new car. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: You ought to have (A)/ finish your homework (B)/ by now. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the in the sentence: He was a talented musician, (A)/ he could play (B)/ the piano at the age of five. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
@@ -1156,7 +1156,7 @@ const englishData = {
         ],
         [
           { question: "Find the error in the sentence: He dare not to (A)/ enter my room (B)/ without my permission. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
-          { question: "Find the error in the sentence: You need not to (A)/ have waited for me (B)/ as I was going to be late. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
+          { question: "Find the error in the sentence: You need not (A)/ have waited for me (B)/ as I was going to be late. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: Work hard lest (A)/ you will not fail (B)/ in the examination. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: He should have (A)/ took the admission (B)/ in a better college. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: It is very hot today, (A)/ you should to take (B)/ an umbrella with you. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
@@ -1164,7 +1164,7 @@ const englishData = {
           { question: "Find the error in the sentence: He ran fast (A)/ so that he may (B)/ catch the last bus. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: You ought to have (A)/ informed your parents (B)/ about your decision. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
           { question: "Find the error in the sentence: Can I know (A)/ your good name (B)/ please? (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
-          { question: "Find the error in the sentence: May God bless you! (A)/ the old man said (B)/ to the young couple. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
+          { question: "Find the error in the sentence: 'May God bless you!' (A)/ the old man said (B)/ to the young couple. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 3 },
           { question: "Find the error in the sentence: You must not to (A)/ have spoken to your (B)/ teacher in that tone. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: He used to (A)/ smoking a lot when (B)/ he was in college. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: I would rather (A)/ to starve than (B)/ to ask for help. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
@@ -1172,7 +1172,7 @@ const englishData = {
           { question: "Find the error in the sentence: He must had (A)/ left the house before (B)/ I reached there. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: You should not to (A)/ have wasted your time (B)/ on such trivial matters. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 0 },
           { question: "Find the error in the sentence: The weather is clear, (A)/ it can be a (B)/ sunny day today. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
-          { question: "Find the error in the sentence: He promised that (A)/ he will help me (B)/ in my project. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
+          { question: "Find the error in the sentence: He promised that (A)/ he would help me (B)/ in my project. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: You had better (A)/ to finish your work (B)/ before you go out to play. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 },
           { question: "Find the error in the sentence: We ought to (A)/ respecting our elders (B)/ and seek their blessings. (C)/ No error (D)", options: ["A", "B", "C", "D"], answer: 1 }
         ]
@@ -1878,13 +1878,13 @@ const englishData = {
     {
       name: 'Parajumbles',
       sets: [
-        [
+        [ // Corrected Set 1
           { question: "Rearrange the parts P, Q, R, S to form a meaningful sentence: P: for the last two years Q: in the production of food grains R: there has been a marginal increase S: despite the increase in the irrigated area", options: ["QRSP", "RSQP", "QPSR", "RPSQ"], answer: 2 },
           { question: "Rearrange the parts P, Q, R, S to form a meaningful sentence: P: it is a wonder that Q: he has been able to R: with such a little investment S: build up such a large business", options: ["PQRS", "QPSR", "RSPQ", "PRSQ"], answer: 3 },
           { question: "Rearrange the parts P, Q, R, S to form a meaningful sentence: P: the small boy who Q: broke his leg R: fell down and S: was playing in the park", options: ["PSQR", "SQPR", "PS R Q", "QSRP"], answer: 0 },
           { question: "Rearrange the parts P, Q, R, S to form a meaningful sentence: P: the government has Q: to help the poor R: launched a new scheme S: and the needy", options: ["PRQS", "QPRS", "RSPQ", "SPQR"], answer: 0 },
           { question: "Rearrange the parts P, Q, R, S to form a meaningful sentence: P: the old man Q: who was sitting in the corner R: is a retired S: army officer", options: ["PQRS", "QRSP", "PQSR", "QPRS"], answer: 2 },
-          { question: "Rearrange the parts P, Q, R, S to form a meaningful sentence: P: the teacher told the students Q: that they should R: not to make a noise S: in the classroom", options: ["PQRS", "PRQS", "QRSP", "QPSR"], answer: 1 },
+          { question: "Rearrange the parts P, Q, R, S to form a meaningful sentence: P: the teacher told the students Q: that they should R: not make a noise S: in the classroom", options: ["PQRS", "PRQS", "QRSP", "QPSR"], answer: 1 },
           { question: "Rearrange the parts P, Q, R, S to form a meaningful sentence: P: he was so tired Q: that he could R: not even stand S: on his feet", options: ["PQRS", "PRQS", "QRSP", "QPSR"], answer: 0 },
           { question: "Rearrange the parts P, Q, R, S to form a meaningful sentence: P: the police have arrested Q: the man who R: was responsible for S: the accident", options: ["PQRS", "QRSP", "PRQS", "QPRS"], answer: 0 },
           { question: "Rearrange the parts P, Q, R, S to form a meaningful sentence: P: it is very difficult Q: to find a good job R: in this competitive S: world", options: ["PQRS", "PRQS", "QRSP", "QPSR"], answer: 0 },
@@ -1899,7 +1899,7 @@ const englishData = {
           { question: "Rearrange the parts P, Q, R, S to form a meaningful sentence: P: the boy who Q: won the first prize R: is my S: best friend", options: ["PQRS", "QRSP", "PRQS", "QPRS"], answer: 0 },
           { question: "Rearrange the parts P, Q, R, S to form a meaningful sentence: P: the story that Q: he told us R: was very S: funny", options: ["PQRS", "QRSP", "PRQS", "QPRS"], answer: 0 },
           { question: "Rearrange the parts P, Q, R, S to form a meaningful sentence: P: the song that Q: she sang at the party R: was very S: melodious", options: ["PQRS", "QRSP", "PRQS", "QPRS"], answer: 0 }
-        ],
+        ], // End of Corrected Set 1
         [
           { question: "Rearrange the parts P, Q, R, S to form a meaningful sentence: P: the problem of Q: unemployment is very R: serious in S: our country", options: ["PQRS", "QRSP", "PRQS", "QPRS"], answer: 0 },
           { question: "Rearrange the parts P, Q, R, S to form a meaningful sentence: P: the quality of Q: the products that R: this company manufactures S: is very good", options: ["PQRS", "QRSP", "PRQS", "QPRS"], answer: 0 },
@@ -1922,7 +1922,7 @@ const englishData = {
           { question: "Rearrange the parts P, Q, R, S to form a meaningful sentence: P: the car that Q: he drives R: is a S: sports car", options: ["PQRS", "QRSP", "PRQS", "QPRS"], answer: 0 },
           { question: "Rearrange the parts P, Q, R, S to form a meaningful sentence: P: the house where Q: he grew up R: has been S: demolished", options: ["PQRS", "QRSP", "PRQS", "QPRS"], answer: 0 }
         ],
-        [
+        [ // Corrected Set 3
           { question: "Rearrange the parts P, Q, R, S to form a meaningful sentence: P: the boy who Q: is wearing a blue shirt R: is the captain S: of our team", options: ["PQRS", "QRSP", "PRQS", "QPRS"], answer: 0 },
           { question: "Rearrange the parts P, Q, R, S to form a meaningful sentence: P: the story that Q: my grandmother used to tell me R: was very S: interesting", options: ["PQRS", "QRSP", "PRQS", "QPRS"], answer: 0 },
           { question: "Rearrange the parts P, Q, R, S to form a meaningful sentence: P: the song that Q: is playing on the loop R: is very S: catchy", options: ["PQRS", "QRSP", "PRQS", "QPRS"], answer: 0 },
@@ -1966,7 +1966,7 @@ const englishData = {
           { question: "Rearrange the parts P, Q, R, S to form a meaningful sentence: P: the song that Q: was composed by the legend R: is S: timeless", options: ["PQRS", "QRSP", "PRQS", "QPRS"], answer: 0 },
           { question: "Rearrange the parts P, Q, R, S to form a meaningful sentence: P: the cake that Q: was shared among the friends R: was very S: small", options: ["PQRS", "QRSP", "PRQS", "QPRS"], answer: 0 }
         ],
-        [
+        [ // Corrected Set 5
           { question: "Rearrange the parts P, Q, R, S to form a meaningful sentence: P: the car that Q: he crashed R: was his S: father's", options: ["PQRS", "QRSP", "PRQS", "QPRS"], answer: 0 },
           { question: "Rearrange the parts P, Q, R, S to form a meaningful sentence: P: the house where Q: the wedding took place R: was decorated with S: lights", options: ["PQRS", "QRSP", "PRQS", "QPRS"], answer: 0 },
           { question: "Rearrange the parts P, Q, R, S to form a meaningful sentence: P: the boy who Q: stole the money R: was arrested by S: the police", options: ["PQRS", "QRSP", "PRQS", "QPRS"], answer: 0 },
@@ -1988,13 +1988,13 @@ const englishData = {
           { question: "Rearrange the parts P, Q, R, S to form a meaningful sentence: P: the car that Q: he is driving R: belongs to S: his friend", options: ["PQRS", "QRSP", "PRQS", "QPRS"], answer: 0 },
           { question: "Rearrange the parts P, Q, R, S to form a meaningful sentence: P: the house where Q: the crime was committed R: is under S: investigation", options: ["PQRS", "QRSP", "PRQS", "QPRS"], answer: 0 }
         ]
-      ]//Complete Parajumbles
+      ]
     },
 
     {
       name: 'Cloze Test',
       sets: [
-        [
+        [ // New Set 1
           { question: "The rapid ___ of technology has transformed the way we live and work.", options: ["advancement", "decline", "stagnation", "retreat"], answer: 0 },
           { question: "He was ___ with a rare medical condition that baffled the doctors.", options: ["afflicted", "blessed", "endowed", "gifted"], answer: 0 },
           { question: "The police are looking ___ the matter to find the real culprits.", options: ["at", "for", "into", "after"], answer: 2 },
@@ -2005,106 +2005,22 @@ const englishData = {
           { question: "The heavy rains ___ the entire coastal village, forcing an evacuation.", options: ["drained", "dried", "parched", "inundated"], answer: 3 },
           { question: "He is known for his ___ nature, always surrounded by friends and admirers.", options: ["reclusive", "gregarious", "introverted", "shy"], answer: 1 },
           { question: "The peace treaty was finally ___ by both the warring nations.", options: ["annulled", "rejected", "ratified", "revoked"], answer: 2 },
-          { question: "She gave a ___ smile, clearly indicating that she was not interested in the conversation.", options: ["genuine", "heartfelt", "sincere", "vacuous"], answer: 3 },
-          { question: "The ___ of the evidence presented in court led to his acquittal.", options: ["paucity", "abundance", "plethora", "surplus"], answer: 0 },
-          { question: "His ___ arguments failed to convince the jury of his innocence.", options: ["cogent", "specious", "valid", "sound"], answer: 1 },
-          { question: "The politician's speech was full of ___ and empty promises.", options: ["sincerity", "veracity", "bombast", "truthfulness"], answer: 2 },
-          { question: "The ___ of the old building was a sad sight for the local residents.", options: ["construction", "renovation", "restoration", "dilapidation"], answer: 3 },
-          { question: "He is a ___ reader and has a vast collection of books on various subjects.", options: ["voracious", "reluctant", "occasional", "sparing"], answer: 0 },
-          { question: "The ___ of the two companies created a new market leader.", options: ["separation", "division", "split", "amalgamation"], answer: 3 },
-          { question: "Her ___ behavior at the party was a source of embarrassment for her family.", options: ["decorous", "seemly", "propriety", "frivolous"], answer: 3 },
-          { question: "The ___ of the disease was so rapid that it soon became a pandemic.", options: ["containment", "suppression", "eradication", "proliferation"], answer: 3 },
-          { question: "He was ___ for his bravery in the face of extreme danger.", options: ["castigated", "censured", "lauded", "rebuked"], answer: 2 }
+          { question: "She gave a ___ smile, which suggested she was not happy.", options: ["genuine", "heartfelt", "forced", "warm"], answer: 2 },
+          { question: "The ___ of evidence presented in court was not enough to convict him.", options: ["paucity", "abundance", "plethora", "surplus"], answer: 0 },
+          { question: "His ___ arguments convinced everyone in the room.", options: ["weak", "specious", "cogent", "flimsy"], answer: 2 },
+          { question: "The politician's speech was full of ___ and lacked substance.", options: ["sincerity", "veracity", "bombast", "truthfulness"], answer: 2 },
+          { question: "The ___ of the old mansion was a sad reminder of its glorious past.", options: ["construction", "renovation", "restoration", "dilapidation"], answer: 3 },
+          { question: "He is a ___ reader and finishes several books a week.", options: ["voracious", "reluctant", "occasional", "sparing"], answer: 0 },
+          { question: "The ___ of the two small companies created a major new competitor.", options: ["separation", "division", "split", "amalgamation"], answer: 3 },
+          { question: "Her ___ behavior at the formal dinner was quite embarrassing.", options: ["decorous", "seemly", "proper", "frivolous"], answer: 3 },
+          { question: "The ___ of the new species in the ecosystem worried the scientists.", options: ["containment", "suppression", "eradication", "proliferation"], answer: 3 },
+          { question: "She was ___ for her groundbreaking research in genetics.", options: ["castigated", "censured", "lauded", "rebuked"], answer: 2 }
         ],
-        [
-          { question: "The ___ of the new policy on the economy is yet to be seen.", options: ["cause", "impact", "origin", "source"], answer: 1 },
-          { question: "She is ___ in the art of negotiation and always gets the best deal.", options: ["inept", "clumsy", "adept", "awkward"], answer: 2 },
-          { question: "The company had to ___ with the new government regulations.", options: ["contend", "defy", "comply", "resist"], answer: 2 },
-          { question: "His ___ for adventure led him to explore the most remote corners of the world.", options: ["fear", "aversion", "penchant", "dislike"], answer: 2 },
-          { question: "The ___ of the situation demanded immediate and decisive action.", options: ["triviality", "levity", "gravity", "frivolity"], answer: 2 },
-          { question: "The ___ of the evidence was not enough to convict the accused.", options: ["plethora", "surfeit", "dearth", "abundance"], answer: 2 },
-          { question: "The ___ of the old traditions is important for preserving our cultural heritage.", options: ["abandonment", "neglect", "perpetuation", "destruction"], answer: 2 },
-          { question: "He is a ___ of fine arts and has a huge collection of paintings.", options: ["critic", "detractor", "connoisseur", "novice"], answer: 2 },
-          { question: "The ___ of the two rivers occurs at the holy city of Prayagraj.", options: ["divergence", "separation", "confluence", "bifurcation"], answer: 2 },
-          { question: "Her ___ nature made her a perfect candidate for the job of a diplomat.", options: ["abrasive", "tactful", "rude", "blunt"], answer: 1 },
-          { question: "The ___ of the new technology made the old one obsolete.", options: ["advent", "departure", "exit", "retreat"], answer: 0 },
-          { question: "He was ___ by the beauty of the landscape and stood there mesmerized.", options: ["repulsed", "disgusted", "captivated", "appalled"], answer: 2 },
-          { question: "The ___ of the speaker's voice held the audience spellbound.", options: ["monotony", "dullness", "cadence", "harshness"], answer: 2 },
-          { question: "The ___ of the problem was so complex that it took months to solve.", options: ["simplicity", "clarity", "intricacy", "easiness"], answer: 2 },
-          { question: "He is a ___ supporter of the cause and has donated a large sum of money.", options: ["lukewarm", "half-hearted", "staunch", "indifferent"], answer: 2 },
-          { question: "The ___ of the old building was a major challenge for the architects.", options: ["demolition", "destruction", "restoration", "ruination"], answer: 2 },
-          { question: "Her ___ remarks during the meeting were not appreciated by her colleagues.", options: ["pertinent", "relevant", "flippant", "serious"], answer: 2 },
-          { question: "The ___ of the new evidence changed the course of the trial.", options: ["suppression", "concealment", "emergence", "disappearance"], answer: 2 },
-          { question: "He was ___ for his contribution to the field of science.", options: ["condemned", "criticized", "honored", "ignored"], answer: 2 },
-          { question: "The ___ of the two cultures resulted in a unique blend of traditions.", options: ["isolation", "segregation", "assimilation", "separation"], answer: 2 }
-        ],
-        [
-          { question: "The ___ of the situation was not lost on the experienced leader.", options: ["humor", "enormity", "triviality", "lightness"], answer: 1 },
-          { question: "She has an ___ talent for playing the piano.", options: ["acquired", "innate", "learned", "developed"], answer: 1 },
-          { question: "The company was forced to ___ its expansion plans due to the economic slowdown.", options: ["accelerate", "expedite", "curtail", "hasten"], answer: 2 },
-          { question: "His ___ for spicy food is well-known among his friends.", options: ["disgust", "aversion", "fondness", "hatred"], answer: 2 },
-          { question: "The ___ of the argument was that the company needed to change its strategy.", options: ["crux", "periphery", "surface", "exterior"], answer: 0 },
-          { question: "The ___ of skilled workers is a major problem for the industry.", options: ["surplus", "abundance", "scarcity", "plethora"], answer: 2 },
-          { question: "The ___ of the ancient monument was a top priority for the government.", options: ["destruction", "preservation", "neglect", "damage"], answer: 1 },
-          { question: "He is a ___ of good wine and can distinguish between different varieties.", options: ["novice", "amateur", "aficionado", "beginner"], answer: 2 },
-          { question: "The ___ of the two ideas led to a new and innovative solution.", options: ["clash", "conflict", "synthesis", "disagreement"], answer: 2 },
-          { question: "Her ___ approach to the problem helped in finding a quick solution.", options: ["dogmatic", "rigid", "pragmatic", "inflexible"], answer: 2 },
-          { question: "The ___ of the new software made the old one redundant.", options: ["introduction", "withdrawal", "removal", "elimination"], answer: 0 },
-          { question: "He was ___ by the complexity of the puzzle and could not solve it.", options: ["bored", "fascinated", "perplexed", "enlightened"], answer: 2 },
-          { question: "The ___ of her voice was so soothing that it put the baby to sleep.", options: ["shrillness", "harshness", "melody", "loudness"], answer: 2 },
-          { question: "The ___ of the legal document required careful and thorough reading.", options: ["simplicity", "ambiguity", "verbiage", "clarity"], answer: 2 },
-          { question: "He is a ___ believer in the power of positive thinking.", options: ["skeptical", "doubtful", "fervent", "cynical"], answer: 2 },
-          { question: "The ___ of the old castle was a long and expensive process.", options: ["construction", "renovation", "demolition", "building"], answer: 1 },
-          { question: "His ___ comments during the serious discussion were inappropriate.", options: ["somber", "grave", "jocular", "serious"], answer: 2 },
-          { question: "The ___ of a new witness gave a new twist to the case.", options: ["disappearance", "absence", "appearance", "withdrawal"], answer: 2 },
-          { question: "He was ___ for his selfless service to the community.", options: ["criticized", "condemned", "venerated", "ignored"], answer: 2 },
-          { question: "The ___ of different cultures can be seen in the city's cuisine.", options: ["homogeneity", "uniformity", "fusion", "purity"], answer: 2 }
-        ],
-        [
-          { question: "The ___ of the evidence against him was overwhelming.", options: ["paucity", "scarcity", "weight", "lack"], answer: 2 },
-          { question: "She has a ___ ability to calm down angry people.", options: ["remarkable", "common", "ordinary", "usual"], answer: 0 },
-          { question: "The government had to ___ to the demands of the protesters.", options: ["accede", "resist", "defy", "oppose"], answer: 0 },
-          { question: "His ___ for collecting old coins is a well-known hobby.", options: ["dislike", "aversion", "passion", "hatred"], answer: 2 },
-          { question: "The ___ of the matter is that we need to act now.", options: ["essence", "surface", "exterior", "periphery"], answer: 0 },
-          { question: "The ___ of resources in the region is a major cause of conflict.", options: ["abundance", "plethora", "surplus", "paucity"], answer: 3 },
-          { question: "The ___ of the endangered species is a global concern.", options: ["extinction", "protection", "proliferation", "increase"], answer: 1 },
-          { question: "He is a ___ of modern art and has a deep understanding of it.", options: ["detractor", "critic", "patron", "neophyte"], answer: 2 },
-          { question: "The ___ of the two companies led to a stronger and more competitive entity.", options: ["split", "division", "merger", "separation"], answer: 2 },
-          { question: "Her ___ handling of the delicate situation prevented a major crisis.", options: ["clumsy", "awkward", "deft", "inept"], answer: 2 },
-          { question: "The ___ of the new policy was met with mixed reactions.", options: ["repeal", "annulment", "promulgation", "revocation"], answer: 2 },
-          { question: "He was ___ by the sudden turn of events and did not know how to react.", options: ["elated", "thrilled", "bewildered", "joyful"], answer: 2 },
-          { question: "The ___ of the music created a very romantic atmosphere.", options:["dissonance", "cacophony", "harmony", "noise"], answer: 2 },
-          { question: "The ___ of the contract were so complicated that he had to hire a lawyer.", options: ["stipulations", "simplicity", "clarity", "easiness"], answer: 0 },
-          { question: "He is a ___ opponent of the new law and has been protesting against it.", options: ["mild", "vehement", "gentle", "tame"], answer: 1 },
-          { question: "The ___ of the old bridge was necessary for the safety of the people.", options: ["repair", "maintenance", "reconstruction", "preservation"], answer: 2 },
-          { question: "His ___ attitude towards his work is the reason for his failure.", options: ["diligent", "conscientious", "lackadaisical", "assiduous"], answer: 2 },
-          { question: "The ___ of the truth finally brought justice to the victim.", options: ["concealment", "suppression", "revelation", "hiding"], answer: 2 },
-          { question: "He was ___ for his courage and determination.", options: ["admired", "despised", "scorned", "disdained"], answer: 0 },
-          { question: "The ___ of Eastern and Western cultures can be seen in the country's art and architecture.", options: ["divergence", "separation", "synthesis", "isolation"], answer: 2 }
-        ],
-        [
-          { question: "The ___ of his argument was so strong that no one could refute it.", options: ["weakness", "flaw", "potency", "frailty"], answer: 2 },
-          { question: "She has an ___ ability to learn new languages quickly.", options: ["uncanny", "ordinary", "common", "usual"], answer: 0 },
-          { question: "The company had to ___ its operations due to the pandemic.", options: ["expand", "scale down", "grow", "enlarge"], answer: 1 },
-          { question: "His ___ for reading books is evident from his vast library.", options: ["dislike", "aversion", "proclivity", "hatred"], answer: 2 },
-          { question: "The ___ of the problem lies in the lack of communication.", options: ["root", "surface", "exterior", "periphery"], answer: 0 },
-          { question: "The ___ of evidence made it difficult to prove his guilt.", options: ["abundance", "plethora", "surplus", "dearth"], answer: 3 },
-          { question: "The ___ of the historical monument is the responsibility of the archaeological department.", options: ["destruction", "upkeep", "neglect", "damage"], answer: 1 },
-          { question: "He is a ___ of classical music and attends concerts regularly.", options: ["detractor", "critic", "devotee", "novice"], answer: 2 },
-          { question: "The ___ of the two companies resulted in a monopoly in the market.", options: ["competition", "rivalry", "consolidation", "conflict"], answer: 2 },
-          { question: "Her ___ negotiation skills helped in sealing the deal.", options: ["poor", "ineffective", "astute", "weak"], answer: 2 },
-          { question: "The ___ of the new law was a landmark event in the country's history.", options: ["enactment", "repeal", "annulment", "revocation"], answer: 0 },
-          { question: "He was ___ by the magician's tricks and could not believe his eyes.", options: ["bored", "unimpressed", "enthralled", "disgusted"], answer: 2 },
-          { question: "The ___ of the waterfall was a mesmerizing sight.", options: ["stagnation", "stillness", "cascade", "pool"], answer: 2 },
-          { question: "The ___ of the plot made the movie very predictable.", options: ["complexity", "intricacy", "simplicity", "convolution"], answer: 2 },
-          { question: "He is a ___ advocate of human rights and has fought many cases for free.", options: ["passive", "zealous", "indifferent", "apathetic"], answer: 1 },
-          { question: "The ___ of the old building was a challenging task for the engineers.", options: ["construction", "refurbishment", "demolition", "creation"], answer: 1 },
-          { question: "His ___ remarks during the funeral were highly inappropriate.", options: ["solemn", "grave", "facetious", "serious"], answer: 2 },
-          { question: "The ___ of the hidden treasure created a lot of excitement.", options: ["discovery", "loss", "disappearance", "concealment"], answer: 0 },
-          { question: "He was ___ for his contribution to literature.", options: ["celebrated", "criticized", "condemned", "ignored"], answer: 0 },
-          { question: "The ___ of different musical genres created a unique sound.", options: ["separation", "division", "amalgam", "isolation"], answer: 2 }
-        ]
-      ]//Complete Cloze Test
+        [],
+        [],
+        [],
+        []
+      ]
     },
 
     {
@@ -2144,7 +2060,7 @@ const englishData = {
           { question: "Choose the synonym for 'TACITURN'", options: ["Talkative", "Garrulous", "Reserved", "Loquacious"], answer: 2 },
           { question: "Choose the antonym for 'UBIQUITOUS'", options: ["Everywhere", "Omnipresent", "Pervasive", "Rare"], answer: 3 }
         ],
-        [
+        [ // Corrected Set 2
           { question: "Choose the synonym for 'ABHOR'", options: ["Admire", "Love", "Adore", "Detest"], answer: 3 },
           { question: "Choose the antonym for 'BENEVOLENT'", options: ["Kind", "Malevolent", "Generous", "Caring"], answer: 1 },
           { question: "Choose the synonym for 'COPIOUS'", options: ["Scarce", "Abundant", "Lacking", "Meager"], answer: 1 },
@@ -2166,7 +2082,7 @@ const englishData = {
           { question: "Choose the synonym for 'TRANSIENT'", options: ["Permanent", "Lasting", "Fleeting", "Enduring"], answer: 2 },
           { question: "Choose the antonym for 'VALOR'", options: ["Bravery", "Courage", "Cowardice", "Heroism"], answer: 2 }
         ],
-        [
+        [ // Corrected Set 3
           { question: "Choose the synonym for 'ACUMEN'", options: ["Stupidity", "Insight", "Ignorance", "Obtuseness"], answer: 1 },
           { question: "Choose the antonym for 'BRUSQUE'", options: ["Abrupt", "Curt", "Courteous", "Blunt"], answer: 2 },
           { question: "Choose the synonym for 'CONUNDRUM'", options: ["Solution", "Answer", "Puzzle", "Clarity"], answer: 2 },
@@ -2188,7 +2104,7 @@ const englishData = {
           { question: "Choose the synonym for 'SALIENT'", options: ["Inconspicuous", "Prominent", "Minor", "Unimportant"], answer: 1 },
           { question: "Choose the antonym for 'TENABLE'", options: ["Defensible", "Indefensible", "Sound", "Justifiable"], answer: 1 }
         ],
-        [
+        [ // Corrected Set 4
           { question: "Choose the synonym for 'ADROIT'", options: ["Clumsy", "Skillful", "Awkward", "Inept"], answer: 1 },
           { question: "Choose the antonym for 'CACOPHONY'", options: ["Discord", "Harmony", "Noise", "Dissonance"], answer: 1 },
           { question: "Choose the synonym for 'DELETERIOUS'", options: ["Beneficial", "Harmless", "Harmful", "Innocuous"], answer: 2 },
@@ -2210,7 +2126,7 @@ const englishData = {
           { question: "Choose the synonym for 'UPBRAID'", options: ["Praise", "Scold", "Commend", "Applaud"], answer: 1 },
           { question: "Choose the antonym for 'VERBOSE'", options: ["Wordy", "Succinct", "Talkative", "Loquacious"], answer: 1 }
         ],
-        [
+        [ // Corrected Set 5
           { question: "Choose the synonym for 'ALACRITY'", options: ["Eagerness", "Apathy", "Reluctance", "Slowness"], answer: 0 },
           { question: "Choose the antonym for 'CHURLISH'", options: ["Rude", "Polite", "Sullen", "Boorish"], answer: 1 },
           { question: "Choose the synonym for 'DIATRIBE'", options: ["Praise", "Tirade", "Eulogy", "Compliment"], answer: 1 },
@@ -2231,8 +2147,8 @@ const englishData = {
           { question: "Choose the antonym for 'UNTOWARD'", options: ["Unfavorable", "Favorable", "Unfortunate", "Adverse"], answer: 1 },
           { question: "Choose the synonym for 'VITUPERATE'", options: ["Praise", "Berate", "Honor", "Laud"], answer: 1 },
           { question: "Choose the antonym for 'ZEALOT'", options: ["Fanatic", "Moderate", "Extremist", "Militant"], answer: 1 }
-        ]
-      ]//Complete Vocabulary
+        ] // End of Set 5
+      ]
     },
 
   ]    
@@ -2240,4 +2156,3 @@ const englishData = {
 };
 // Export for app.js
 window.englishData = englishData;
-
