@@ -218,6 +218,10 @@
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
                     <span>Home</span>
                 </button>
+                <button id="menu-profile-btn" class="side-menu-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                    <span>My Profile</span>
+                </button>
                 <a href="mailto:productionrtf@gmail.com?subject=Feedback for Quizify App" class="side-menu-item">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
                     <span>Feedback</span>
@@ -278,6 +282,11 @@
                 <!-- NEW: Sparkle container for the welcome message -->
                 <div id="welcome-sparkles"></div>
                 <h1 id="welcome-heading">Welcome, <span id="user-name-display"></span>!</h1>
+                <!-- NEW: Streak Counter -->
+                <div id="streak-counter" class="streak-counter" style="display: none;">
+                    <span class="streak-icon">🔥</span>
+                    <span id="streak-value">0</span>-day streak!
+                </div>
             </div>
 
             <!-- Homepage Search Bar -->
@@ -565,6 +574,33 @@
             </div>
         </div>
 
+        <!-- NEW: Profile Page -->
+        <div id="profile-page" class="page">
+            <button class="back-btn">← Back to Home</button>
+            <h1>My Profile & Stats</h1>
+            <div class="profile-grid">
+                <div class="profile-card">
+                    <h2 id="profile-user-name"></h2>
+                    <p>Focus: <strong id="profile-user-focus"></strong></p>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span class="stat-label">Total Quizzes Taken</span>
+                        <span class="stat-value" id="profile-quizzes-taken">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Overall Average Score</span>
+                        <span class="stat-value" id="profile-average-score">0%</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Quizzes Passed</span>
+                        <span class="stat-value" id="profile-quizzes-passed">0</span>
+                    </div>
+                </div>
+            </div>
+            <div id="profile-chart-container"></div>
+        </div>
+
         <!-- NEW: Settings Page -->
         <div id="settings-page" class="page">
             <button class="back-btn">← Back to Home</button>
@@ -637,6 +673,7 @@
     <!-- Load data files -->
     <script src="classes.js"></script>
     <script src="quantitative.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- NEW: Chart.js library -->
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
