@@ -801,59 +801,64 @@
                 </div>
             </div>
 
-            <!-- NEW: Profile Page Tabs -->
-            <div class="profile-tabs">
-                <button class="profile-tab-btn active" data-tab="profile-stats-tab">📊 Stats</button>
-                <button class="profile-tab-btn" data-tab="profile-analysis-tab">🔬 Analysis</button>
-                <button class="profile-tab-btn" data-tab="profile-history-tab">📜 History</button>
-            </div>
-
-            <!-- NEW: Profile Page Tab Content -->
-            <div class="profile-tab-content active" id="profile-stats-tab">
-                <div id="profile-chart-container">
-                    <canvas id="performanceChart"></canvas>
-                    <div id="mobile-performance-list" class="mobile-performance-list"></div>
+            <!-- NEW: Apply vertical layout to profile page as well -->
+            <div class="settings-layout">
+                <!-- NEW: Profile Page Tabs -->
+                <div class="profile-tabs" id="profile-tabs-container">
+                    <button class="profile-tab-btn active" data-tab="profile-stats-tab">📊 Stats</button>
+                    <button class="profile-tab-btn" data-tab="profile-analysis-tab">🔬 Analysis</button>
+                    <button class="profile-tab-btn" data-tab="profile-history-tab">📜 History</button>
                 </div>
-            </div>
-
-            <div class="profile-tab-content" id="profile-analysis-tab">
-                <div id="topic-strength-analysis" class="topic-strength-section">
-                    <h2>Topic Strength Analysis</h2>
-                    <p class="section-description">Based on your average scores in completed quiz sets.</p>
-                    <div class="strength-grid">
-                        <div class="strength-column">
-                            <h3><span class="strength-icon">💪</span>Strengths</h3>
-                            <ul id="strength-topics-list"></ul>
-                        </div>
-                        <div class="strength-column">
-                            <h3><span class="strength-icon">🧠</span>Areas to Improve</h3>
-                            <ul id="improvement-topics-list"></ul>
+    
+                <!-- NEW: Profile Page Tab Content -->
+                <div class="settings-content-wrapper">
+                    <div class="profile-tab-content active" id="profile-stats-tab">
+                        <div id="profile-chart-container">
+                            <canvas id="performanceChart"></canvas>
+                            <div id="mobile-performance-list" class="mobile-performance-list"></div>
                         </div>
                     </div>
-                </div>
-            </div>
-
-            <div class="profile-tab-content" id="profile-history-tab">
-                <div class="profile-section" id="profile-history">
-                    <h2>Quiz History</h2>
-                    <p class="section-description">Review your past quiz attempts and track your performance over time.</p>
-                    <div class="history-filter-container">
-                        <div class="filter-group">
-                            <label for="history-subject-filter">Filter by Subject:</label>
-                            <select id="history-subject-filter" class="form-control"></select>
-                        </div>
-                        <div class="filter-group">
-                            <label for="history-chapter-filter">Filter by Chapter:</label>
-                            <select id="history-chapter-filter" class="form-control" disabled></select>
-                        </div>
-                        <div class="filter-group">
-                            <label for="history-status-filter">Filter by Status:</label>
-                            <select id="history-status-filter" class="form-control"></select>
+        
+                    <div class="profile-tab-content" id="profile-analysis-tab">
+                        <div id="topic-strength-analysis" class="topic-strength-section">
+                            <h2>Topic Strength Analysis</h2>
+                            <p class="section-description">Based on your average scores in completed quiz sets.</p>
+                            <div class="strength-grid">
+                                <div class="strength-column">
+                                    <h3><span class="strength-icon">💪</span>Strengths</h3>
+                                    <ul id="strength-topics-list"></ul>
+                                </div>
+                                <div class="strength-column">
+                                    <h3><span class="strength-icon">🧠</span>Areas to Improve</h3>
+                                    <ul id="improvement-topics-list"></ul>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div id="history-list-container" class="history-list-container">
-                    <!-- History items will be populated here by JS -->
+        
+                    <div class="profile-tab-content" id="profile-history-tab">
+                        <div class="profile-section" id="profile-history">
+                            <h2>Quiz History</h2>
+                            <p class="section-description">Review your past quiz attempts and track your performance over time.</p>
+                            <div class="history-filter-container">
+                                <div class="filter-group">
+                                    <label for="history-subject-filter">Filter by Subject:</label>
+                                    <select id="history-subject-filter" class="form-control"></select>
+                                </div>
+                                <div class="filter-group">
+                                    <label for="history-chapter-filter">Filter by Chapter:</label>
+                                    <select id="history-chapter-filter" class="form-control" disabled></select>
+                                </div>
+                                <div class="filter-group">
+                                    <label for="history-status-filter">Filter by Status:</label>
+                                    <select id="history-status-filter" class="form-control"></select>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="history-list-container" class="history-list-container">
+                            <!-- History items will be populated here by JS -->
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -912,92 +917,97 @@
             <h1>Settings</h1>
             <p class="page-description">Manage your account details, customize the app's appearance, and adjust quiz settings.</p>
 
-            <!-- NEW: Settings Tabs (reusing profile-tabs styling) -->
-            <div class="profile-tabs" id="settings-tabs-container">
-                <button class="profile-tab-btn active" data-tab="settings-account-tab">Account</button>
-                <button class="profile-tab-btn" data-tab="settings-customization-tab">Customization</button>
-                <button class="profile-tab-btn" data-tab="settings-general-tab">General</button>
-                <button class="profile-tab-btn" data-tab="settings-danger-tab">Danger Zone</button>
-            </div>
-
-            <!-- NEW: Tab Content Panes -->
-            <div class="profile-tab-content active" id="settings-account-tab">
-                <div class="setting-section" id="settings-account">
-                    <div class="setting-card">
-                        <div class="setting-card-header with-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                            <h3>Account Management</h3>
-                            <button id="edit-account-btn" class="btn btn--icon" title="Edit Account Details">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                            </button>
-                        </div>
-                        <div class="setting-item">
-                            <label for="account-name-input" class="setting-label">Your Name</label>
-                            <input type="text" id="account-name-input" class="form-control" disabled>
-                        </div>
-                        <div class="setting-item">
-                            <label for="account-pin-input" class="setting-label">Your 4-Digit PIN</label>
-                            <input type="number" id="account-pin-input" class="form-control" maxlength="4" oninput="this.value=this.value.slice(0,4)" disabled>
-                        </div>
-                        <div class="setting-actions">
-                            <button id="save-account-btn" class="btn btn--primary btn--full-width">Save Account Changes</button>
-                        </div>
-                    </div>
+            <!-- NEW: Vertical Settings Layout -->
+            <div class="settings-layout">
+                <!-- NEW: Settings Tabs (reusing profile-tabs styling) -->
+                <div class="profile-tabs" id="settings-tabs-container">
+                    <button class="profile-tab-btn active" data-tab="settings-account-tab">Account</button>
+                    <button class="profile-tab-btn" data-tab="settings-customization-tab">Customization</button>
+                    <button class="profile-tab-btn" data-tab="settings-general-tab">General</button>
+                    <button class="profile-tab-btn" data-tab="settings-danger-tab">Danger Zone</button>
                 </div>
-            </div>
-
-            <div class="profile-tab-content" id="settings-customization-tab">
-                <div class="setting-section" id="settings-customization">
-                    <div class="setting-card">
-                        <div class="setting-card-header with-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0L12 2.69z"></path></svg>
-                            <h3>Appearance</h3>
-                        </div>
-                        <div class="setting-item">
-                            <label class="setting-label">Select Your Avatar</label>
-                            <p class="setting-description">Choose from your purchased avatars. Buy more in the Store!</p>
-                            <div id="avatar-selection-grid" class="selection-grid"></div>
-                            <div class="setting-actions" id="avatar-actions" style="display: none; margin-top: 16px;">
-                                <button id="apply-avatar-btn" class="btn btn--primary btn--full-width">Apply Selection</button>
+    
+                <!-- NEW: Tab Content Panes -->
+                <div class="settings-content-wrapper">
+                    <div class="profile-tab-content active" id="settings-account-tab">
+                        <div class="setting-section" id="settings-account">
+                            <div class="setting-card">
+                                <div class="setting-card-header with-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                    <h3>Account Management</h3>
+                                    <button id="edit-account-btn" class="btn btn--icon" title="Edit Account Details">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                                    </button>
+                                </div>
+                                <div class="setting-item">
+                                    <label for="account-name-input" class="setting-label">Your Name</label>
+                                    <input type="text" id="account-name-input" class="form-control" disabled>
+                                </div>
+                                <div class="setting-item">
+                                    <label for="account-pin-input" class="setting-label">Your 4-Digit PIN</label>
+                                    <input type="number" id="account-pin-input" class="form-control" maxlength="4" oninput="this.value=this.value.slice(0,4)" disabled>
+                                </div>
+                                <div class="setting-actions">
+                                    <button id="save-account-btn" class="btn btn--primary btn--full-width">Save Account Changes</button>
+                                </div>
                             </div>
                         </div>
-                        <div class="setting-item">
-                            <label class="setting-label">Select Your Theme</label>
-                            <p class="setting-description">Choose from your purchased themes. Buy more in the Store!</p>
-                            <div id="theme-selection-grid" class="selection-grid"></div>
-                        </div>
                     </div>
-                </div>
-            </div>
-
-            <div class="profile-tab-content" id="settings-general-tab">
-                <div class="setting-section" id="settings-general">
-                    <div class="setting-card">
-                        <div class="setting-card-header with-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                            <h3>Quiz Settings</h3>
-                        </div>
-                        <div class="setting-item">
-                            <label for="timer-duration-input" class="setting-label">Quiz Timer Duration</label>
-                            <p class="setting-description">Time per question in seconds (10-180).</p>
-                            <input type="number" id="timer-duration-input" class="form-control" min="10" max="180" step="5">
-                        </div>
-                        <div class="setting-actions">
-                            <button id="save-quiz-settings-btn" class="btn btn--primary btn--full-width">Save Quiz Settings</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="profile-tab-content" id="settings-danger-tab">
-                <div class="setting-section" id="settings-danger">
-                    <div class="setting-card danger-zone">
-                        <div class="danger-zone-item">
-                            <div>
-                                <strong>Delete Account</strong>
-                                <p class="setting-description">Permanently delete your account and all data. This cannot be undone.</p>
+        
+                    <div class="profile-tab-content" id="settings-customization-tab">
+                        <div class="setting-section" id="settings-customization">
+                            <div class="setting-card">
+                                <div class="setting-card-header with-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0L12 2.69z"></path></svg>
+                                    <h3>Appearance</h3>
+                                </div>
+                                <div class="setting-item">
+                                    <label class="setting-label">Select Your Avatar</label>
+                                    <p class="setting-description">Choose from your purchased avatars. Buy more in the Store!</p>
+                                    <div id="avatar-selection-grid" class="selection-grid"></div>
+                                    <div class="setting-actions" id="avatar-actions" style="display: none; margin-top: 16px;">
+                                        <button id="apply-avatar-btn" class="btn btn--primary btn--full-width">Apply Selection</button>
+                                    </div>
+                                </div>
+                                <div class="setting-item">
+                                    <label class="setting-label">Select Your Theme</label>
+                                    <p class="setting-description">Choose from your purchased themes. Buy more in the Store!</p>
+                                    <div id="theme-selection-grid" class="selection-grid"></div>
+                                </div>
                             </div>
-                            <button id="delete-account-btn" class="btn btn--danger">Delete Account</button>
+                        </div>
+                    </div>
+        
+                    <div class="profile-tab-content" id="settings-general-tab">
+                        <div class="setting-section" id="settings-general">
+                            <div class="setting-card">
+                                <div class="setting-card-header with-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                    <h3>Quiz Settings</h3>
+                                </div>
+                                <div class="setting-item">
+                                    <label for="timer-duration-input" class="setting-label">Quiz Timer Duration</label>
+                                    <p class="setting-description">Time per question in seconds (10-180).</p>
+                                    <input type="number" id="timer-duration-input" class="form-control" min="10" max="180" step="5">
+                                </div>
+                                <div class="setting-actions">
+                                    <button id="save-quiz-settings-btn" class="btn btn--primary btn--full-width">Save Quiz Settings</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+        
+                    <div class="profile-tab-content" id="settings-danger-tab">
+                        <div class="setting-section" id="settings-danger">
+                            <div class="setting-card danger-zone">
+                                <div class="danger-zone-item">
+                                    <div>
+                                        <strong>Delete Account</strong>
+                                        <p class="setting-description">Permanently delete your account and all data. This cannot be undone.</p>
+                                    </div>
+                                    <button id="delete-account-btn" class="btn btn--danger">Delete Account</button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
