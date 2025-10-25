@@ -66,15 +66,15 @@
         </div>
     </div>
 
-    <!-- NEW: Account Update Spinner Modal -->
-    <div id="account-update-modal" class="modal-overlay">
+    <!-- NEW: Generic Spinner Modal (for account updates, data syncing, etc.) -->
+    <div id="spinner-modal" class="modal-overlay">
         <div class="modal-content">
-            <div id="account-update-spinner-container" class="spinner-container" style="padding: 20px 0;">
+            <div id="spinner-modal-spinner-container" class="spinner-container" style="padding: 20px 0;">
                 <div class="spinner"></div>
             </div>
-            <div id="account-update-success-container" style="display: none;"></div>
-            <h2 id="account-update-title">Updating Account...</h2>
-            <p id="account-update-message">Please wait while we migrate your data. This may take a moment.</p>
+            <div id="spinner-modal-success-container" style="display: none;"></div>
+            <h2 id="spinner-modal-title">Updating Account...</h2>
+            <p id="spinner-modal-message">Please wait while we migrate your data. This may take a moment.</p>
         </div>
     </div>
 
@@ -168,6 +168,18 @@
         </div>
     </div>
 
+    <!-- NEW: Feature Coming Soon Modal -->
+    <div id="feature-coming-soon-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="feature-coming-soon-title">Feature Coming Soon!</h2>
+                <button id="close-feature-coming-soon-btn" class="modal-close-btn" title="Close">&times;</button>
+            </div>
+            <p id="feature-coming-soon-message">This feature is currently under development and not yet available. Please check back later!</p>
+        </div>
+    </div>
+
+
     <!-- NEW: Generic Info/Festive Wish Modal -->
     <div id="info-modal" class="modal-overlay">
         <div class="modal-content info-modal-content">
@@ -182,6 +194,93 @@
             <p id="info-modal-subtext" class="info-subtext"></p>
         </div>
     </div>
+
+    <!-- NEW: Achievement Unlocked Modal -->
+    <div id="achievement-unlocked-modal" class="modal-overlay">
+        <div class="modal-content achievement-modal-content">
+            <div class="sparkle-fall-container">
+                <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+            </div>
+            <div id="achievement-icon" class="achievement-icon"></div>
+            <h2>Achievement Unlocked!</h2>
+            <p id="achievement-name" class="achievement-name"></p>
+            <p id="achievement-description" class="achievement-description"></p>
+            <button id="close-achievement-modal-btn" class="btn btn--primary">Awesome!</button>
+        </div>
+    </div>
+
+    <!-- NEW: Daily Coin Reward Modal -->
+    <div id="daily-coin-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Daily Reward!</h2>
+                <button id="close-daily-coin-btn" class="modal-close-btn" title="Close">&times;</button>
+            </div>
+            <p>Your daily reward of <strong>2 Quiz Coins</strong> is ready to be collected!</p>
+            <div class="daily-coin-reward-icon">💰💰</div>
+            <div class="modal-actions">
+                <button id="collect-daily-coin-btn" class="btn btn--primary">Collect Coins</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- NEW: Store Purchase Confirmation Modal -->
+    <div id="store-confirm-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h2 id="store-confirm-title">Confirm Purchase</h2>
+            <div id="store-confirm-item-details" class="store-confirm-item-details">
+                <!-- Item icon, name, description will be populated here by JS -->
+            </div>
+            <p>Are you sure you want to purchase this item?</p>
+            <div id="store-confirm-balance-info" class="store-confirm-balance-info">
+                <p>Cost: <span class="coin-icon">💰</span><strong id="store-confirm-item-cost">0</strong></p>
+                <p>Your current balance: <span class="coin-icon">💰</span><span id="store-confirm-current-balance"></span></p>
+                <p>Balance after purchase: <span class="coin-icon">💰</span><span id="store-confirm-new-balance"></span></p>
+            </div>
+            <div class="modal-actions">
+                <button id="cancel-purchase-btn" class="btn btn--secondary">Cancel</button>
+                <button id="confirm-purchase-btn" class="btn btn--primary">Confirm Purchase</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- NEW: Purchase Success Modal -->
+    <div id="purchase-success-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="success-checkmark-container">
+                <svg class="success-checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                    <circle class="checkmark-circle" cx="26" cy="26" r="25" fill="none"/>
+                    <path class="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                </svg>
+            </div>
+            <h2 id="purchase-success-title">Purchase Successful!</h2>
+            <p id="purchase-success-message">You have successfully purchased the item.</p>
+            <div class="modal-actions">
+                <button id="close-purchase-success-btn" class="btn btn--primary">Continue Shopping</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- NEW: Store Updates Modal -->
+    <div id="store-updates-modal" class="modal-overlay">
+        <div class="modal-content info-modal-content">
+            <div class="sparkle-fall-container">
+                <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+            </div>
+            <button id="close-store-updates-btn" class="modal-close-btn" title="Close">&times;</button>
+            <div class="info-icon">🛍️</div>
+            <h2 id="store-updates-title">Store Updates!</h2>
+            <p id="store-updates-message">Check out the latest deals and newest items available now!</p>
+            <div id="store-updates-content" class="store-updates-content">
+                <!-- Deals and new items will be populated here by JS -->
+            </div>
+            <div class="modal-actions">
+                <button id="later-store-updates-btn" class="btn btn--secondary">Maybe Later</button>
+                <button id="go-to-store-updates-btn" class="btn btn--primary">Go to Store</button>
+            </div>
+        </div>
+    </div>
+
 
     <div class="container">
         <!-- Page-level Background Animation -->
@@ -220,54 +319,60 @@
                     <span>Home</span>
                 </button>
                 <button id="menu-profile-btn" class="side-menu-item">
+                    <span id="profile-notification-dot" class="notification-dot side-menu-dot" style="display: none;"></span>
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                     <span>My Profile</span>
                 </button>
-                <a href="mailto:productionrtf@gmail.com?subject=Feedback for Quizify App" class="side-menu-item">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-                    <span>Feedback</span>
-                </a>
+                <button id="menu-leaderboard-btn" class="side-menu-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        <path d="M12 10l-4 4 2 2 6-6-2-2-2 2z"></path>
+                    </svg>
+                    <span>Leaderboard</span>
+                </button>
+                <button id="menu-achievements-btn" class="side-menu-item">
+                    <span id="achievements-notification-dot" class="notification-dot side-menu-dot" style="display: none;"></span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><path d="m9 12 2 2 4-4"></path></svg>
+                    <span>Achievements</span>
+                </button>
                 <button id="menu-bookmarks-btn" class="side-menu-item">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
                     <span>Bookmarks</span>
+                </button>
+                <!-- NEW: Store Button -->
+                <button id="menu-store-btn" class="side-menu-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                    <span>Store</span>
+                </button>
+                <!-- NEW: Settings Button -->
+                <button id="menu-settings-btn" class="side-menu-item">
+                    <span id="settings-notification-dot" class="notification-dot side-menu-dot" style="display: none;"></span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                    <span>Settings</span>
                 </button>
                 <button id="menu-community-btn" class="side-menu-item">
                     <span id="community-notification-dot" class="notification-dot side-menu-dot" style="display: none;"></span>
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
                     <span>Community</span>
                 </button>
-                <!-- NEW: Settings Button -->
-                <button id="menu-settings-btn" class="side-menu-item">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-                    <span>Settings</span>
+                <button id="menu-about-us-btn" class="side-menu-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                    <span>About Us</span>
                 </button>
-                <button id="menu-leaderboard-btn" class="side-menu-item">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                        <path d="m9 12 2 2 4-4"></path>
-                    </svg>
-                    <span>Leaderboard</span>
-                </button>
-                <!-- NEW: Theme Chooser -->
-                <div class="theme-chooser">
-                    <label class="theme-chooser-label">Theme</label>
-                    <div id="theme-buttons" class="theme-buttons">
-                        <button class="theme-btn" data-theme="light" title="Light Mode">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
-                        </button>
-                        <button class="theme-btn" data-theme="dark" title="Dark Mode">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
-                        </button>
-                        <button class="theme-btn" data-theme="system" title="System Default">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
-                        </button>
-                    </div>
-                </div>
+                <a href="mailto:productionrtf@gmail.com?subject=Feedback for Quizify App" class="side-menu-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                    <span>Feedback</span>
+                </a>
             </div>
             <div class="side-menu-bottom">
                 <button id="logout-btn" class="side-menu-logout-btn">Logout</button>
                 <div class="side-menu-footer">
                     <p>Quizify <span id="menu-app-version"></span></p>
+                </div>
+                <!-- NEW: Quiz Coins Display -->
+                <div class="quiz-coins-display">
+                    <span class="coin-icon">💰</span>
+                    <span id="quiz-coins-balance">0</span>
                 </div>
             </div>
         </div>
@@ -479,6 +584,22 @@
             <!-- NEW: Instant Feedback for Practice Mode -->
             <div id="practice-feedback" class="practice-feedback"></div>
 
+            <!-- NEW: Lifelines for Practice Mode -->
+            <div id="lifeline-container" class="lifeline-container" style="display: none;">
+                <button id="lifeline-5050" class="lifeline-btn" title="50-50: Remove two wrong options">
+                    50/50
+                    <span id="lifeline-5050-count" class="lifeline-count">0</span>
+                </button>
+                <button id="lifeline-hint" class="lifeline-btn" title="Get a hint for the question">
+                    Hint
+                    <span id="lifeline-hint-count" class="lifeline-count">0</span>
+                </button>
+                <button id="lifeline-skip" class="lifeline-btn" title="Skip this question">
+                    Skip
+                    <span id="lifeline-skip-count" class="lifeline-count">0</span>
+                </button>
+            </div>
+
             <div class="navigation-buttons">
                 <button id="prev-btn">Previous</button>
                 <button id="next-btn">Next</button>
@@ -528,8 +649,8 @@
 
         <!-- Review Page -->
         <div id="review-page" class="page">
-            <button class="back-btn">← Back to Results</button>
-            <h1>Review Your Answers</h1>
+            <button id="review-page-back-btn" class="back-btn">← Back</button>
+            <h1 id="review-page-title">Review Answers</h1>
             <div id="review-container" class="review-container">
                 <!-- Review content will be populated by JavaScript -->
             </div>
@@ -572,6 +693,82 @@
                 <div id="user-rank-details">
                     <!-- User's rank will be populated by JavaScript -->
                 </div>
+                <!-- NEW: Avatar display on leaderboard -->
+                <div class="leaderboard-avatar-note">
+                    <p>Avatars can be purchased and changed from the Store and Settings page.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- NEW: Achievements Page -->
+        <div id="achievements-page" class="page">
+            <button class="back-btn">← Back to Home</button>
+            <h1>Your Achievements</h1>
+            <p>Unlock badges by completing quizzes and reaching milestones!</p>
+            <div id="achievements-grid" class="achievements-grid">
+                <!-- Achievements will be populated by JavaScript -->
+            </div>
+        </div>
+
+        <!-- NEW: Store Page (Placeholder) -->
+        <div id="store-page" class="page store-page-redesigned">
+            <button class="back-btn">← Back to Home</button>
+
+            <div class="store-header">
+                <div class="store-header-content">
+                    <h1>Quizify Store</h1>
+                    <p>Use your coins to unlock new themes, avatars, and helpful items!</p>
+                </div>
+                <div class="store-coin-balance-wrapper">
+                    <div class="store-coin-balance">
+                        <span>Your Balance</span>
+                        <strong id="store-coin-balance-display">0</strong>
+                        <span class="coin-icon">💰</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NEW: Store Tab Navigation -->
+            <div class="store-tabs">
+                <button class="store-tab-btn active" data-tab="daily-deals-tab">✨ Deals</button>
+                <button class="store-tab-btn" data-tab="avatars-tab">🧑‍🎓 Avatars</button>
+                <button class="store-tab-btn" data-tab="themes-tab">🎨 Themes</button>
+                <button class="store-tab-btn" data-tab="lifelines-tab">🎭 Lifelines</button>
+                <button class="store-tab-btn" data-tab="utilities-tab">🔑 Utilities</button>
+            </div>
+
+            <!-- NEW: Store Tab Content -->
+            <div class="store-tab-content active" id="daily-deals-tab">
+                <div class="daily-deals-section">
+                    <div class="daily-deals-header">
+                        <h3>✨ Daily Deals</h3>
+                        <div id="daily-deals-timer-container" class="daily-deals-timer-wrapper">
+                            <span>Deals refresh in:</span>
+                            <strong id="daily-deals-timer">00:00:00</strong>
+                        </div>
+                    </div>
+                    <!-- NEW: Featured Item Section (Moved inside deals tab) -->
+                    <div id="featured-item-section" class="featured-item-section" style="display: none;">
+                        <!-- Featured item will be populated here by JS -->
+                    </div>
+
+                    <div id="daily-deals-grid" class="store-item-grid">
+                        <!-- Daily deal items will be populated here -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="store-tab-content" id="avatars-tab">
+                <!-- Avatars will be populated here by JS -->
+            </div>
+            <div class="store-tab-content" id="themes-tab">
+                <!-- Themes will be populated here by JS -->
+            </div>
+            <div class="store-tab-content" id="lifelines-tab">
+                <!-- Lifelines will be populated here by JS -->
+            </div>
+            <div class="store-tab-content" id="utilities-tab">
+                <!-- Utilities will be populated here by JS -->
             </div>
         </div>
 
@@ -579,6 +776,10 @@
         <div id="profile-page" class="page">
             <button class="back-btn">← Back to Home</button>
             <h1>My Profile & Stats</h1>
+            <!-- NEW: Avatar display on profile -->
+            <div id="profile-avatar-display" class="profile-avatar-display">
+                👤
+            </div>
             <div class="profile-grid">
                 <div class="profile-card">
                     <h2 id="profile-user-name"></h2>
@@ -599,25 +800,109 @@
                     </div>
                 </div>
             </div>
-            <div id="profile-chart-container"></div>
-            <!-- NEW: Topic Strength Analysis Section -->
-            <div id="topic-strength-analysis" class="topic-strength-section">
-                <h2>Topic Strength Analysis</h2>
-                <p class="section-description">Based on your average scores in completed quiz sets.</p>
-                <div class="strength-grid">
-                    <div class="strength-column">
-                        <h3><span class="strength-icon">💪</span>Strengths</h3>
-                        <ul id="strength-topics-list">
-                            <!-- Strong topics will be populated here -->
-                        </ul>
-                    </div>
-                    <div class="strength-column">
-                        <h3><span class="strength-icon">🧠</span>Areas to Improve</h3>
-                        <ul id="improvement-topics-list">
-                            <!-- Topics to improve will be populated here -->
-                        </ul>
+
+            <!-- NEW: Profile Page Tabs -->
+            <div class="profile-tabs">
+                <button class="profile-tab-btn active" data-tab="profile-stats-tab">📊 Stats</button>
+                <button class="profile-tab-btn" data-tab="profile-analysis-tab">🔬 Analysis</button>
+                <button class="profile-tab-btn" data-tab="profile-history-tab">📜 History</button>
+            </div>
+
+            <!-- NEW: Profile Page Tab Content -->
+            <div class="profile-tab-content active" id="profile-stats-tab">
+                <div id="profile-chart-container">
+                    <canvas id="performanceChart"></canvas>
+                    <div id="mobile-performance-list" class="mobile-performance-list"></div>
+                </div>
+            </div>
+
+            <div class="profile-tab-content" id="profile-analysis-tab">
+                <div id="topic-strength-analysis" class="topic-strength-section">
+                    <h2>Topic Strength Analysis</h2>
+                    <p class="section-description">Based on your average scores in completed quiz sets.</p>
+                    <div class="strength-grid">
+                        <div class="strength-column">
+                            <h3><span class="strength-icon">💪</span>Strengths</h3>
+                            <ul id="strength-topics-list"></ul>
+                        </div>
+                        <div class="strength-column">
+                            <h3><span class="strength-icon">🧠</span>Areas to Improve</h3>
+                            <ul id="improvement-topics-list"></ul>
+                        </div>
                     </div>
                 </div>
+            </div>
+
+            <div class="profile-tab-content" id="profile-history-tab">
+                <div class="profile-section" id="profile-history">
+                    <h2>Quiz History</h2>
+                    <p class="section-description">Review your past quiz attempts and track your performance over time.</p>
+                    <div class="history-filter-container">
+                        <div class="filter-group">
+                            <label for="history-subject-filter">Filter by Subject:</label>
+                            <select id="history-subject-filter" class="form-control"></select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="history-chapter-filter">Filter by Chapter:</label>
+                            <select id="history-chapter-filter" class="form-control" disabled></select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="history-status-filter">Filter by Status:</label>
+                            <select id="history-status-filter" class="form-control"></select>
+                        </div>
+                    </div>
+                </div>
+                <div id="history-list-container" class="history-list-container">
+                    <!-- History items will be populated here by JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- NEW: About Us Page -->
+        <div id="about-us-page" class="page">
+            <button class="back-btn">← Back to Home</button>
+            <div class="about-us-header">
+                <h1>About Quizify</h1>
+                <p>Your partner in learning and growth.</p>
+            </div>
+
+            <div class="about-section fade-in-section">
+                <h2>Our Story</h2>
+                <p>Quizify was born from a simple idea: learning should be exciting, not intimidating. As a student preparing for competitive exams, our founder, Raj Mishra, realized that traditional study methods were often monotonous and ineffective. He envisioned a platform that could transform learning into an interactive and enjoyable experience. Starting as a passion project, Quizify grew into a comprehensive tool designed to empower students with the knowledge and confidence they need to excel. Our journey is fueled by a commitment to innovation and a deep-seated belief in the power of accessible education for all.</p>
+            </div>
+
+            <div class="about-section fade-in-section">
+                <h2>Meet the Creator</h2>
+                <div class="team-grid">
+                    <div class="team-member-card">
+                        <img src="profile/profile.webp" alt="Raj Mishra" class="team-member-avatar">
+                        <h3>Raj Mishra</h3>
+                        <p class="team-member-role">Founder & Lead Developer</p>
+                        <p class="team-member-bio">A passionate software engineer with a vision to revolutionize ed-tech. Raj is the architect behind Quizify, dedicated to building intuitive and powerful learning tools.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="about-section">
+                <h2>Our Mission</h2>
+                <p>Our mission is to make quality education accessible, engaging, and effective for everyone. We believe in the power of knowledge and strive to create a platform that not only helps students prepare for exams but also fosters a lifelong love for learning. By leveraging technology, we aim to break down barriers to education, empower learners with the tools they need to succeed, and build a global community of curious minds.</p>
+            </div>
+
+            <div class="about-section fade-in-section">
+                <h2>Our Values</h2>
+                <div class="values-grid">
+                    <div class="value-card"><h4>Excellence</h4><p>We are committed to delivering a high-quality, reliable, and top-notch learning experience.</p></div>
+                    <div class="value-card"><h4>Accessibility</h4><p>We believe that learning should be available to everyone, regardless of their background or location.</p></div>
+                    <div class="value-card"><h4>Innovation</h4><p>We continuously innovate to bring the best and most effective learning tools to our users.</p></div>
+                    <div class="value-card"><h4>User-Centric</h4><p>Our users are at the heart of everything we do. We listen, learn, and build to meet their needs.</p></div>
+                    <div class="value-card"><h4>Integrity</h4><p>We operate with honesty and transparency, ensuring a trustworthy platform for all our users.</p></div>
+                    <div class="value-card"><h4>Community</h4><p>We foster a supportive community where learners can grow together and share their knowledge.</p></div>
+                </div>
+            </div>
+
+            <div class="about-section vision-section fade-in-section">
+                <h2>Our Vision</h2>
+                <p>We envision a world where learning is not a chore but an adventure. Our goal is to be the leading platform for interactive education, where curiosity is sparked, knowledge is retained, and every user is empowered to achieve their full potential.</p>
             </div>
         </div>
 
@@ -625,11 +910,19 @@
         <div id="settings-page" class="page">
             <button class="back-btn">← Back to Home</button>
             <h1>Settings</h1>
+            <p class="page-description">Manage your account details, customize the app's appearance, and adjust quiz settings.</p>
 
-            <div class="settings-layout">
-                <!-- Account Section (Moved to top) -->
+            <!-- NEW: Settings Tabs (reusing profile-tabs styling) -->
+            <div class="profile-tabs" id="settings-tabs-container">
+                <button class="profile-tab-btn active" data-tab="settings-account-tab">Account</button>
+                <button class="profile-tab-btn" data-tab="settings-customization-tab">Customization</button>
+                <button class="profile-tab-btn" data-tab="settings-general-tab">General</button>
+                <button class="profile-tab-btn" data-tab="settings-danger-tab">Danger Zone</button>
+            </div>
+
+            <!-- NEW: Tab Content Panes -->
+            <div class="profile-tab-content active" id="settings-account-tab">
                 <div class="setting-section" id="settings-account">
-                    <h2 class="setting-section-title">Account</h2>
                     <div class="setting-card">
                         <div class="setting-card-header with-icon">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
@@ -651,29 +944,53 @@
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- General Section -->
-                <div class="setting-section" id="settings-general">
-                    <!-- General Settings -->
-                        <h2 class="setting-section-title">General</h2>
-                        <div class="setting-card">
-                            <div class="setting-card-header with-icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                                <h3>Quiz Settings</h3>
+            <div class="profile-tab-content" id="settings-customization-tab">
+                <div class="setting-section" id="settings-customization">
+                    <div class="setting-card">
+                        <div class="setting-card-header with-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0L12 2.69z"></path></svg>
+                            <h3>Appearance</h3>
+                        </div>
+                        <div class="setting-item">
+                            <label class="setting-label">Select Your Avatar</label>
+                            <p class="setting-description">Choose from your purchased avatars. Buy more in the Store!</p>
+                            <div id="avatar-selection-grid" class="selection-grid"></div>
+                            <div class="setting-actions" id="avatar-actions" style="display: none; margin-top: 16px;">
+                                <button id="apply-avatar-btn" class="btn btn--primary btn--full-width">Apply Selection</button>
                             </div>
-                            <div class="setting-item">
-                                <label for="timer-duration-input" class="setting-label">Quiz Timer Duration</label>
-                                <p class="setting-description">Time per question in seconds (10-180).</p>
-                                <input type="number" id="timer-duration-input" class="form-control" min="10" max="180" step="5">
-                            </div>
-                             <div class="setting-actions">
-                                <button id="save-quiz-settings-btn" class="btn btn--primary btn--full-width">Save Quiz Settings</button>
-                            </div>
+                        </div>
+                        <div class="setting-item">
+                            <label class="setting-label">Select Your Theme</label>
+                            <p class="setting-description">Choose from your purchased themes. Buy more in the Store!</p>
+                            <div id="theme-selection-grid" class="selection-grid"></div>
+                        </div>
+                    </div>
                 </div>
+            </div>
 
-                <!-- Danger Zone Section -->
+            <div class="profile-tab-content" id="settings-general-tab">
+                <div class="setting-section" id="settings-general">
+                    <div class="setting-card">
+                        <div class="setting-card-header with-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                            <h3>Quiz Settings</h3>
+                        </div>
+                        <div class="setting-item">
+                            <label for="timer-duration-input" class="setting-label">Quiz Timer Duration</label>
+                            <p class="setting-description">Time per question in seconds (10-180).</p>
+                            <input type="number" id="timer-duration-input" class="form-control" min="10" max="180" step="5">
+                        </div>
+                        <div class="setting-actions">
+                            <button id="save-quiz-settings-btn" class="btn btn--primary btn--full-width">Save Quiz Settings</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="profile-tab-content" id="settings-danger-tab">
                 <div class="setting-section" id="settings-danger">
-                    <h2 class="setting-section-title">Danger Zone</h2>
                     <div class="setting-card danger-zone">
                         <div class="danger-zone-item">
                             <div>
@@ -702,6 +1019,7 @@
     <script src="english.js"></script>
     <script src="reasoning.js"></script>
     
+    <script src="store.js"></script> <!-- NEW: Include the store script -->
     
     <!-- Main application script -->
     <script src="app.js"></script>
