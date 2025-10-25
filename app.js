@@ -1,4 +1,6 @@
 
+
+
 // app.js - Complete Quiz Platform with Class and Competitive Exam functionality
 // Only business logic - questions stored in separate data files
 // ===================== APP CHANGELOG =====================
@@ -3829,10 +3831,6 @@ async function displayLeaderboard() {
             const isCurrentUser = doc.id === currentUserId;
             if (isCurrentUser) {
                 userInTop10 = true;
-                // NEW: Add avatar to the current user's rank display
-                const userAvatar = userProgress.activeAvatar || '👤';
-                userRankDetails.innerHTML = `<span class="leaderboard-avatar">${userAvatar}</span>` + userRankDetails.innerHTML;
-
             }
             
             // Add medal classes for top 3
@@ -4310,4 +4308,3 @@ function useSkip() {
 
     nextQuestion(); // Simply move to the next question
 }
-
