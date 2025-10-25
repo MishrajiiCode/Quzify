@@ -728,47 +728,43 @@
                 </div>
             </div>
 
-            <!-- NEW: Store Tab Navigation -->
-            <div class="store-tabs">
-                <button class="store-tab-btn active" data-tab="daily-deals-tab">✨ Deals</button>
-                <button class="store-tab-btn" data-tab="avatars-tab">🧑‍🎓 Avatars</button>
-                <button class="store-tab-btn" data-tab="themes-tab">🎨 Themes</button>
-                <button class="store-tab-btn" data-tab="lifelines-tab">🎭 Lifelines</button>
-                <button class="store-tab-btn" data-tab="utilities-tab">🔑 Utilities</button>
-            </div>
-
-            <!-- NEW: Store Tab Content -->
-            <div class="store-tab-content active" id="daily-deals-tab">
-                <div class="daily-deals-section">
-                    <div class="daily-deals-header">
-                        <h3>✨ Daily Deals</h3>
-                        <div id="daily-deals-timer-container" class="daily-deals-timer-wrapper">
-                            <span>Deals refresh in:</span>
-                            <strong id="daily-deals-timer">00:00:00</strong>
+            <div class="store-layout">
+                <!-- NEW: Store Tab Navigation -->
+                <div class="store-tabs">
+                    <button class="store-tab-btn active" data-tab="daily-deals-tab">✨ Deals</button>
+                    <button class="store-tab-btn" data-tab="avatars-tab">🧑‍🎓 Avatars</button>
+                    <button class="store-tab-btn" data-tab="themes-tab">🎨 Themes</button>
+                    <button class="store-tab-btn" data-tab="lifelines-tab">🎭 Lifelines</button>
+                    <button class="store-tab-btn" data-tab="utilities-tab">🔑 Utilities</button>
+                </div>
+    
+                <!-- NEW: Store Tab Content -->
+                <div class="store-tab-content-wrapper">
+                    <div class="store-tab-content active" id="daily-deals-tab">
+                        <div class="daily-deals-section">
+                            <div class="daily-deals-header">
+                                <h3>✨ Daily Deals</h3>
+                                <div id="daily-deals-timer-container" class="daily-deals-timer-wrapper">
+                                    <span>Deals refresh in:</span>
+                                    <strong id="daily-deals-timer">00:00:00</strong>
+                                </div>
+                            </div>
+                            <!-- NEW: Featured Item Section (Moved inside deals tab) -->
+                            <div id="featured-item-section" class="featured-item-section" style="display: none;">
+                                <!-- Featured item will be populated here by JS -->
+                            </div>
+        
+                            <div id="daily-deals-grid" class="store-item-grid">
+                                <!-- Daily deal items will be populated here -->
+                            </div>
                         </div>
                     </div>
-                    <!-- NEW: Featured Item Section (Moved inside deals tab) -->
-                    <div id="featured-item-section" class="featured-item-section" style="display: none;">
-                        <!-- Featured item will be populated here by JS -->
-                    </div>
-
-                    <div id="daily-deals-grid" class="store-item-grid">
-                        <!-- Daily deal items will be populated here -->
-                    </div>
+        
+                    <div class="store-tab-content" id="avatars-tab"></div>
+                    <div class="store-tab-content" id="themes-tab"></div>
+                    <div class="store-tab-content" id="lifelines-tab"></div>
+                    <div class="store-tab-content" id="utilities-tab"></div>
                 </div>
-            </div>
-
-            <div class="store-tab-content" id="avatars-tab">
-                <!-- Avatars will be populated here by JS -->
-            </div>
-            <div class="store-tab-content" id="themes-tab">
-                <!-- Themes will be populated here by JS -->
-            </div>
-            <div class="store-tab-content" id="lifelines-tab">
-                <!-- Lifelines will be populated here by JS -->
-            </div>
-            <div class="store-tab-content" id="utilities-tab">
-                <!-- Utilities will be populated here by JS -->
             </div>
         </div>
 
