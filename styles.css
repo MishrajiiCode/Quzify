@@ -2408,27 +2408,12 @@ button:focus-visible {
 .profile-tabs {
     display: flex;
     gap: var(--space-8);
-    border-bottom: 1px solid var(--color-border);
-    margin-bottom: var(--space-24);
-    margin-top: var(--space-32);
-    /* NEW: Allow horizontal scrolling on small screens */
-    overflow-x: auto; /* Ensure horizontal scrolling is enabled */
-    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
-    scrollbar-width: thin; /* For Firefox */
-    scrollbar-color: var(--color-border) var(--color-surface); /* For Firefox */
-}
-.profile-tabs::-webkit-scrollbar {
-    height: 6px; /* Make scrollbar visible on WebKit browsers */
-}
-
-.profile-tabs::-webkit-scrollbar-track {
-    background: var(--color-secondary);
-    border-radius: var(--radius-full);
-}
-
-.profile-tabs::-webkit-scrollbar-thumb {
-    background-color: var(--color-border);
-    border-radius: var(--radius-full);
+    flex-direction: column;
+    flex-shrink: 0;
+    width: 100%; /* Full width on mobile */
+    border-bottom: none;
+    padding-right: 0;
+    margin: var(--space-24) 0;
 }
 
 .profile-tab-btn {
@@ -2439,8 +2424,11 @@ button:focus-visible {
     color: var(--color-text-secondary);
     font-weight: var(--font-weight-medium);
     font-size: var(--font-size-lg);
-    border-bottom: 3px solid transparent;
+    border-left: 3px solid transparent; /* Use left border for active state */
     transition: all var(--duration-fast);
+    text-align: left;
+    width: 100%;
+    justify-content: flex-start;
 }
 
 .profile-tab-btn:hover {
@@ -2451,7 +2439,8 @@ button:focus-visible {
 
 .profile-tab-btn.active {
     color: var(--color-primary);
-    border-bottom-color: var(--color-primary);
+    border-left-color: var(--color-primary);
+    background-color: var(--color-secondary);
 }
 
 .profile-tab-content { display: none; }
@@ -2803,10 +2792,10 @@ button:focus-visible {
     }
 
     /* Apply to both settings and profile tab containers */
-    #settings-tabs-container, #profile-tabs-container {
+    .profile-tabs {
         flex-direction: column;
         flex-shrink: 0;
-        width: 200px; /* Fixed width for the tab navigation */
+        width: 200px; /* Fixed width for the tab navigation on larger screens */
         border-bottom: none; /* Remove horizontal border */
         border-right: 1px solid var(--color-border); /* Add vertical border */
         padding-right: var(--space-24);
@@ -2814,19 +2803,6 @@ button:focus-visible {
         overflow-x: visible; /* No horizontal scroll needed */
     }
 
-    #settings-tabs-container .profile-tab-btn,
-    #profile-tabs-container .profile-tab-btn {
-        border-bottom: none; /* Remove bottom border */
-        border-left: 3px solid transparent; /* Add left border for active state */
-        text-align: left;
-        width: 100%;
-        justify-content: flex-start; /* Align text to the left */
-    }
-    #settings-tabs-container .profile-tab-btn.active,
-    #profile-tabs-container .profile-tab-btn.active {
-        border-left-color: var(--color-primary);
-        background-color: var(--color-secondary);
-    }
     #settings-page .profile-tab-content,
     #profile-page .profile-tab-content {
         margin-top: 0; /* Remove top margin from content panes */
@@ -4096,10 +4072,19 @@ footer a:hover svg {
 
 /* NEW: Store Tabs */
 .store-page-redesigned .store-tabs {
-    display: flex;
+    display: flex; /* Changed to flex */
+    flex-direction: column; /* Make it vertical */
     gap: var(--space-8);
-    border-bottom: 1px solid var(--color-border);
-    margin-bottom: var(--space-24);
+    border-bottom: none; /* Remove bottom border */
+    margin-bottom: 0; /* Adjust margin */
+    flex-shrink: 0;
+    width: 100%; /* Full width on mobile */
+}
+
+.store-page-redesigned .store-layout {
+    display: flex;
+    flex-direction: column; /* Default for mobile */
+    gap: var(--space-24);
 }
 
 .store-tab-btn {
@@ -4110,8 +4095,11 @@ footer a:hover svg {
     color: var(--color-text-secondary);
     font-weight: var(--font-weight-medium);
     font-size: var(--font-size-lg);
-    border-bottom: 3px solid transparent;
+    border-left: 3px solid transparent; /* Use left border for active state */
     transition: all var(--duration-fast);
+    text-align: left;
+    width: 100%;
+    justify-content: flex-start;
 }
 
 .store-tab-btn:hover {
@@ -4122,11 +4110,30 @@ footer a:hover svg {
 
 .store-tab-btn.active {
     color: var(--color-primary);
-    border-bottom-color: var(--color-primary);
+    border-left-color: var(--color-primary);
+    background-color: var(--color-secondary);
 }
 
 .store-tab-content {
     display: none;
+    flex-grow: 1;
+}
+
+/* On larger screens, make it a side-by-side layout for the store */
+@media (min-width: 768px) {
+    .store-page-redesigned .store-layout {
+        flex-direction: row;
+        gap: var(--space-32);
+    }
+
+    .store-page-redesigned .store-tabs {
+        width: 200px; /* Fixed width for the tab navigation on larger screens */
+        border-right: 1px solid var(--color-border); /* Add vertical border */
+        padding-right: var(--space-24);
+    }
+    .store-tab-content {
+        margin-top: 0; /* Remove top margin from content panes */
+    }
 }
 .store-tab-content.active {
     display: block;
@@ -4470,4 +4477,3 @@ footer a:hover svg {
     background-color: rgba(var(--color-success-rgb), 0.15);
     color: var(--color-success);
 }
-
