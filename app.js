@@ -1,12 +1,21 @@
 
-
-
 // app.js - Complete Quiz Platform with Class and Competitive Exam functionality
 // Only business logic - questions stored in separate data files
 // ===================== APP CHANGELOG =====================
 const COMMUNITY_POSTS = {
+    '1.7.2-Beta.': {
+        date: 'Oct 21, 2025',
+        type: 'update',
+        changes: [
+            'General bug fixes and performance improvements.',
+            'Enhanced UI responsiveness on smaller devices.',
+            'Optimized data loading for a faster startup experience.'
+        ],
+        note: "We're continuously working to improve Quizify for you. Stay tuned for more updates!"
+    },
     '1.7.1-Beta.': {
         date: 'Oct 20, 2025',
+        type: 'content', // NEW
         changes: [
             '<strong>Major Content Overhaul!</strong> The English question bank has been fully reviewed and expanded.',
             'Performed a deep-dive review of all existing English questions for 100% accuracy.',
@@ -17,6 +26,7 @@ const COMMUNITY_POSTS = {
     },
     '1.7.0-Beta.': {
         date: 'Oct 19, 2025',
+        type: 'security', // NEW
         changes: [
             '<strong>Critical Security Update!</strong> Your data is now more secure.',
             'Implemented robust server-side security rules for Firestore to protect user scores and quiz history.',
@@ -27,6 +37,7 @@ const COMMUNITY_POSTS = {
     },
     '1.6.2-Beta.': {
         date: 'Sep 28, 2025',
+        type: 'feature', // NEW
         changes: [
             '<strong>Major Feature: Online Leaderboard!</strong> Your quiz scores are now saved online.',
             'Added a dynamic Leaderboard to show the top 10 high scores across all quizzes.',
@@ -38,6 +49,7 @@ const COMMUNITY_POSTS = {
     },
     '1.6.0-Beta.': {
         date: 'Sep 27, 2025',
+        type: 'update', // NEW
         changes: [
             'Added class-specific Daily Challenges for academic students (Classes 9-12).',
             'Fixed a bug where the back button would not work after clicking on an empty Daily Challenge.',
@@ -47,6 +59,7 @@ const COMMUNITY_POSTS = {
     },
     '1.5.13-Beta.': {
         date: 'Sep 26, 2025',
+        type: 'ui', // NEW
         changes: [
             'Added an info button to update notifications to show what\'s new.',
             'Replaced all disruptive browser alerts with a new, professional toast notification system.',
@@ -55,7 +68,7 @@ const COMMUNITY_POSTS = {
     }
 };
 // ===================== APP CONFIGURATION =====================
-const APP_VERSION = '1.7.1-Beta.'; // Increment this to show an update notification
+const APP_VERSION = '1.7.2-Beta.'; // Increment this to show an update notification
 
 // NEW: Configuration for the informational/festive popup
 const INFO_POPUP_CONFIG = {
@@ -70,6 +83,21 @@ const INFO_POPUP_CONFIG = {
     subtext: 'Keep learning and shining bright!'
 };
 
+// NEW: Achievements Configuration
+const ACHIEVEMENTS = {
+    first_quiz: { name: 'First Step', description: 'Complete your first quiz.', icon: '🎓' },
+    passed_quiz: { name: 'Achiever', description: 'Pass your first quiz with 40% or more.', icon: '✅' },
+    perfect_score: { name: 'Perfectionist', description: 'Get a 100% score on any quiz.', icon: '🎯' },
+    chapter_master: { name: 'Chapter Master', description: 'Pass all 5 sets in any chapter.', icon: '📚' },
+    subject_expert: { name: 'Subject Expert', description: 'Pass all sets in a whole subject.', icon: '🧠' },
+    streak_5: { name: 'On a Roll!', description: 'Maintain a 5-day streak.', icon: '🔥' },
+    streak_10: { name: 'Unstoppable', description: 'Maintain a 10-day streak.', icon: '🚀' },
+    speed_demon: { name: 'Speed Demon', description: 'Pass a quiz with an average of <30s per question.', icon: '⚡' },
+    comeback_kid: { name: 'Comeback Kid', description: 'Pass a quiz set you previously failed.', icon: '💪' },
+    dedicated_learner: { name: 'Dedicated Learner', description: 'Complete 10 quizzes.', icon: '📖' },
+    quiz_master: { name: 'Quiz Master', description: 'Complete 50 quizzes.', icon: '👑' }
+};
+
 
 // ===================== GLOBAL STATE VARIABLES =====================
 let currentSubject = '';
@@ -81,16 +109,19 @@ let timer = null;
 let totalTime = 0;
 let timeRemaining = 1200; // 20 minutes for 20 questions
 let quizData = null;
-let bookmarkedQuestions = []; // Will be loaded from userProgress
-let userProgress = {};
+let bookmarkedQuestions = []; // Will be loaded from userProgress or Firestore
+let userProgress = {}; // This will be the single source of truth for all user data.
+let unlockedAchievements = new Set(); // To track newly unlocked achievements in a session
 
 // NEW: Class-related state variables
 let currentClass = '';
 let currentStream = '';
-let academicDailyChallenge = false; // NEW: To distinguish academic vs competitive daily challenge
-let practiceMode = false; // NEW: To handle practice mode logic
-let pendingSetIndex = -1; // NEW: To hold the set index while the mode modal is open
+let academicDailyChallenge = false; // To distinguish academic vs competitive daily challenge
+let practiceMode = false; // To handle practice mode logic
+let pendingSetIndex = -1; // To hold the set index while the mode modal is open
 let classMode = false; // true if user is in class (academic) mode
+
+let dailyCoinReminderInterval = null; // NEW: For the daily coin reminder
 
 // NEW: Daily Challenge state
 let dailyChallengeMode = false;
@@ -136,13 +167,36 @@ document.addEventListener('DOMContentLoaded', function() {
         initializeSideMenu();
         initializeUpdateDetailsModal();
         initializeHomepageSearch();
+        initializeFeatureComingSoonModal();
         initializeLockedContentModal();
         initializeSettingsPage();
         initializeQuizModeModal();
         initializeLeaderboard();
         initializeProfilePage();
+        initializeAchievements(); // NEW
+        initializeSettingsTabs(); // NEW
+        initializeProfileTabs(); // NEW
         initializeSparkles();
+        initializePurchaseSuccessModal(); // NEW
         initializeEventListeners();
+        initializeDailyCoinModal(); // NEW
+        initializeStoreUpdatesModal(); // NEW: Add event listeners for the store updates modal
+        // NEW: Initialize the store module
+        QuizifyStore.init({
+            // Pass the necessary state and functions to the store
+            get quizCoins() { return userProgress.quizCoins || 0; }, // Read directly from userProgress
+            get userProgress() { return userProgress; }, // Pass the whole object
+            // NEW: Pass purchased items for store logic
+            get purchasedItems() { return userProgress.purchasedItems || { themes: [], avatars: [] }; },
+            set purchasedItems(value) { userProgress.purchasedItems = value; },
+
+            saveUserProgress,
+            updateCoinDisplay,
+            updateLifelineDisplay,
+            showNotification,
+            showPage,
+            showPurchaseSuccessModal // NEW
+        });
         initializeLogoutConfirmation();
         initializeInfoPopup();
         checkAndShowPinReminder();
@@ -190,12 +244,15 @@ function initializeEventListeners() {
     document.querySelector('#class-page .back-btn').addEventListener('click', goBack);
     document.querySelector('#subject-page .back-btn').addEventListener('click', goBack);
     document.querySelector('#chapter-page .back-btn').addEventListener('click', goToSubject);
+    document.querySelector('#store-page .back-btn').addEventListener('click', goToHome); // NEW
     document.querySelector('#results-page .action-buttons button:nth-child(3)').addEventListener('click', goToChapter);
     document.querySelector('#review-page .back-btn').addEventListener('click', goToResults);
     document.querySelector('#bookmarks-page .back-btn').addEventListener('click', goToHome);
     document.querySelector('#community-page .back-btn').addEventListener('click', goToHome);
+    document.querySelector('#about-us-page .back-btn').addEventListener('click', goToHome); // NEW
     document.querySelector('#profile-page .back-btn').addEventListener('click', goToHome); // NEW
     document.querySelector('#leaderboard-page .back-btn').addEventListener('click', goToHome);
+    document.querySelector('#achievements-page .back-btn').addEventListener('click', goToHome); // NEW
     document.querySelector('#settings-page .back-btn').addEventListener('click', goToHome);
 
     // --- Search ---
@@ -225,11 +282,77 @@ function initializeEventListeners() {
         }
     });
 
+    // --- Lifeline Buttons ---
+    document.getElementById('lifeline-5050').addEventListener('click', useFiftyFifty);
+    document.getElementById('lifeline-hint').addEventListener('click', useHint);
+    document.getElementById('lifeline-skip').addEventListener('click', useSkip);
+
+
     document.getElementById('class-content').addEventListener('click', (e) => {
         const subjectCard = e.target.closest('.subject-card:not(.daily-challenge-card)');
         if (subjectCard && subjectCard.dataset.subject) {
             selectClassSubject(subjectCard.dataset.subject);
         }
+    });
+}
+
+/**
+ * NEW: Initializes event listeners for the store updates modal.
+ * This was missing, causing the buttons to be unresponsive.
+ */
+function initializeStoreUpdatesModal() {
+    const modal = document.getElementById('store-updates-modal');
+    const closeBtn = document.getElementById('close-store-updates-btn');
+    const laterBtn = document.getElementById('later-store-updates-btn');
+    const goToStoreBtn = document.getElementById('go-to-store-updates-btn');
+
+    if (!modal || !closeBtn || !laterBtn || !goToStoreBtn) {
+        return; // Exit if elements are not found
+    }
+
+    const closeModal = () => {
+        modal.classList.remove('visible');
+    };
+
+    // Close button and "Maybe Later" button should just close the modal
+    closeBtn.addEventListener('click', closeModal);
+    laterBtn.addEventListener('click', closeModal);
+
+    // "Go to Store" button should close the modal and navigate to the store page
+    goToStoreBtn.addEventListener('click', () => {
+        closeModal();
+        // The QuizifyStore object handles the logic for displaying the store page
+        QuizifyStore.displayStorePage();
+    });
+}
+
+/**
+ * NEW: Initializes event listeners for the store updates modal.
+ * This was missing, causing the buttons to be unresponsive.
+ */
+function initializeStoreUpdatesModal() {
+    const modal = document.getElementById('store-updates-modal');
+    const closeBtn = document.getElementById('close-store-updates-btn');
+    const laterBtn = document.getElementById('later-store-updates-btn');
+    const goToStoreBtn = document.getElementById('go-to-store-updates-btn');
+
+    if (!modal || !closeBtn || !laterBtn || !goToStoreBtn) {
+        return; // Exit if elements are not found
+    }
+
+    const closeModal = () => {
+        modal.classList.remove('visible');
+    };
+
+    // Close button and "Maybe Later" button should just close the modal
+    closeBtn.addEventListener('click', closeModal);
+    laterBtn.addEventListener('click', closeModal);
+
+    // "Go to Store" button should close the modal and navigate to the store page
+    goToStoreBtn.addEventListener('click', () => {
+        closeModal();
+        // The QuizifyStore object handles the logic for displaying the store page
+        QuizifyStore.displayStorePage();
     });
 }
 
@@ -253,7 +376,10 @@ function goToHome() {
     currentStream = '';
     currentSubject = '';
     academicDailyChallenge = false;
-    currentChapter = '';
+    QuizifyStore.stopDealsCountdown(); // NEW: Stop the deals timer
+    currentChapter = '';    
+    updateCoinDisplay(); // NEW: Update coin display on home
+
 
     // Correctly show/hide sections based on user preference
     document.getElementById('competitive-section').style.display = userFocus === 'competitive' ? 'block' : 'none';
@@ -908,6 +1034,7 @@ function startPracticeMode(setIndex) {
     // DO NOT start the timer for practice mode
     setupQuestionNumbers();
     showPage('quiz-page');
+    updateLifelineDisplay();
 }
 
 function displayQuestion() {
@@ -926,6 +1053,9 @@ function displayQuestion() {
 
     // Hide timer in practice mode
     document.getElementById('timer').style.display = practiceMode ? 'none' : 'block';
+    // FIX: Show lifelines in BOTH practice and timed mode
+    document.getElementById('lifeline-container').style.display = 'flex';
+
     // Hide previous button in practice mode
     document.getElementById('prev-btn').style.display = practiceMode ? 'none' : 'inline-flex';
     
@@ -970,6 +1100,11 @@ function displayQuestion() {
     
     // Update bookmark button
     updateBookmarkButton();
+
+    // NEW: Reset and enable lifeline buttons for the new question
+    document.getElementById('lifeline-5050').disabled = false;
+    document.getElementById('lifeline-hint').disabled = false;
+    document.getElementById('lifeline-skip').disabled = false;
 
     updateQuestionNumbers();
 }
@@ -1101,6 +1236,21 @@ function updateTimerDisplay() {
     }
 }
 
+/**
+ * Checks if a user has previously failed a specific quiz set.
+ * @param {string} progressKey - The unique key for the quiz set.
+ * @returns {boolean} - True if there is a recorded failed attempt, false otherwise.
+ */
+function hasPreviouslyFailed(progressKey) {
+    const progress = userProgress[progressKey];
+    // FIX: Correctly check for a failed attempt in the history.
+    // The logic should check if there's more than one attempt AND if any of the previous attempts had a score < 40.
+    if (progress && Array.isArray(progress.attempts) && progress.attempts.length > 1) {
+        return progress.attempts.slice(0, -1).some(attempt => typeof attempt.score === 'number' && attempt.score < 40);
+    }
+    return false;
+}
+
 function submitQuiz() {
     if (timer) {
         clearInterval(timer);
@@ -1140,6 +1290,20 @@ function submitQuiz() {
         saveUserProgress();
         updateStreak(results.passed); // NEW: Update streak
     } else {
+        // NEW: Award coins for regular quiz completion
+        let coinsEarned = 0;
+        if (results.passed) {
+            coinsEarned += 10; // 10 coins for passing
+            if (results.percentage === 100) {
+                coinsEarned += 25; // Bonus for a perfect score
+            }
+        }
+        if (coinsEarned > 0) {
+            quizCoins += coinsEarned;
+            showNotification(`You earned ${coinsEarned} Quiz Coins! 💰`, 'success');
+            updateCoinDisplay();
+        }
+
         // Save progress for regular chapter sets
         const progressKey = `${currentSubject}_${currentChapter}_${currentSet}`;
 
@@ -1177,6 +1341,9 @@ function submitQuiz() {
     // FIX: Always display results and show the results page for any timed quiz.
     displayResults(results, timeTaken);
     showPage('results-page'); 
+
+    // NEW: Check for achievements AFTER displaying results and saving progress.
+    checkAchievements(results, timeTaken);
     updateStreakDisplay(); // NEW: Update streak display after a quiz
 }
 
@@ -1376,16 +1543,27 @@ function retakeQuiz() {
 }
 
 function reviewAnswers() {
-    displayReview();
+    // NEW: Set the back button to go to the results page
+    const backBtn = document.getElementById('review-page-back-btn');
+    backBtn.onclick = goToResults;
+    document.getElementById('review-page-title').textContent = 'Review Your Answers';
+
+    // Pass the current quiz data and user answers to the display function
+    displayReview(quizData, userAnswers);
     showPage('review-page');
 }
 
-function displayReview() {
+/**
+ * Displays the review of a quiz, showing user answers against correct answers.
+ * @param {Array} questions - The array of question objects for the quiz.
+ * @param {Array} userAnswersForQuiz - The array of user's answers for that quiz.
+ */
+function displayReview(questions, userAnswersForQuiz) {
     const reviewContainer = document.getElementById('review-container');
     reviewContainer.innerHTML = '';
     
-    quizData.forEach((question, index) => {
-        const userAnswer = userAnswers[index];
+    questions.forEach((question, index) => {
+        const userAnswer = userAnswersForQuiz[index];
         const correctAnswer = question.answer;
         const isCorrect = userAnswer === correctAnswer;
         
@@ -1443,6 +1621,8 @@ async function saveUserProgress() {
         return;
     }
 
+    userProgress.bookmarks = bookmarkedQuestions; // Ensure latest bookmarks are on the object before saving
+
     try {
         await userProgressCollection.doc(userId).set(userProgress);
         console.log("User progress saved to Firestore.");
@@ -1458,13 +1638,13 @@ async function saveUserProgress() {
  * If not found, it checks localStorage for any previously saved progress.
  */
 async function loadUserProgress() {
-    showNotification('Syncing your progress...', 'updating');
+    showSpinnerModal(true, 'Syncing Your Progress', 'Please wait while we fetch your latest data...');
     const userId = getOrCreateUserId();
     if (!userId || userId.startsWith('user_anonymous')) {
         const savedLocal = localStorage.getItem('quizProgress');
         userProgress = savedLocal ? JSON.parse(savedLocal) : {};
         console.log("User not identified, loading progress from localStorage.");
-        showNotification('Progress loaded locally.', 'info');
+        showSpinnerModal(false); // Hide spinner
         return;
     }
 
@@ -1472,19 +1652,42 @@ async function loadUserProgress() {
         const doc = await userProgressCollection.doc(userId).get();
         if (doc.exists) {
             userProgress = doc.data();
-            // NEW: Load bookmarks and theme from the user's online profile
-            bookmarkedQuestions = userProgress.bookmarks || [];
-            initializeTheme(); // Re-initialize theme with data from Firestore
         } else {
-            userProgress = {};
-            bookmarkedQuestions = [];
+            // NEW: Initialize for a brand new user on Firestore
+            userProgress = {
+                quizCoins: 50, // Starting coins
+                lifelines: { fiftyFifty: 3, hint: 3, skip: 3 }, // Starting lifelines
+                achievements: [],
+                bookmarks: [],
+                purchasedItems: { themes: ['system', 'light', 'dark'], avatars: ['👤'] },
+                activeAvatar: '👤',
+                theme: 'system'
+            };
+            saveUserProgress(); // Save the defaults for the new user immediately
         }
         console.log("User progress loaded from Firestore.");
-        showNotification('Progress synced successfully!', 'success');
+        showSpinnerModal(false); // Hide spinner on success
     } catch (error) {
         console.error("Error loading progress from Firestore: ", error);
-        showNotification('Could not sync progress. Using local data.', 'error');
+        showSpinnerModal(false); // Hide spinner on error
     }
+
+    // --- NEW: Initialize local state from the loaded userProgress object ---
+    // This ensures consistency for both new and existing users.
+    quizCoins = userProgress.quizCoins || 50;
+    lifelines = userProgress.lifelines || { fiftyFifty: 3, hint: 3, skip: 3 }; // Default lifelines
+    bookmarkedQuestions = userProgress.bookmarks || []; // Ensure bookmarks are loaded
+    userProgress.purchasedItems = userProgress.purchasedItems || { themes: ['system', 'light', 'dark'], avatars: ['👤'] };
+    userProgress.activeAvatar = userProgress.activeAvatar || '👤';
+    userProgress.theme = userProgress.theme || 'system';
+    // userProgress.utilityTokens = userProgress.utilityTokens || {}; // REVERTED: Removed for now
+
+    // NEW: Apply active avatar
+    document.getElementById('profile-avatar-display').textContent = userProgress.activeAvatar || '👤';
+    
+    // Apply the loaded theme
+    applyTheme(userProgress.theme, false); // false to prevent re-saving
+
 }
 
 /**
@@ -1531,6 +1734,9 @@ function loadQuizSettings() {
     // which is synced with Firestore. Default to 60 if not set.
     quizTimerSetting = userProgress.quizTimer || 60;
 }
+function updateCoinDisplay() {
+    document.getElementById('quiz-coins-balance').textContent = userProgress.quizCoins || 0;
+}
 
 /**
  * NEW: Saves the quiz timer setting to the user's progress object.
@@ -1538,7 +1744,6 @@ function loadQuizSettings() {
  */
 function saveQuizSettings() {
     userProgress.quizTimer = quizTimerSetting;
-    // NEW: Call the main save function to sync changes to Firestore.
     saveUserProgress();
 }
 
@@ -1574,11 +1779,12 @@ function initializeSettingsPage() {
     const nameInput = document.getElementById('account-name-input');
     const pinInput = document.getElementById('account-pin-input');
     const deleteBtn = document.getElementById('delete-account-btn');
-    const editBtn = document.getElementById('edit-account-btn'); // NEW: Edit button
+    const editBtn = document.getElementById('edit-account-btn');    
+    const applyAvatarBtn = document.getElementById('apply-avatar-btn');
 
     // FIX: Check for all required elements to prevent errors.
-    if (!saveAccountBtn || !saveQuizBtn || !durationInput || !nameInput || !pinInput || !deleteBtn || !editBtn) return;
-
+    if (!saveAccountBtn || !saveQuizBtn || !durationInput || !nameInput || !pinInput || !deleteBtn || !editBtn || !applyAvatarBtn) return;
+    
     // Populate fields when settings page is opened
     const menuSettingsBtn = document.getElementById('menu-settings-btn');
     if (menuSettingsBtn) {
@@ -1586,7 +1792,8 @@ function initializeSettingsPage() {
             // NEW: Reset fields to disabled state when opening settings
             nameInput.disabled = true;
             pinInput.disabled = true;
-            editBtn.style.display = 'block';
+            saveAccountBtn.style.display = 'none'; // Hide save button initially
+            document.getElementById('avatar-actions').style.display = 'none'; // Hide apply avatar button
 
             loadQuizSettings(); // Load latest settings
             durationInput.value = quizTimerSetting;
@@ -1594,13 +1801,17 @@ function initializeSettingsPage() {
             pinInput.value = localStorage.getItem('userPin') || '';
             goToSettings();
             closeSideMenu();
+            // NEW: Populate customization options when settings are opened
+            populateCustomizationGrids();
         });
     }
 
     // Set initial values on first load
-    nameInput.disabled = true; // NEW: Disable by default
-    pinInput.disabled = true;  // NEW: Disable by default
+    nameInput.disabled = true;
+    pinInput.disabled = true;
     loadQuizSettings();
+    document.getElementById('avatar-actions').style.display = 'none'; // Hide apply avatar button
+    saveAccountBtn.style.display = 'none'; // Hide save button initially
     durationInput.value = quizTimerSetting;
     nameInput.value = localStorage.getItem('userName') || '';
     pinInput.value = localStorage.getItem('userPin') || '';
@@ -1625,7 +1836,39 @@ function initializeSettingsPage() {
     // Add event listeners for delete and edit buttons
     deleteBtn.addEventListener('click', confirmAccountDeletion);
     editBtn.addEventListener('click', confirmAccountEdit);
+
+    // NEW: Event listener for the Apply Avatar button
+    applyAvatarBtn.addEventListener('click', () => {
+        const selectedAvatarEl = document.querySelector('.selection-item.selected[data-avatar]');
+        if (selectedAvatarEl) {
+            const newAvatar = selectedAvatarEl.dataset.avatar;
+            selectAvatar(newAvatar);
+            document.getElementById('avatar-actions').style.display = 'none'; // Hide after applying
+        } else {
+            showNotification('Please select an avatar first.', 'info');
+        }
+    });
 }
+
+document.getElementById('settings-page').addEventListener('click', (e) => {
+    const avatarItem = e.target.closest('.selection-item[data-avatar]');
+    if (avatarItem) {
+        // NEW: Select avatar visually, don't apply it yet
+        document.querySelectorAll('.selection-item[data-avatar]').forEach(item => item.classList.remove('selected'));
+        avatarItem.classList.add('selected');
+        
+        // Show the "Apply" button
+        document.getElementById('avatar-actions').style.display = 'block';
+    }
+
+    // NEW: Handle theme selection clicks
+    const themeItem = e.target.closest('.selection-item[data-theme]');
+    if (themeItem) {
+        const newTheme = themeItem.dataset.theme;
+        // Unlike avatars, themes can be applied instantly for preview.
+        applyTheme(newTheme);
+    }
+});
 
 /**
  * NEW: Shows a confirmation modal before allowing the user to edit account details.
@@ -1645,6 +1888,7 @@ function confirmAccountEdit() {
         document.getElementById('account-name-input').disabled = false;
         document.getElementById('account-pin-input').disabled = false;
         document.getElementById('account-name-input').focus();
+        document.getElementById('save-account-btn').style.display = 'block'; // Show save button
     };
 }
 
@@ -1669,14 +1913,14 @@ async function saveAccountChanges() {
     }
 
     // NEW: Show the full-screen updating modal
-    const updateModal = document.getElementById('account-update-modal');
-    const titleEl = document.getElementById('account-update-title');
-    const messageEl = document.getElementById('account-update-message');
-    const spinnerContainer = document.getElementById('account-update-spinner-container');
-    const successContainer = document.getElementById('account-update-success-container');
+    const updateModal = document.getElementById('spinner-modal');
+    const titleEl = document.getElementById('spinner-modal-title');
+    const messageEl = document.getElementById('spinner-modal-message');
+    const spinnerContainer = document.getElementById('spinner-modal-spinner-container');
+    const successContainer = document.getElementById('spinner-modal-success-container');
 
-    if (updateModal) showUpdateModal(true);
-
+    if (updateModal) showSpinnerModal(true, 'Updating Account...', 'Please wait while we migrate your data.');
+    
     const oldUserId = getOrCreateUserId(); // Gets ID based on old localStorage values
     const newUserId = `user_${newName.toLowerCase().replace(/[^a-z0-9]/g, '')}_${newPin}`;
 
@@ -1701,25 +1945,27 @@ async function saveAccountChanges() {
         setTimeout(() => window.location.reload(), 1500);
     } catch (error) {
         console.error("Error updating account:", error);
-        if (updateModal) showUpdateModal(false); // Hide modal on failure
+        if (updateModal) showSpinnerModal(false); // Hide modal on failure
         showNotification('Failed to update account. Please try again.', 'error');
     }
 }
 
 /**
- * NEW: Helper function to show or hide the account update modal and reset its state.
+ * NEW: Helper function to show or hide the generic spinner modal and reset its state.
  * @param {boolean} show - True to show the modal, false to hide it.
+ * @param {string} [title=''] - The title to display in the modal.
+ * @param {string} [message=''] - The message to display in the modal.
  */
-function showUpdateModal(show) {
-    const modal = document.getElementById('account-update-modal');
+function showSpinnerModal(show, title = '', message = '') {
+    const modal = document.getElementById('spinner-modal');
     if (!modal) return;
 
     if (show) {
         // Reset to initial "updating" state before showing
-        document.getElementById('account-update-title').textContent = 'Updating Account...';
-        document.getElementById('account-update-message').textContent = 'Please wait while we migrate your data. This may take a moment.';
-        document.getElementById('account-update-spinner-container').style.display = 'block';
-        document.getElementById('account-update-success-container').style.display = 'none';
+        document.getElementById('spinner-modal-title').textContent = title || 'Loading...';
+        document.getElementById('spinner-modal-message').textContent = message || 'Please wait.';
+        document.getElementById('spinner-modal-spinner-container').style.display = 'block';
+        document.getElementById('spinner-modal-success-container').style.display = 'none';
         modal.classList.add('visible');
     } else {
         modal.classList.remove('visible');
@@ -1786,13 +2032,13 @@ async function deleteAccount() {
     const userId = getOrCreateUserId();
     
     // Use the account update modal to show deletion progress
-    const updateModal = document.getElementById('account-update-modal');
-    const titleEl = document.getElementById('account-update-title');
-    const messageEl = document.getElementById('account-update-message');
+    const updateModal = document.getElementById('spinner-modal');
+    const titleEl = document.getElementById('spinner-modal-title');
+    const messageEl = document.getElementById('spinner-modal-message');
     if (updateModal && titleEl && messageEl) {
         titleEl.textContent = 'Deleting Account...';
         messageEl.textContent = 'Your data is being permanently removed. Please wait.';
-        showUpdateModal(true);
+        showSpinnerModal(true, 'Deleting Account...', 'Your data is being permanently removed. Please wait.');
     }
 
     try {
@@ -1802,13 +2048,14 @@ async function deleteAccount() {
 
         // Clear local storage
         localStorage.clear(); // Clears everything for a full reset
+    userProgress = {}; // Reset in-memory progress
 
-        if (updateModal) showUpdateModal(false);
+        if (updateModal) showSpinnerModal(false);
         showNotification('Account deleted successfully. Reloading...', 'success');
         setTimeout(() => window.location.reload(), 2000);
     } catch (error) {
         console.error("Error deleting account:", error);
-        if (updateModal) showUpdateModal(false);
+        if (updateModal) showSpinnerModal(false);
         showNotification('Failed to delete account. Please try again.', 'error');
     }
 }
@@ -1818,49 +2065,36 @@ async function deleteAccount() {
  * Defaults to 'system' for new users.
  */
 function initializeTheme() {
-    // This function is now called AFTER user profile is loaded.
-    const themeButtons = document.querySelectorAll('.theme-btn');
-    if (!themeButtons.length) return; // Guard against missing elements
-
-    // Use theme from userProgress if available, otherwise default to 'system'.
-    const savedTheme = userProgress.theme || 'system';
-
-    const applyTheme = (theme) => {
-        if (theme === 'system') {
-            // Check OS preference and apply it
-            const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            document.documentElement.setAttribute('data-color-scheme', systemPrefersDark ? 'dark' : 'light');
-        } else {
-            document.documentElement.setAttribute('data-color-scheme', theme);
-        }
-
-        // Update the active state of the buttons
-        themeButtons.forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.theme === theme);
-        });
-    };
-
-    // Apply the initial theme on load
-    applyTheme(savedTheme);
-
-    // Add click listeners to each theme button
-    themeButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            const newTheme = button.dataset.theme;
-            // NEW: Save theme to userProgress object and sync with Firestore
-            userProgress.theme = newTheme;
-            saveUserProgress();
-            applyTheme(newTheme);
-        });
-    });
-
+    // This function is now just for one-time setup.
+    // The population logic is moved to populateCustomizationGrids.
     // Add a listener to automatically change theme if OS preference changes and 'system' is selected
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
-        if (localStorage.getItem('theme') === 'system' || !localStorage.getItem('theme')) {
+        if (userProgress.theme === 'system' || !userProgress.theme) {
             const newColorScheme = event.matches ? "dark" : "light";
             document.documentElement.setAttribute('data-color-scheme', newColorScheme);
         }
     });
+}
+
+function applyTheme(theme, shouldSave = true) {
+    // This function is now called AFTER user profile is loaded.
+    
+    if (theme === 'system') {
+        // Check OS preference and apply it
+        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.setAttribute('data-color-scheme', systemPrefersDark ? 'dark' : 'light');
+    } else {
+        document.documentElement.setAttribute('data-color-scheme', theme);
+    }
+
+    // Save the new theme preference
+    if (shouldSave) {
+        userProgress.theme = theme;
+        saveUserProgress();
+    }
+
+    // Re-populate to update the 'active' state on the buttons
+    populateCustomizationGrids();
 }
 
 // ===================== NEW: DAILY CHALLENGE =====================
@@ -2106,6 +2340,8 @@ async function checkUserProfile() { // NEW: Make this function async
     // NEW: These are now called after user data is loaded, ensuring they have the correct data.
     initializeTheme();
     initializeInfoPopup();
+    QuizifyStore.showStoreUpdatesModal(); // NEW: Moved here to ensure it runs after user data is loaded.
+    checkDailyCoinReward(); // NEW: Check for daily coin reward
     updateStreakDisplay();
     document.getElementById('app-version').textContent = `v${APP_VERSION}`;
     document.getElementById('menu-app-version').textContent = `v${APP_VERSION}`;
@@ -2253,6 +2489,58 @@ function showLockedContentMessage() {
     document.getElementById('locked-content-modal').classList.add('visible');
 }
 
+/**
+ * NEW: Initializes the "Feature Coming Soon" modal.
+ */
+function initializeFeatureComingSoonModal() {
+    const modal = document.getElementById('feature-coming-soon-modal');
+    const closeBtn = document.getElementById('close-feature-coming-soon-btn');
+
+    if (!modal || !closeBtn) return;
+
+    const closeModal = () => modal.classList.remove('visible');
+
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+}
+
+/**
+ * NEW: Shows the "Feature Coming Soon" modal.
+ */
+function showFeatureComingSoonModal() {
+    const modal = document.getElementById('feature-coming-soon-modal');
+    if (modal) modal.classList.add('visible');
+}
+
+/**
+ * NEW: Initializes the purchase success modal.
+ */
+function initializePurchaseSuccessModal() {
+    const modal = document.getElementById('purchase-success-modal');
+    const closeBtn = document.getElementById('close-purchase-success-btn');
+
+    if (!modal || !closeBtn) return;
+
+    const closeModal = () => modal.classList.remove('visible');
+
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+}
+
+/**
+ * NEW: Shows the purchase success modal with a custom message.
+ * @param {string} itemName - The name of the item that was purchased.
+ */
+function showPurchaseSuccessModal(itemName) {
+    const modal = document.getElementById('purchase-success-modal');
+    const messageEl = document.getElementById('purchase-success-message');
+    if (!modal || !messageEl) return;
+
+    messageEl.textContent = `You have successfully purchased "${itemName}".`;
+    modal.classList.add('visible');
+}
 // ===================== NEW: LOGOUT CONFIRMATION MODAL =====================
 function initializeLogoutConfirmation() {
     const modal = document.getElementById('logout-confirm-modal');
@@ -2267,6 +2555,7 @@ function initializeLogoutConfirmation() {
         localStorage.removeItem('userName');
         localStorage.removeItem('userFocus');
         localStorage.removeItem('userPin'); // NEW: Clear PIN on logout
+    userProgress.activeAvatar = '👤'; // Reset avatar
         window.location.reload();
     });
 
@@ -2557,8 +2846,11 @@ function initializeSideMenu() {
     const menuHomeBtn = document.getElementById('menu-home-btn');
     const menuBookmarksBtn = document.getElementById('menu-bookmarks-btn');
     const menuCommunityBtn = document.getElementById('menu-community-btn');
+    const menuAboutUsBtn = document.getElementById('menu-about-us-btn'); // NEW
     const menuSettingsBtn = document.getElementById('menu-settings-btn'); // NEW
+    const menuAchievementsBtn = document.getElementById('menu-achievements-btn'); // NEW
     const menuProfileBtn = document.getElementById('menu-profile-btn'); // NEW
+    const menuStoreBtn = document.getElementById('menu-store-btn'); // NEW
     const menuLeaderboardBtn = document.getElementById('menu-leaderboard-btn');
     const menuOverlay = document.getElementById('menu-overlay');
     
@@ -2566,6 +2858,7 @@ function initializeSideMenu() {
         document.getElementById('side-menu').classList.add('open');
         document.getElementById('menu-overlay').classList.add('visible');
         document.getElementById('menu-toggle-btn').classList.add('is-active');
+        updateCoinDisplay(); // FIX: Update coin display when menu opens
         checkCommunityUpdates(); // Re-check to ensure dot is visible if menu was closed
     };
 
@@ -2583,6 +2876,14 @@ function initializeSideMenu() {
         displayCommunityPosts();
         closeSideMenu();
     });
+    menuAboutUsBtn.addEventListener('click', () => { // NEW
+        displayAboutUsPage();
+        closeSideMenu();
+    });
+    menuAchievementsBtn.addEventListener('click', () => { // NEW
+        displayAchievements();
+        closeSideMenu();
+    });
     menuSettingsBtn.addEventListener('click', () => { // NEW
         goToSettings();
         closeSideMenu();
@@ -2591,12 +2892,24 @@ function initializeSideMenu() {
         displayProfilePage();
         closeSideMenu();
     });
+    menuStoreBtn.addEventListener('click', () => { // NEW
+        QuizifyStore.displayStorePage(); // Use the new store module
+        closeSideMenu();
+    });
     menuLeaderboardBtn.addEventListener('click', () => {
         displayLeaderboard();
         closeSideMenu();
     });
     menuOverlay.addEventListener('click', closeSideMenu);
 }
+
+/**
+ * NEW: Displays the About Us page.
+ */
+function displayAboutUsPage() {
+    showPage('about-us-page');
+}
+
 
 // ===================== NEW: HOMEPAGE GLOBAL SEARCH =====================
 function initializeHomepageSearch() {
@@ -2818,10 +3131,25 @@ function displayCommunityPosts() {
 
     const versions = Object.keys(COMMUNITY_POSTS); // Keys are already in newest-to-oldest order
 
+    // NEW: Add a timeline container
+    const timelineContainer = document.createElement('div');
+    timelineContainer.className = 'timeline';
+    container.appendChild(timelineContainer);
+
     versions.forEach(version => {
         const post = COMMUNITY_POSTS[version];
         const postCard = document.createElement('div');
         postCard.className = 'community-post-card';
+
+        // NEW: Icon mapping based on post type
+        const iconMap = {
+            feature: '⭐',
+            security: '🛡️',
+            content: '📚',
+            ui: '🎨',
+            update: '🔧'
+        };
+        const icon = iconMap[post.type] || '⚙️'; // Default icon
 
         let bodyHtml = '<ul>';
         post.changes.forEach(change => {
@@ -2829,18 +3157,21 @@ function displayCommunityPosts() {
         });
         bodyHtml += '</ul>';
 
+        // NEW: Add a separate developer note section if it exists
         if (post.note) {
-            bodyHtml += `<p class="developer-note"><strong>Developer's Note:</strong> ${post.note}</p>`;
+            bodyHtml += `<div class="developer-note"><strong>Developer's Note:</strong> ${post.note}</div>`;
         }
 
+        // NEW: Updated card structure for the timeline design
         postCard.innerHTML = `
+            <div class="timeline-icon">${icon}</div>
             <div class="community-post-header">
                 <h3>Version ${version}</h3>
                 <span class="post-date">${post.date || 'N/A'}</span>
             </div>
             <div class="community-post-body">${bodyHtml}</div>
         `;
-        container.appendChild(postCard);
+        timelineContainer.appendChild(postCard);
     });
 
     showPage('community-page');
@@ -2937,6 +3268,51 @@ function initializeProfilePage() {
     // This function is for any one-time setup if needed.
 }
 
+/**
+ * NEW: Initializes the event listeners for the profile page tabs.
+ */
+function initializeProfileTabs() {
+    const tabsContainer = document.querySelector('.profile-tabs');
+    if (!tabsContainer) return;
+
+    tabsContainer.addEventListener('click', (e) => {
+        if (e.target.classList.contains('profile-tab-btn')) {
+            const tabId = e.target.dataset.tab;
+
+            // Update button active state
+            document.querySelectorAll('.profile-tab-btn').forEach(btn => btn.classList.remove('active'));
+            e.target.classList.add('active');
+
+            // Update content active state
+            document.querySelectorAll('.profile-tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+        }
+    });
+}
+
+/**
+ * NEW: Initializes the event listeners for the settings page tabs.
+ */
+function initializeSettingsTabs() {
+    const tabsContainer = document.getElementById('settings-tabs-container');
+    if (!tabsContainer) return;
+
+    tabsContainer.addEventListener('click', (e) => {
+        const targetButton = e.target.closest('.profile-tab-btn');
+        if (targetButton) {
+            const tabId = targetButton.dataset.tab;
+
+            // Update button active state
+            document.querySelectorAll('#settings-tabs-container .profile-tab-btn').forEach(btn => btn.classList.remove('active'));
+            targetButton.classList.add('active');
+
+            // Update content active state
+            document.querySelectorAll('#settings-page .profile-tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+        }
+    });
+}
+
 function displayProfilePage() {
     const userName = localStorage.getItem('userName') || 'Guest';
     const userFocus = localStorage.getItem('userFocus') || 'Not Set';
@@ -2945,6 +3321,10 @@ function displayProfilePage() {
     document.getElementById('profile-user-focus').textContent = userFocus.charAt(0).toUpperCase() + userFocus.slice(1);
 
     const stats = calculateOverallStats();
+
+    // NEW: Update avatar on profile page display
+    const avatarDisplay = document.getElementById('profile-avatar-display');
+    avatarDisplay.textContent = userProgress.activeAvatar || '👤';
 
     document.getElementById('profile-quizzes-taken').textContent = stats.totalQuizzes;
     document.getElementById('profile-average-score').textContent = `${stats.averageScore.toFixed(0)}%`;
@@ -2956,6 +3336,9 @@ function displayProfilePage() {
     // NEW: Analyze and display topic strengths
     const topicAnalysis = analyzeTopicStrength();
     displayTopicStrength(topicAnalysis);
+
+    // NEW: Initialize all history filters and populate the history list
+    initializeHistoryFilters();
 
 
 
@@ -3002,8 +3385,10 @@ function saveProfileStats(stats) {
 
 function createOrUpdatePerformanceChart(subjectStats) {
     const ctx = document.getElementById('profile-chart-container');
-    ctx.innerHTML = '<canvas id="performanceChart"></canvas>'; // Clear and add canvas
+    // NEW: Add a list container for mobile view
+    ctx.innerHTML = '<canvas id="performanceChart"></canvas><div id="mobile-performance-list" class="mobile-performance-list"></div>';
     const canvas = document.getElementById('performanceChart');
+    const mobileList = document.getElementById('mobile-performance-list');
 
     const labels = Object.keys(subjectStats).map(getSubjectTitle);
     const data = Object.values(subjectStats).map(stat => stat.totalScore / stat.count);
@@ -3033,6 +3418,32 @@ function createOrUpdatePerformanceChart(subjectStats) {
             }
         }
     });
+
+    // NEW: Populate the mobile-friendly list view
+    mobileList.innerHTML = ''; // Clear previous list
+    labels.forEach((label, index) => {
+        const score = data[index];
+        const item = document.createElement('div');
+        let progressBarColor;
+
+        // NEW: Determine color based on score
+        if (score >= 70) {
+            progressBarColor = 'linear-gradient(135deg, var(--color-success), #1a9a4a)';
+        } else if (score >= 40) {
+            progressBarColor = 'linear-gradient(135deg, var(--color-warning), #d48806)';
+        } else {
+            progressBarColor = 'linear-gradient(135deg, var(--color-error), #c0152f)';
+        }
+
+        item.className = 'performance-list-item';
+        item.innerHTML = `
+            <div class="subject-name">${label} <span>${score.toFixed(0)}%</span></div>
+            <div class="progress-bar-container">
+                <div class="progress-bar" style="width: ${score}%; background: ${progressBarColor};"></div>
+            </div>
+        `;
+        mobileList.appendChild(item);
+    });
 }
 
 // ===================== NEW: TOPIC STRENGTH ANALYSIS =====================
@@ -3050,13 +3461,18 @@ function analyzeTopicStrength() {
         if (key.startsWith('daily_challenge') || !key.includes('_')) {
             continue;
         }
-        // A valid quiz progress key looks like 'subject_chapter_setIndex'
-        const parts = key.split('_');
-        if (parts.length >= 3 && userProgress[key] && typeof userProgress[key].score === 'number') {
-            const subject = parts[0];
-            const chapter = parts[1];
-            const chapterKey = `${subject}_${chapter}`;
 
+        // FIX: Robustly parse the key to handle chapter names with spaces.
+        // The key format is 'subject_chapter_name_setIndex'.
+        const lastUnderscoreIndex = key.lastIndexOf('_');
+        if (lastUnderscoreIndex > 0 && userProgress[key] && typeof userProgress[key].score === 'number') {
+            const subjectAndChapter = key.substring(0, lastUnderscoreIndex);
+            const firstUnderscoreIndex = subjectAndChapter.indexOf('_');
+            if (firstUnderscoreIndex === -1) continue; // Invalid format
+
+            const subject = subjectAndChapter.substring(0, firstUnderscoreIndex);
+            const chapter = subjectAndChapter.substring(firstUnderscoreIndex + 1);
+            const chapterKey = `${subject}_${chapter}`;
             if (!chapterScores[chapterKey]) {
                 chapterScores[chapterKey] = { scores: [], name: chapter, subject: getSubjectTitle(subject) };
             }
@@ -3104,6 +3520,236 @@ function displayTopicStrength(analysisData) {
     improvementList.innerHTML = analysisData.improvements.length ? analysisData.improvements.map(t => `<li>${t.name} <span>${t.score}%</span></li>`).join('') : '<li>No specific areas for improvement found yet. Keep it up!</li>';
 }
 
+/**
+ * NEW: Initializes all filters for the quiz history section and populates the initial view.
+ */
+function initializeHistoryFilters() {
+    const subjectFilter = document.getElementById('history-subject-filter');
+    const chapterFilter = document.getElementById('history-chapter-filter');
+    const statusFilter = document.getElementById('history-status-filter');
+
+    if (!subjectFilter || !chapterFilter || !statusFilter) return;
+
+    // --- 1. Populate Subject Filter ---
+    const attemptedSubjects = new Set();
+    for (const key in userProgress) {
+        if (key.includes('_') && !key.startsWith('daily_challenge')) {
+            const subjectKey = key.split('_')[0];
+            // Check if it's a valid subject from our data to avoid adding junk keys
+            if (subjectData[subjectKey] || Object.values(classData).some(c => c.subjects.includes(subjectKey))) {
+                attemptedSubjects.add(subjectKey);
+            }
+        }
+    }
+
+    subjectFilter.innerHTML = '<option value="all">All Subjects</option>';
+    attemptedSubjects.forEach(subject => {
+        const option = document.createElement('option');
+        option.value = subject;
+        option.textContent = getSubjectTitle(subject);
+        subjectFilter.appendChild(option);
+    });
+
+    // --- 2. Add Event Listeners ---
+    // FIX: Populate the status filter dropdown dynamically.
+    statusFilter.innerHTML = `
+        <option value="all">All</option>
+        <option value="passed">Passed</option>
+        <option value="failed">Failed</option>
+    `;
+
+    subjectFilter.addEventListener('change', () => {
+        populateChapterFilter();
+        populateQuizHistory();
+    });
+    chapterFilter.addEventListener('change', populateQuizHistory);
+    statusFilter.addEventListener('change', populateQuizHistory);
+
+    // --- 3. Initial Population ---
+    populateChapterFilter(); // Populate chapters based on default "All Subjects"
+    populateQuizHistory();   // Populate the history list for the first time
+}
+
+/**
+ * NEW: Populates the chapter filter based on the selected subject.
+ */
+function populateChapterFilter() {
+    const subjectFilter = document.getElementById('history-subject-filter');
+    const chapterFilter = document.getElementById('history-chapter-filter');
+    const selectedSubject = subjectFilter.value;
+
+    chapterFilter.innerHTML = '<option value="all">All Chapters</option>'; // Reset
+
+    if (selectedSubject === 'all') {
+        chapterFilter.disabled = true;
+        return;
+    }
+
+    const attemptedChapters = new Set();
+    for (const key in userProgress) {
+        if (key.startsWith(selectedSubject + '_') && userProgress[key] && Array.isArray(userProgress[key].attempts)) {
+            const chapterName = key.split('_')[1];
+            attemptedChapters.add(chapterName);
+        }
+    }
+
+    if (attemptedChapters.size > 0) {
+        attemptedChapters.forEach(chapter => {
+            const option = document.createElement('option');
+            option.value = chapter;
+            option.textContent = chapter;
+            chapterFilter.appendChild(option);
+        });
+        chapterFilter.disabled = false;
+    } else {
+        chapterFilter.disabled = true;
+    }
+}
+
+/**
+ * NEW: Gathers, filters, and displays all quiz attempts in the history section.
+ */
+function populateQuizHistory() {
+    const historyContainer = document.getElementById('history-list-container');
+    if (!historyContainer) return;
+
+    historyContainer.innerHTML = ''; // Clear previous list
+
+    const subjectFilter = document.getElementById('history-subject-filter').value;
+    const chapterFilter = document.getElementById('history-chapter-filter').value;
+    const statusFilter = document.getElementById('history-status-filter').value;
+
+    const allAttempts = [];
+
+    // 1. Gather all attempts from the userProgress object
+    for (const key in userProgress) {
+        // Check for a valid quiz progress key (e.g., 'subject_chapter_setIndex')
+        if (key.includes('_') && !key.startsWith('daily_challenge') && userProgress[key] && Array.isArray(userProgress[key].attempts)) {
+            const [subject, chapter, setIndex] = key.split('_');
+            
+            userProgress[key].attempts.forEach(attempt => {
+                allAttempts.push({
+                    subject,
+                    chapter,
+                    setIndex: parseInt(setIndex, 10),
+                    score: attempt.score,
+                    date: new Date(attempt.date),
+                    passed: attempt.score >= 40
+                });
+            });
+        }
+    }
+
+    // 2. Sort attempts by date, most recent first
+    allAttempts.sort((a, b) => b.date - a.date);
+
+    // 3. Filter attempts based on dropdown selections
+    const filteredAttempts = allAttempts.filter(attempt => {
+        const subjectMatch = (subjectFilter === 'all' || attempt.subject === subjectFilter);
+        const chapterMatch = (chapterFilter === 'all' || attempt.chapter === chapterFilter);
+        const statusMatch = (statusFilter === 'all' || (statusFilter === 'passed' && attempt.passed) || (statusFilter === 'failed' && !attempt.passed));
+        return subjectMatch && chapterMatch && statusMatch;
+    });
+
+    // 4. Display the filtered attempts
+    if (filteredAttempts.length === 0) {
+        historyContainer.innerHTML = '<p class="setting-description" style="text-align: center;">No quiz history found for the selected filters.</p>';
+        return;
+    }
+
+    filteredAttempts.forEach(attempt => {
+        const item = document.createElement('div');
+        const statusClass = attempt.passed ? 'passed' : 'failed';
+        item.className = `history-item ${statusClass}`;
+
+        // Add data attributes to uniquely identify this attempt for future review functionality
+        item.dataset.subject = attempt.subject;
+        item.dataset.chapter = attempt.chapter;
+        item.dataset.setIndex = attempt.setIndex;
+        item.dataset.attemptDate = attempt.date.toISOString(); // Store ISO string for precise lookup
+
+        item.onclick = () => {
+            reviewHistoricalQuiz(attempt);
+        };
+
+        const formattedDate = attempt.date.toLocaleDateString('en-GB', {
+            day: 'numeric', month: 'short', year: 'numeric'
+        });
+
+        item.innerHTML = `
+            <div class="history-item-details">
+                <h4>${getSubjectTitle(attempt.subject)} - ${attempt.chapter} (Set ${attempt.setIndex + 1})</h4>
+                <p>Attempted on: ${formattedDate}</p>
+            </div>
+            <div class="history-item-score">
+                <span class="stat-value">${attempt.score}%</span>
+            </div>
+        `;
+        historyContainer.appendChild(item);
+    });
+}
+
+/**
+ * NEW: Prepares and displays the review page for a specific historical quiz attempt.
+ * @param {object} attempt - The historical attempt object from userProgress.
+ */
+function reviewHistoricalQuiz(attempt) {
+    // Find the full attempt data from userProgress using the precise date
+    const progressKey = `${attempt.subject}_${attempt.chapter}_${attempt.setIndex}`;
+    const fullAttemptData = userProgress[progressKey]?.attempts.find(
+        a => new Date(a.date).toISOString() === attempt.date.toISOString()
+    );
+
+    if (!fullAttemptData || !fullAttemptData.answers) {
+        showNotification('Could not find the answers for this quiz attempt.', 'error'); // This was step 1, but I've renumbered for clarity
+        return;
+    }
+
+    // Find the correct set of questions for this attempt
+    let questionSet = null;
+
+    // Check if it's a competitive subject
+    const subjectKey = attempt.subject;
+    const chapterName = attempt.chapter;
+    const setIndex = attempt.setIndex;
+
+    // Try to find in competitive data first
+    if (subjectData[subjectKey]) {
+        const chapter = subjectData[subjectKey].chapters?.find(ch => ch.name === chapterName);
+        if (chapter && chapter.sets[setIndex]) {
+            questionSet = chapter.sets[setIndex];
+        }
+    }
+
+    // If not found, search in academic data
+    if (!questionSet && classData) {
+        for (const classKey in classData) {
+            const classInfo = classData[classKey];
+            if (classInfo.chapters && classInfo.chapters[subjectKey]) {
+                const chapter = classInfo.chapters[subjectKey].find(ch => ch.name === chapterName);
+                if (chapter && chapter.sets[setIndex]) {
+                    questionSet = chapter.sets[setIndex];
+                    break; // Found it, no need to search other classes
+                }
+            }
+        }
+    }
+
+    if (!questionSet) {
+        showNotification('Could not load questions for this historical attempt.', 'error');
+        return;
+    }
+
+    // 2. Set up the review page
+    const backBtn = document.getElementById('review-page-back-btn');
+    backBtn.onclick = displayProfilePage; // Set back button to go to the profile
+    document.getElementById('review-page-title').textContent = `Review: ${attempt.chapter} - Set ${attempt.setIndex + 1}`;
+
+    // 3. Display the review with the historical data
+    displayReview(questionSet, fullAttemptData.answers);
+    showPage('review-page');
+}
+
 // ===================== NEW: FIREBASE & LEADERBOARD FUNCTIONS =====================
 
 /**
@@ -3139,6 +3785,7 @@ async function saveResultToFirestore(name, userId, quizTitle, score) {
             await userLeaderboardRef.set({
                 name: name,
                 score: score,
+                activeAvatar: userProgress.activeAvatar || '👤', // NEW: Save avatar with score
                 lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
             });
             console.log("Leaderboard updated with new high score!");
@@ -3182,12 +3829,22 @@ async function displayLeaderboard() {
             const isCurrentUser = doc.id === currentUserId;
             if (isCurrentUser) {
                 userInTop10 = true;
+                // NEW: Add avatar to the current user's rank display
+                const userAvatar = userProgress.activeAvatar || '👤';
+                userRankDetails.innerHTML = `<span class="leaderboard-avatar">${userAvatar}</span>` + userRankDetails.innerHTML;
+
             }
             
             // Add medal classes for top 3
             const rankClass = rank <= 3 ? `rank-${rank}` : '';
             const medalIcon = rank <= 3 ? `<span class="leaderboard-medal"></span>` : '';
-            const listItem = `<li class="${isCurrentUser ? 'current-user-rank' : ''} ${rankClass}"><span class="leaderboard-rank">${rank}.</span> ${medalIcon} <span class="leaderboard-name">${data.name}</span> <span class="leaderboard-score">${data.score}%</span></li>`;
+            // NEW: Add avatar to each list item
+            const avatar = data.activeAvatar || '👤'; // Use saved avatar or default
+            const listItem = `<li class="${isCurrentUser ? 'current-user-rank' : ''} ${rankClass}">
+                                <span class="leaderboard-rank">${rank}.</span>
+                                <span class="leaderboard-avatar">${avatar}</span>
+                                ${medalIcon} <span class="leaderboard-name">${data.name}</span> <span class="leaderboard-score">${data.score}%</span>
+                              </li>`;
             leaderboardList.innerHTML += listItem;
             rank++;
         });
@@ -3206,9 +3863,11 @@ async function displayLeaderboard() {
                 const userRank = higherRankSnapshot.size + 1;
 
                 // Display user's rank
+                const userAvatar = userProgress.activeAvatar || '👤';
                 userRankDetails.innerHTML = `
                     <span class="leaderboard-rank">${userRank}.</span>
-                    <span class="leaderboard-name">${userName} (You)</span>
+                    <span class="leaderboard-avatar">${userAvatar}</span>
+                    <span class="leaderboard-name">${userName} (You)</span> 
                     <span class="leaderboard-score">${userScore}%</span>
                 `;
                 userRankContainer.style.display = 'block';
@@ -3274,3 +3933,381 @@ async function migrateFirestoreDocument(collection, oldId, newId, updateData = {
 function addIdToQuestion(question, subject, chapter, setIndex, qIndex) {
     question.id = `${subject}_${chapter}_${setIndex}_${qIndex}`;
 }
+
+// ===================== NEW: ACHIEVEMENTS SYSTEM =====================
+
+function initializeAchievements() {
+    const modal = document.getElementById('achievement-unlocked-modal');
+    const closeBtn = document.getElementById('close-achievement-modal-btn');
+    if (modal && closeBtn) {
+        closeBtn.onclick = () => modal.classList.remove('visible');
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) modal.classList.remove('visible');
+        });
+    }
+}
+
+/**
+ * Checks for and awards achievements based on the latest quiz result and overall progress.
+ * @param {object} results - The results object from the just-completed quiz.
+ */
+function checkAchievements(results, timeTaken) {
+    // FIX: Refactor the logic to allow multiple achievements to be unlocked at once.
+    // This ensures that on the first quiz, a user can get 'First Step', 'Achiever', and 'Perfectionist' simultaneously.
+    if (!userProgress.achievements) userProgress.achievements = [];
+
+
+    const stats = calculateOverallStats();
+    const totalQuizzes = stats.totalQuizzes;
+
+    // Check for 'First Quiz' and 'Achiever' achievements.
+    // These should only be awarded once.
+    if (totalQuizzes > 0) {
+        if (!hasAchievement('first_quiz')) {
+            unlockAchievement('first_quiz');
+        }
+        if (results.passed && !hasAchievement('passed_quiz')) {
+            unlockAchievement('passed_quiz');
+        }
+    }
+
+    // Check for 'Perfect Score'. This can be awarded multiple times if we enhance the system later,
+    // but for now, we check if it's the first time.
+    if (results.percentage === 100 && !hasAchievement('perfect_score')) {
+        unlockAchievement('perfect_score');
+    }
+
+    // 4. Chapter Master
+    const chapterKeyPrefix = `${currentSubject}_${currentChapter}`;
+    let passedSetsInChapter = 0;
+    for (let i = 0; i < 5; i++) {
+        const progress = userProgress[`${chapterKeyPrefix}_${i}`];
+        if (progress && progress.score >= 40) {
+            passedSetsInChapter++;
+        }
+    }
+    if (passedSetsInChapter === 5 && !hasAchievement(`chapter_master_${chapterKeyPrefix}`)) {
+        unlockAchievement(`chapter_master_${chapterKeyPrefix}`, ACHIEVEMENTS.chapter_master);
+    }
+
+    // 5. Streak Achievements
+    const streak = userProgress.streak || 0;
+    if (streak >= 5 && !hasAchievement('streak_5')) {
+        unlockAchievement('streak_5');
+    }
+    if (streak >= 10 && !hasAchievement('streak_10')) {
+        unlockAchievement('streak_10');
+    }
+
+    // NEW: Speed Demon - Pass with average time < 30s/question
+    const averageTimePerQuestion = timeTaken / (quizData.length || 1); // Avoid division by zero
+    if (results.passed && averageTimePerQuestion < 30 && !hasAchievement('speed_demon')) {
+        unlockAchievement('speed_demon');
+    }
+
+    // NEW: Comeback Kid - Pass a quiz that was previously failed
+    const progressKey = `${currentSubject}_${currentChapter}_${currentSet}`;
+    if (results.passed && hasPreviouslyFailed(progressKey) && !hasAchievement('comeback_kid')) {
+        unlockAchievement('comeback_kid');
+    }
+
+    // NEW: Dedicated Learner & Quiz Master
+    if (totalQuizzes >= 10 && !hasAchievement('dedicated_learner')) {
+        unlockAchievement('dedicated_learner');
+    }
+    if (totalQuizzes >= 50 && !hasAchievement('quiz_master')) {
+        unlockAchievement('quiz_master');
+    }
+
+    // After checking, save any new achievements
+    if (unlockedAchievements.size > 0) {
+        saveUserProgress();
+    }
+}
+
+function hasAchievement(id) {
+    return userProgress.achievements && userProgress.achievements.some(ach => ach.id === id);
+}
+
+function unlockAchievement(id, achievementData = null) {
+    if (hasAchievement(id)) return;
+
+    const achievement = achievementData || ACHIEVEMENTS[id];
+    if (!achievement) return;
+
+    userProgress.achievements.push({ id, name: achievement.name, date: new Date().toISOString() });
+    unlockedAchievements.add(id); // Track for this session
+
+    // Show the unlock modal
+    const modal = document.getElementById('achievement-unlocked-modal');
+    document.getElementById('achievement-icon').textContent = achievement.icon;
+    document.getElementById('achievement-name').textContent = achievement.name;
+    document.getElementById('achievement-description').textContent = achievement.description;
+    modal.classList.add('visible');
+
+    // Update notification dots
+    document.getElementById('menu-notification-dot').style.display = 'block';
+    document.getElementById('achievements-notification-dot').style.display = 'block';
+}
+
+function displayAchievements() {
+    const grid = document.getElementById('achievements-grid');
+    grid.innerHTML = '';
+
+    // FIX: Ensure userProgress.achievements is an array before trying to access it.
+    if (!userProgress.achievements) {
+        userProgress.achievements = [];
+    }
+
+    for (const id in ACHIEVEMENTS) {
+        const achievement = ACHIEVEMENTS[id];
+        // FIX: Make the check for multi-instance achievements like 'chapter_master' more specific.
+        // This prevents potential conflicts if other achievement IDs share a prefix.
+        const isUnlocked = hasAchievement(id) || 
+                           (id.startsWith('chapter_master') && userProgress.achievements.some(a => a.id.startsWith('chapter_master_')));
+
+        const card = document.createElement('div');
+        card.className = `achievement-card ${isUnlocked ? 'unlocked' : ''}`;
+        card.innerHTML = `
+            <div class="achievement-card-icon">${achievement.icon}</div>
+            <h3 class="achievement-card-title">${achievement.name}</h3>
+            <p class="achievement-card-description">${achievement.description}</p>
+        `;
+        grid.appendChild(card);
+    }
+
+    // Hide notification dot after viewing
+    document.getElementById('achievements-notification-dot').style.display = 'none';
+    if (localStorage.getItem('lastSeenVersion') === Object.keys(COMMUNITY_POSTS)[0]) {
+        document.getElementById('menu-notification-dot').style.display = 'none';
+    }
+
+    showPage('achievements-page');
+}
+
+// ===================== NEW: DAILY COIN REWARD FUNCTIONS =====================
+
+function initializeDailyCoinModal() {
+    const modal = document.getElementById('daily-coin-modal');
+    const collectBtn = document.getElementById('collect-daily-coin-btn');
+    const closeBtn = document.getElementById('close-daily-coin-btn');
+
+    if (!modal || !collectBtn || !closeBtn) return;
+
+    collectBtn.addEventListener('click', () => {
+        quizCoins += 2;
+        const today = new Date().toISOString().split('T')[0];
+        userProgress.lastDailyCoinCollectionDate = today;
+        userProgress.quizCoins = quizCoins;
+        
+        saveUserProgress();
+        updateCoinDisplay();
+        
+        modal.classList.remove('visible');
+        if (dailyCoinReminderInterval) {
+            clearInterval(dailyCoinReminderInterval);
+            dailyCoinReminderInterval = null;
+        }
+        
+        showNotification('You collected 2 daily coins! 💰', 'success');
+    });
+
+    closeBtn.addEventListener('click', () => {
+        modal.classList.remove('visible');
+        // The reminder interval is handled in showDailyCoinModal
+    });
+}
+
+function checkDailyCoinReward() {
+    const today = new Date().toISOString().split('T')[0];
+    const lastCollectionDate = userProgress.lastDailyCoinCollectionDate;
+
+    if (lastCollectionDate !== today) {
+        showDailyCoinModal();
+    }
+}
+
+function showDailyCoinModal() {
+    document.getElementById('daily-coin-modal').classList.add('visible');
+    // If user closes it, remind them every 2 minutes until collected
+    if (!dailyCoinReminderInterval) {
+        dailyCoinReminderInterval = setInterval(showDailyCoinModal, 2 * 60 * 1000); // 2 minutes
+    }
+}
+
+// ===================== NEW: CUSTOMIZATION FUNCTIONS =====================
+
+/**
+ * Populates the avatar and theme selection grids in the settings page.
+ */
+function populateCustomizationGrids() {
+    // --- Populate Themes ---
+    const themeGrid = document.getElementById('theme-selection-grid');
+    if (!themeGrid) return;
+
+    themeGrid.innerHTML = '';
+    const purchasedThemes = userProgress.purchasedItems?.themes || ['system', 'light', 'dark'];
+    const allThemes = [
+        { id: 'system', name: 'System', icon: '💻' },
+        { id: 'light', name: 'Light', icon: '☀️' },
+        { id: 'dark', name: 'Dark', icon: '🌙' },
+        ...QuizifyStore.STORE_ITEMS.themes // Add purchasable themes
+    ];
+
+    allThemes.forEach(theme => {
+        if (purchasedThemes.includes(theme.id)) {
+            const item = document.createElement('div');
+            item.className = 'selection-item';
+            item.dataset.theme = theme.id;
+            item.title = theme.name;
+            item.innerHTML = `<div class="selection-item-icon">${theme.icon}</div>`;
+            if (theme.id === (userProgress.theme || 'system')) {
+                item.classList.add('active');
+            }
+            themeGrid.appendChild(item);
+        }
+    });
+
+    // --- Populate Avatars ---
+    const avatarGrid = document.getElementById('avatar-selection-grid');
+    if (!avatarGrid) return;
+
+    avatarGrid.innerHTML = '';
+    const purchasedAvatarIds = userProgress.purchasedItems?.avatars || ['👤'];
+
+    // Create a combined list of all possible avatars (default + purchasable)
+    const allAvatars = [
+        { id: '👤', name: 'Default', icon: '👤' }, // Ensure default is always available
+        ...QuizifyStore.STORE_ITEMS.avatars
+    ];
+
+    // Filter to get the full objects for purchased avatars
+    const purchasedAvatars = allAvatars.filter(avatar => purchasedAvatarIds.includes(avatar.id));
+
+    // Use a Set to avoid duplicates if the default '👤' is also in the store items
+    const uniquePurchasedAvatars = [...new Map(purchasedAvatars.map(item => [item.id, item])).values()];
+
+    uniquePurchasedAvatars.forEach(avatarObj => {
+        const avatar = avatarObj.icon || avatarObj.id; // Use icon or id for the emoji
+
+        const item = document.createElement('div');
+        item.className = 'selection-item';
+        item.dataset.avatar = avatar;
+        item.innerHTML = `<div class="selection-item-icon">${avatar}</div>`;
+        if (avatar === (userProgress.activeAvatar || '👤')) {
+            item.classList.add('active');
+        }
+        avatarGrid.appendChild(item);
+    });
+}
+
+/**
+ * Applies the selected theme and saves the preference.
+ * @param {string} theme - The theme ID to apply.
+ */
+/**
+ * Sets the selected avatar as active and saves the preference.
+ * @param {string} avatar - The avatar emoji/ID to set as active.
+ */
+function selectAvatar(avatar) {
+    if (userProgress.activeAvatar === avatar) return; // No change needed
+
+    userProgress.activeAvatar = avatar;
+    saveUserProgress(); // Save to Firestore
+    updateLeaderboardAvatar(avatar); // NEW: Update leaderboard immediately
+
+    // Update UI
+    document.getElementById('profile-avatar-display').textContent = avatar;
+    populateCustomizationGrids(); // Re-render to update the 'active' highlight
+    showNotification('Avatar updated!', 'success');
+}
+
+/**
+ * NEW: Updates the user's avatar in the leaderboard collection in Firestore.
+ * This ensures the change is reflected even without a new high score.
+ * @param {string} avatar - The new avatar emoji/ID.
+ */
+async function updateLeaderboardAvatar(avatar) {
+    const userId = getOrCreateUserId();
+    const userLeaderboardRef = leaderboardCollection.doc(userId);
+    try {
+        await userLeaderboardRef.update({ activeAvatar: avatar });
+        console.log("Leaderboard avatar updated successfully.");
+    } catch (error) {
+        console.log("Leaderboard avatar update skipped (user may not have a score yet). Error: ", error.code);
+    }
+}
+
+// ===================== NEW: LIFELINE FUNCTIONS =====================
+
+function updateLifelineDisplay() {
+    document.getElementById('lifeline-5050-count').textContent = userProgress.lifelines?.fiftyFifty ?? 0;
+    document.getElementById('lifeline-hint-count').textContent = userProgress.lifelines?.hint ?? 0;
+    document.getElementById('lifeline-skip-count').textContent = userProgress.lifelines?.skip ?? 0;
+}
+
+function useFiftyFifty() {
+    if (!userProgress.lifelines || userProgress.lifelines.fiftyFifty <= 0) {
+        showNotification("You don't have any 50-50 lifelines!", 'error');
+        return;
+    }
+
+    // Disable the button immediately to prevent multiple clicks
+    const fiftyFiftyBtn = document.getElementById('lifeline-5050');
+    if (fiftyFiftyBtn) fiftyFiftyBtn.disabled = true;
+
+    // Decrement lifeline count and save progress
+    userProgress.lifelines.fiftyFifty--;
+    saveUserProgress();
+    updateLifelineDisplay();
+
+    const question = quizData[currentQuestionIndex];
+    const correctAnswerIndex = question.answer;
+    const optionElements = document.querySelectorAll('.option');
+    
+    // Get indices of all incorrect options
+    let wrongOptions = [0, 1, 2, 3].filter(i => i !== correctAnswerIndex);
+    
+    // Shuffle the wrong options and pick the first two to hide
+    wrongOptions.sort(() => Math.random() - 0.5);
+    const optionsToHide = wrongOptions.slice(0, 2);
+
+    // Hide the selected incorrect options
+    optionsToHide.forEach(index => {
+        if (optionElements[index]) {
+            optionElements[index].style.visibility = 'hidden';
+            optionElements[index].classList.add('disabled'); // Also disable clicks
+        }
+    });
+}
+
+function useHint() {
+    if (userProgress.lifelines.hint <= 0) {
+        showNotification("You don't have any hint lifelines!", 'error');
+        return;
+    }
+
+    userProgress.lifelines.hint--;
+    saveUserProgress();
+    updateLifelineDisplay();
+
+    const question = quizData[currentQuestionIndex];
+    const hint = question.hint || "No hint is available for this question.";
+    showNotification(hint, 'info');
+
+    document.getElementById('lifeline-hint').disabled = true; // Disable for this question
+}
+
+function useSkip() {
+    if (userProgress.lifelines.skip <= 0) {
+        showNotification("You don't have any skip lifelines!", 'error');
+        return;
+    }
+
+    userProgress.lifelines.skip--;
+    saveUserProgress();
+    updateLifelineDisplay();
+
+    nextQuestion(); // Simply move to the next question
+}
+
