@@ -74,16 +74,20 @@ const QuizifyStore = {
         if (storePage) {
             // Use event delegation to handle clicks on buy buttons
             storePage.addEventListener('click', (e) => {
-                if (e.target.classList.contains('buy-lifeline-btn')) {
-                    const itemType = e.target.dataset.type;
-                    const itemId = e.target.dataset.id;
+                // Use closest to ensure clicks on nested elements inside the button are handled
+                const buyBtn = e.target.closest ? e.target.closest('.buy-lifeline-btn') : null;
+                const sellBtn = e.target.closest ? e.target.closest('.sell-item-btn') : null;
+                if (buyBtn) {
+                    const itemType = buyBtn.dataset.type;
+                    const itemId = buyBtn.dataset.id;
                     this.showPurchaseConfirmation(itemType, itemId);
+                    return;
                 }
-                // NEW: Handle sell button clicks
-                if (e.target.classList.contains('sell-item-btn')) {
-                    const itemType = e.target.dataset.type;
-                    const itemId = e.target.dataset.id;
+                if (sellBtn) {
+                    const itemType = sellBtn.dataset.type;
+                    const itemId = sellBtn.dataset.id;
                     this.showSellConfirmation(itemType, itemId);
+                    return;
                 }
             });
 
@@ -590,7 +594,8 @@ const QuizifyStore = {
     purchaseLifeline(type, cost) {
         if (this._app.quizCoins >= cost) {
             this._app.userProgress.quizCoins = (this._app.userProgress.quizCoins || 0) - cost;
-            this._app.userProgress.lifelines[type]++;
+            this._app.userProgress.lifelines = this._app.userProgress.lifelines || {};
+            this._app.userProgress.lifelines[type] = (this._app.userProgress.lifelines[type] || 0) + 1;
             this._app.saveUserProgress();
             this.renderStoreItems(); // Re-render to update coin display
             this._app.updateCoinDisplay();
@@ -648,8 +653,21 @@ const QuizifyStore = {
      * NEW: Handles logic for purchasing a utility item.
      */
     purchaseUtility(id, cost) {
-        // This is a placeholder. The actual logic for using utilities will be in app.js.
-        // For now, we just add it to the user's inventory.
+        // Handle purchasing a utility token (adds to userProgress.utilities)
+        if (this._app.quizCoins >= cost) {
+            this._app.userProgress.quizCoins = (this._app.userProgress.quizCoins || 0) - cost;
+            this._app.purchasedItems = this._app.purchasedItems || { themes: ['system', 'light', 'dark'], avatars: ['👤'] };
+            this._app.userProgress.utilities = this._app.userProgress.utilities || {};
+            this._app.userProgress.utilities[id] = (this._app.userProgress.utilities[id] || 0) + 1;
+            // Persist the purchase
+            this._app.userProgress.purchasedItems = this._app.purchasedItems;
+            this._app.saveUserProgress();
+            this.renderStoreItems();
+            this._app.updateCoinDisplay();
+            this._app.showPurchaseSuccessModal(`${this.UTILITY_ITEMS[id].name}`);
+        } else {
+            this._app.showNotification("Not enough Quiz Coins! Complete quizzes to earn more.", 'error');
+        }
     },
 
     /**
@@ -658,7 +676,7 @@ const QuizifyStore = {
      * @param {string} itemId - The specific ID of the item.
      * @param {number} cost - The cost of the item.
      */
-    purchaseItem(itemType, itemId) {
+    purchaseItem(itemType, itemId, cost) {
         // Find the item from the correct source to get its full details
         let item;
         if (itemType === 'utilities') {
@@ -669,21 +687,21 @@ const QuizifyStore = {
 
         if (!item) {
             console.error(`Item to purchase not found: type=${itemType}, id=${itemId}`);
-            this._app.showNotification('An unexpected error occurred. Please try again.', 'error');
+            this._app.showNotification('An unexpected error occurred. Please refresh and try again.', 'error');
             return;
         }
 
         if (itemType === 'avatars') {
             const avatar = this.STORE_ITEMS.avatars.find(a => a.id === itemId);
-            if (avatar) this.purchaseAvatar(avatar, avatar.cost);
+            if (avatar) this.purchaseAvatar(avatar, cost ?? avatar.cost);
         } else if (itemType === 'themes') {
             const theme = this.STORE_ITEMS.themes.find(t => t.id === itemId);
-            if (theme) this.purchaseTheme(theme, theme.cost);
+            if (theme) this.purchaseTheme(theme, cost ?? theme.cost);
         } else if (itemType === 'lifelines') {
             const lifeline = this.STORE_ITEMS.lifelines.find(l => l.id === itemId);
-            if (lifeline) this.purchaseLifeline(lifeline.id, lifeline.cost);
+            if (lifeline) this.purchaseLifeline(lifeline.id, cost ?? lifeline.cost);
         } else if (itemType === 'utilities') {
-            // This logic is currently handled in `showPurchaseConfirmation` to show the "Coming Soon" modal.
+            // Utilities are shown as Coming Soon in confirmation UI for now.
         }
     },
 
