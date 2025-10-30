@@ -1,0 +1,182 @@
+/* Store Page Responsive Layout */
+.store-page-redesigned {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+/* Store Header */
+.store-header {
+    padding: var(--space-16);
+}
+
+/* Store Tabs Navigation */
+.store-tabs {
+    display: flex;
+    gap: var(--space-8);
+    border-bottom: 1px solid var(--color-border);
+    margin-bottom: var(--space-24);
+    overflow-x: auto;
+    padding-bottom: var(--space-8);
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    position: sticky;
+    top: 0;
+    background: var(--color-surface);
+    z-index: 10;
+}
+
+.store-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+/* Store Content Layout */
+.store-layout {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-24);
+}
+
+.store-tab-content-wrapper {
+    flex: 1;
+    min-width: 0;
+}
+
+/* Store Grid Layout */
+.store-item-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--space-16);
+}
+
+/* Scrollable Content Areas */
+.store-items-scroll {
+    max-height: calc(100vh - 250px);
+    overflow-y: auto;
+    padding: var(--space-8);
+    margin: 0 -var(--space-8);
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border) transparent;
+}
+
+.store-items-scroll::-webkit-scrollbar {
+    width: 6px;
+}
+
+.store-items-scroll::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.store-items-scroll::-webkit-scrollbar-thumb {
+    background-color: var(--color-border);
+    border-radius: var(--radius-full);
+}
+
+/* Category Content Areas */
+.daily-deals-section,
+.lifelines-section,
+.themes-section,
+.avatars-section,
+.utilities-section {
+    background: var(--color-surface);
+    border-radius: var(--radius-lg);
+    padding: var(--space-16);
+    margin-bottom: var(--space-24);
+}
+
+/* Horizontal Scrolling Sections */
+.lifeline-container,
+.utilities-container {
+    display: flex;
+    gap: var(--space-12);
+    overflow-x: auto;
+    padding: var(--space-12) var(--space-8);
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.lifeline-container::-webkit-scrollbar,
+.utilities-container::-webkit-scrollbar {
+    display: none;
+}
+
+/* Store Items */
+.store-item {
+    background: var(--color-surface);
+    border-radius: var(--radius-lg);
+    padding: var(--space-16);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-12);
+    transition: transform 0.2s ease;
+}
+
+/* Responsive Breakpoints */
+@media (max-width: 768px) {
+    .store-tab-btn {
+        flex: 0 0 auto;
+        white-space: nowrap;
+        padding: var(--space-8) var(--space-16);
+        font-size: var(--font-size-base);
+    }
+
+    .store-item {
+        width: 100%;
+    }
+
+    .store-items-scroll {
+        max-height: calc(100vh - 200px);
+    }
+}
+
+@media (max-width: 640px) {
+    .store-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-12);
+    }
+
+    .store-coin-balance-wrapper {
+        width: 100%;
+    }
+
+    .store-item-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (min-width: 769px) {
+    .store-layout {
+        flex-direction: row;
+    }
+
+    .store-tabs {
+        flex-direction: column;
+        width: 200px;
+        border-bottom: none;
+        border-right: 1px solid var(--color-border);
+        padding-right: var(--space-16);
+        margin-right: var(--space-24);
+        position: sticky;
+        top: var(--space-24);
+        max-height: calc(100vh - 100px);
+        overflow-y: auto;
+        padding-bottom: 0;
+    }
+
+    .store-tab-btn {
+        width: 100%;
+        text-align: left;
+        padding: var(--space-12) var(--space-16);
+        border-left: 3px solid transparent;
+        border-bottom: none;
+    }
+
+    .store-tab-btn.active {
+        border-left-color: var(--color-primary);
+        border-bottom-color: transparent;
+    }
+}
