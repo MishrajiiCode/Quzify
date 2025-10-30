@@ -681,7 +681,7 @@ const QuizifyStore = {
             if (theme) this.purchaseTheme(theme, theme.cost);
         } else if (itemType === 'lifelines') {
             const lifeline = this.STORE_ITEMS.lifelines.find(l => l.id === itemId);
-            if (lifeline) this.purchaseLifeline(lifeline, lifeline.cost);
+            if (lifeline) this.purchaseLifeline(lifeline.id, lifeline.cost);
         } else if (itemType === 'utilities') {
             // This logic is currently handled in `showPurchaseConfirmation` to show the "Coming Soon" modal.
         }
