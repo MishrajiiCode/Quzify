@@ -2,7 +2,7 @@
 // app.js - Complete Quiz Platform with Class and Competitive Exam functionality
 // Only business logic - questions stored in separate data files
 // ===================== APP CHANGELOG =====================
-const APP_VERSION = '2.0.0'; // NEW: Stable Release Version
+const APP_VERSION = '2.0.1'; // NEW: Stable Release Version
 
 const COMMUNITY_POSTS = {
     '2.0.0': {
@@ -141,6 +141,11 @@ let dailyCoinReminderInterval = null; // NEW: For the daily coin reminder
 // NEW: Daily Challenge state
 let dailyChallengeMode = false;
 let quizTimerSetting = 60; // NEW: Default time per question in seconds
+// NEW: Time Freeze lifeline state
+let isTimerFrozen = false;
+let freezeInterval = null;
+let freezeRemaining = 0; // seconds remaining while frozen
+const FREEZE_DURATION = 30; // seconds
 
 
 // ===================== DATA & FIREBASE SETUP =====================
@@ -179,6 +184,7 @@ document.addEventListener('DOMContentLoaded', async function() { // Make async
         initializeLockedContentModal();
         initializeSettingsPage();
         initializeQuizModeModal();
+            initializeImageViewer();
         initializeLeaderboard();
         initializeProfilePage();
         initializeAchievements(); // NEW
@@ -247,6 +253,14 @@ async function loadAllQuizData() {
     try {
         const snapshot = await quizzesCollection.get();
         allQuizData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        // Ensure modules that captured an earlier reference get the fresh data
+        if (typeof MockTest !== 'undefined') {
+            MockTest._allQuizData = allQuizData;
+            // Refresh mock-test related UI/status now that data is available
+            if (typeof MockTest.checkAndDisplayDailyMock === 'function') {
+                try { MockTest.checkAndDisplayDailyMock(); } catch (e) { console.warn('MockTest refresh failed', e); }
+            }
+        }
         console.log("All quiz data loaded from Firestore.");
         showSpinnerModal(false); // Hide spinner on success
     } catch (error) {
@@ -340,6 +354,9 @@ function initializeEventListeners() {
     document.getElementById('lifeline-5050').addEventListener('click', useFiftyFifty);
     document.getElementById('lifeline-hint').addEventListener('click', useHint);
     document.getElementById('lifeline-skip').addEventListener('click', useSkip);
+    // NEW: Time Freeze lifeline
+    const freezeBtn = document.getElementById('lifeline-freeze');
+    if (freezeBtn) freezeBtn.addEventListener('click', useTimeFreeze);
     // NEW: Re-add chat button event listeners
     document.getElementById('send-chat-message-btn').addEventListener('click', () => QuizifyChat.sendChatMessage());
     document.getElementById('open-chat-fab').addEventListener('click', () => QuizifyChat.openGlobalChat());
@@ -355,6 +372,33 @@ function initializeEventListeners() {
             selectClassSubject(subjectCard.dataset.subject);
         }
     });
+
+    // --- Sample Paper Modal: robust close handlers ---
+    try {
+        const sampleModal = document.getElementById('sample-paper-modal');
+        const closeSampleBtn = document.getElementById('close-sample-paper-modal-btn');
+        const openNewTabBtn = document.getElementById('open-sample-paper-new-tab-btn');
+        const previewContainer = document.getElementById('sample-paper-preview');
+        if (closeSampleBtn && sampleModal) {
+            // Close when clicking the × button
+            closeSampleBtn.addEventListener('click', () => {
+                sampleModal.classList.remove('visible');
+                if (previewContainer) previewContainer.innerHTML = '';
+                if (openNewTabBtn) openNewTabBtn.style.display = 'none';
+            });
+
+            // Also allow clicking on the overlay (outside modal-content) to close
+            sampleModal.addEventListener('click', (ev) => {
+                if (ev.target === sampleModal) {
+                    sampleModal.classList.remove('visible');
+                    if (previewContainer) previewContainer.innerHTML = '';
+                    if (openNewTabBtn) openNewTabBtn.style.display = 'none';
+                }
+            });
+        }
+    } catch (e) {
+        console.warn('Sample paper modal handlers initialization failed', e);
+    }
 }
 
 /**
@@ -545,13 +589,14 @@ function initializeQuizModeModal() {
         modal.classList.remove('visible');
     };
 
+    // When a mode is chosen, we first show the instructions modal before starting the quiz.
     timedBtn.onclick = () => {
         closeModal();
-        startQuiz(pendingSetIndex);
+        showQuizInstructions('timed');
     };
     practiceBtn.onclick = () => {
         closeModal();
-        startPracticeMode(pendingSetIndex);
+        showQuizInstructions('practice');
     };
     closeBtn.onclick = closeModal; // NEW
 
@@ -561,6 +606,88 @@ function initializeQuizModeModal() {
             closeModal();
         }
     });
+}
+
+/**
+ * Shows the quiz instructions modal populated with details for the pending set.
+ * @param {'timed'|'practice'} mode
+ */
+function showQuizInstructions(mode) {
+    const modal = document.getElementById('quiz-instructions-modal');
+    const summaryEl = document.getElementById('quiz-instructions-summary');
+    const titleEl = document.getElementById('quiz-instructions-title');
+    if (!modal || !summaryEl) return;
+
+    // Determine context from global state
+    const subjectTitle = getSubjectTitle(currentSubject || (isGeneralScienceMode ? 'General Science' : '')) || 'Quiz';
+    const chapter = currentChapter || '';
+    const setIndex = pendingSetIndex >= 0 ? pendingSetIndex : currentSet;
+
+    // Attempt to find number of questions for this set
+    let questionsCount = 0;
+    try {
+        let chapterData = null;
+        if (classMode && !academicDailyChallenge) {
+            chapterData = allQuizData.find(d => d.id === `class${currentClass}_${currentSubject}` && d.category === 'academic')?.chapters.find(ch => ch.name === currentChapter);
+        } else if (isGeneralScienceMode && !dailyChallengeMode) {
+            chapterData = allQuizData.find(d => d.id === currentSubject && d.category === 'general_science')?.chapters.find(ch => ch.name === currentChapter);
+        } else if (!classMode && !dailyChallengeMode) {
+            chapterData = allQuizData.find(d => d.id === currentSubject && d.category === 'competitive')?.chapters.find(ch => ch.name === currentChapter);
+        }
+        questionsCount = chapterData?.sets?.[setIndex]?.questions?.length || 0;
+    } catch (e) {
+        questionsCount = 0;
+    }
+
+    const estimatedTimeSec = questionsCount * quizTimerSetting; // seconds
+    const minutes = Math.floor(estimatedTimeSec / 60);
+
+    titleEl.textContent = mode === 'timed' ? 'Timed Quiz - Instructions' : 'Practice Mode - Instructions';
+    summaryEl.innerHTML = `
+        <strong>Subject:</strong> ${subjectTitle}<br>
+        <strong>Chapter:</strong> ${chapter || '—'}<br>
+        <strong>Set:</strong> ${setIndex + 1}<br>
+        <strong>Questions:</strong> ${questionsCount}<br>
+        <strong>Estimated time:</strong> ${minutes} minute(s)${mode === 'practice' ? ' (No timer in Practice Mode)' : ''}
+    `;
+
+    // Wire start/cancel buttons
+    const startBtn = document.getElementById('start-quiz-from-instructions-btn');
+    const cancelBtn = document.getElementById('cancel-quiz-instructions-btn');
+    const closeBtn = document.getElementById('close-quiz-instructions-btn');
+
+    const onStart = () => {
+        modal.classList.remove('visible');
+        // Start the selected mode
+        if (mode === 'timed') {
+            startQuiz(pendingSetIndex);
+        } else {
+            startPracticeMode(pendingSetIndex);
+        }
+        // Clean listeners (defensive)
+        startBtn.removeEventListener('click', onStart);
+        cancelBtn.removeEventListener('click', onCancel);
+        closeBtn.removeEventListener('click', onCancel);
+    };
+
+    const onCancel = () => {
+        modal.classList.remove('visible');
+        // reset pendingSetIndex only if we don't want to carry it over
+        // leave pendingSetIndex untouched so user can re-open mode modal
+        startBtn.removeEventListener('click', onStart);
+        cancelBtn.removeEventListener('click', onCancel);
+        closeBtn.removeEventListener('click', onCancel);
+    };
+
+    // Attach listeners
+    startBtn.removeEventListener('click', onStart); // defensive
+    startBtn.addEventListener('click', onStart);
+    cancelBtn.removeEventListener('click', onCancel);
+    cancelBtn.addEventListener('click', onCancel);
+    closeBtn.removeEventListener('click', onCancel);
+    closeBtn.addEventListener('click', onCancel);
+
+    modal.classList.add('visible');
 }
 /**
  * Checks if a chapter object contains any questions.
@@ -747,6 +874,16 @@ function displaySubjectsForClass() {
     dailyChallengeCard.onclick = () => startAcademicDailyChallenge();
     grid.appendChild(dailyChallengeCard);
 
+    // Sample Papers card for the class (opens a modal listing all sample papers uploaded for this class)
+    const samplePaperCard = document.createElement('div');
+    samplePaperCard.className = 'subject-card sample-paper-card';
+    samplePaperCard.innerHTML = `
+        <h2>Sample Papers</h2>
+        <p>Open sample papers for Class ${currentClass}</p>
+    `;
+    samplePaperCard.onclick = () => openSamplePapersViewer(currentClass);
+    grid.appendChild(samplePaperCard);
+
     let subjects = [];
     const classSubjects = allQuizData.filter(d => d.category === 'academic' && d.id.startsWith(`class${currentClass}_`));
 
@@ -800,6 +937,144 @@ function displaySubjectsForClass() {
     });
 
     checkAcademicDailyChallengeStatus(); // NEW: Check status when displaying subjects
+}
+
+/**
+ * Opens the Sample Papers viewer modal for a given class.
+ * It aggregates sample papers from all academic subject docs for the class
+ * and lists them for preview or opening in a new tab.
+ */
+function openSamplePapersViewer(classNum) {
+    const modal = document.getElementById('sample-paper-modal');
+    const listContainer = document.getElementById('sample-paper-list');
+    const previewContainer = document.getElementById('sample-paper-preview');
+    const openNewTabBtn = document.getElementById('open-sample-paper-new-tab-btn');
+    listContainer.innerHTML = '';
+    previewContainer.innerHTML = '';
+    openNewTabBtn.style.display = 'none';
+
+    // Gather all academic docs for this class
+    const docs = allQuizData.filter(d => d.category === 'academic' && String(d.class) === String(classNum));
+    if (!docs || docs.length === 0) {
+        listContainer.innerHTML = '<p>No sample papers found for this class.</p>';
+        modal.classList.add('visible');
+        return;
+    }
+
+    const items = [];
+    docs.forEach(doc => {
+        const subjectName = doc.subjectName || doc.id;
+        const sp = doc.samplePapers || {};
+        // If samplePapers is a string (legacy), normalize
+        if (typeof sp === 'string' && sp.trim()) {
+            items.push({ title: subjectName + ' (default)', url: sp });
+        } else if (typeof sp === 'object') {
+            for (const key in sp) {
+                if (!sp[key]) continue;
+                const title = key === 'default' ? `${subjectName}` : `${subjectName} - ${key.toUpperCase()}`;
+                items.push({ title, url: sp[key] });
+            }
+        }
+    });
+
+    if (items.length === 0) {
+        listContainer.innerHTML = '<p>No sample papers have been uploaded yet for this class.</p>';
+        modal.classList.add('visible');
+        return;
+    }
+
+    // Build list UI
+    const ul = document.createElement('ul');
+    ul.style.listStyle = 'none';
+    ul.style.padding = '0';
+    items.forEach((it, idx) => {
+        const li = document.createElement('li');
+        li.style.padding = '8px 0';
+        li.style.borderBottom = '1px solid var(--color-border)';
+        li.innerHTML = `<a href="#" data-url="${encodeURI(it.url)}" class="sample-paper-link">${it.title}</a>`;
+        ul.appendChild(li);
+    });
+    listContainer.appendChild(ul);
+
+    // Wire click events to preview or open
+    listContainer.querySelectorAll('.sample-paper-link').forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const url = decodeURI(link.dataset.url);
+            previewContainer.innerHTML = '';
+            openNewTabBtn.style.display = 'inline-block';
+            openNewTabBtn.onclick = () => { window.open(url, '_blank'); };
+
+            // Simple detection for PDF vs image
+            const lower = url.toLowerCase();
+            if (lower.endsWith('.pdf') || lower.includes('pdf')) {
+                // embed pdf in iframe but handle blocked/failed loads
+                previewContainer.innerHTML = '';
+                const iframe = document.createElement('iframe');
+                iframe.src = url;
+                iframe.style.width = '100%';
+                iframe.style.height = '480px';
+                iframe.style.border = '0';
+                // Add listeners to detect load or failure (X-Frame-Options or connection refused)
+                let loadHandled = false;
+                const fail = (msg) => {
+                    if (loadHandled) return;
+                    loadHandled = true;
+                    previewContainer.innerHTML = `<div style="padding:12px;border:1px solid var(--color-border);background:var(--color-secondary);">Could not preview this document inside the app. The host may block embedding (e.g. X-Frame-Options). You can open it in a new tab instead.</div>`;
+                    openNewTabBtn.style.display = 'inline-block';
+                    openNewTabBtn.onclick = () => { window.open(url, '_blank'); };
+                    console.warn('Sample paper preview failed:', msg, url);
+                };
+
+                // onload may still fire even for some blocked cases; use a timeout as a fallback
+                iframe.onload = () => {
+                    if (loadHandled) return;
+                    loadHandled = true;
+                    // loaded successfully
+                    // nothing else to do; iframe is visible
+                };
+                iframe.onerror = () => fail('iframe error');
+
+                // If the iframe doesn't load within 3s, assume it's blocked and show fallback
+                const t = setTimeout(() => {
+                    if (!loadHandled) {
+                        fail('timeout or blocked');
+                    }
+                    clearTimeout(t);
+                }, 3000);
+
+                previewContainer.appendChild(iframe);
+            } else {
+                // show image preview with onerror fallback
+                previewContainer.innerHTML = '';
+                const img = document.createElement('img');
+                img.src = url;
+                img.alt = 'Sample Paper';
+                img.style.maxWidth = '100%';
+                img.style.height = 'auto';
+                img.style.border = '1px solid var(--color-border)';
+                img.onerror = () => {
+                    previewContainer.innerHTML = `<div style="padding:12px;border:1px solid var(--color-border);background:var(--color-secondary);">Could not load the image preview. You can open it in a new tab instead.</div>`;
+                    openNewTabBtn.style.display = 'inline-block';
+                    openNewTabBtn.onclick = () => { window.open(url, '_blank'); };
+                };
+                previewContainer.appendChild(img);
+            }
+        });
+    });
+
+    // Show modal
+    modal.classList.add('visible');
+
+    // Close handler
+    const closeBtn = document.getElementById('close-sample-paper-modal-btn');
+    if (closeBtn) {
+        closeBtn.onclick = () => {
+            modal.classList.remove('visible');
+            previewContainer.innerHTML = '';
+            openNewTabBtn.style.display = 'none';
+        };
+    }
 }
 
 function displayStreamsForClass() {
@@ -1212,6 +1487,40 @@ function displayQuestion() {
 
     // Display question
     document.getElementById('question-text').textContent = question.question;
+    // Optional question image (added by admin via imageUrl)
+    const qImgEl = document.getElementById('question-image');
+    const openImgBtn = document.getElementById('open-question-image-btn');
+    if (qImgEl) {
+        if (question.imageUrl && question.imageUrl.toString().trim()) {
+            qImgEl.src = question.imageUrl;
+            qImgEl.alt = question.alt ? question.alt : `Image for question ${currentQuestionIndex + 1}`;
+            qImgEl.style.display = 'block';
+            // If image fails to load, hide it gracefully
+            qImgEl.onerror = () => {
+                qImgEl.style.display = 'none';
+                qImgEl.src = '';
+                qImgEl.alt = '';
+                if (openImgBtn) openImgBtn.style.display = 'none';
+            };
+            // Show and wire the Open Image button (UX improvement requested)
+            if (openImgBtn) {
+                openImgBtn.style.display = 'inline-block';
+                openImgBtn.onclick = () => {
+                    try { window.openImageViewer(question.imageUrl, question.alt || `Image for question ${currentQuestionIndex + 1}`); } catch (e) { console.warn('Failed to open image', e); }
+                };
+                // Also make the thumbnail clickable to open the viewer
+                qImgEl.style.cursor = 'pointer';
+                qImgEl.onclick = () => {
+                    try { window.openImageViewer(question.imageUrl, question.alt || `Image for question ${currentQuestionIndex + 1}`); } catch (e) { console.warn('Failed to open image', e); }
+                };
+            }
+        } else {
+            qImgEl.style.display = 'none';
+            qImgEl.src = '';
+            qImgEl.alt = '';
+            if (openImgBtn) openImgBtn.style.display = 'none';
+        }
+    }
     
     // Display options
     const optionsContainer = document.getElementById('options-container');
@@ -1247,6 +1556,8 @@ function displayQuestion() {
     document.getElementById('lifeline-5050').disabled = false;
     document.getElementById('lifeline-hint').disabled = false;
     document.getElementById('lifeline-skip').disabled = false;
+    // Reset Time Freeze button as well
+    if (document.getElementById('lifeline-freeze')) document.getElementById('lifeline-freeze').disabled = false;
 
     updateQuestionNumbers();
 }
@@ -1513,6 +1824,14 @@ function submitQuiz() {
     displayResults(results, timeTaken);
     showPage('results-page'); 
 
+    // Restore chat and help bot visibility after quiz submission
+    try {
+        const chatFab = document.getElementById('open-chat-fab');
+        const botFab = document.getElementById('open-help-bot-fab');
+        if (chatFab) chatFab.style.display = 'inline-flex';
+        if (botFab) botFab.style.display = 'inline-flex';
+    } catch (e) { /* Ignore if elements are not present */ }
+
     // NEW: Check for achievements AFTER displaying results and saving progress.
     checkAchievements(results, timeTaken);
     updateCoinDisplay(); // NEW: Update coin display after potential earnings
@@ -1778,6 +2097,32 @@ function displayReview(questions, userAnswersForQuiz) {
         }
         
         reviewDiv.innerHTML = reviewHTML;
+        // If the question has an image, add it to the review card (before the options block)
+        if (question.imageUrl && question.imageUrl.toString().trim()) {
+            try {
+                const imgEl = document.createElement('img');
+                imgEl.className = 'question-thumbnail';
+                imgEl.src = question.imageUrl;
+                imgEl.alt = `Image for question ${index + 1}`;
+                imgEl.onerror = () => { imgEl.style.display = 'none'; };
+                // Insert before the options container if present
+                const optionsBlock = reviewDiv.querySelector('.review-options');
+                if (optionsBlock) {
+                    reviewDiv.insertBefore(imgEl, optionsBlock);
+                } else {
+                    reviewDiv.appendChild(imgEl);
+                }
+                // Make review thumbnails clickable to open full-size image
+                imgEl.style.cursor = 'pointer';
+                imgEl.addEventListener('click', () => {
+                    try { window.openImageViewer(question.imageUrl, question.alt || `Image for question ${index + 1}`); } catch (e) { console.warn('Failed to open review image', e); }
+                });
+            } catch (e) {
+                // If anything goes wrong, skip image for safety
+                console.warn('Failed to add review image:', e);
+            }
+        }
+
         reviewContainer.appendChild(reviewDiv);
     });
 }
@@ -1830,7 +2175,7 @@ async function loadUserProgress() {
             // NEW: Initialize for a brand new user on Firestore
             userProgress = {
                 quizCoins: 50, // Starting coins
-                lifelines: { fiftyFifty: 3, hint: 3, skip: 3 }, // Starting lifelines
+                lifelines: { fiftyFifty: 3, hint: 3, skip: 3, timeFreeze: 1 }, // Starting lifelines (include Time Freeze)
                 achievements: [],
                 bookmarks: [],
                 purchasedItems: { themes: ['system', 'light', 'dark'], avatars: ['👤'] },
@@ -1849,7 +2194,7 @@ async function loadUserProgress() {
     // --- NEW: Initialize local state from the loaded userProgress object ---
     // This ensures consistency for both new and existing users.
     quizCoins = userProgress.quizCoins || 50;
-    lifelines = userProgress.lifelines || { fiftyFifty: 3, hint: 3, skip: 3 }; // Default lifelines
+    lifelines = userProgress.lifelines || { fiftyFifty: 3, hint: 3, skip: 3, timeFreeze: 1 }; // Default lifelines (include Time Freeze)
     bookmarkedQuestions = userProgress.bookmarks || []; // Ensure bookmarks are loaded
     userProgress.purchasedItems = userProgress.purchasedItems || { themes: ['system', 'light', 'dark'], avatars: ['👤'] };
     userProgress.activeAvatar = userProgress.activeAvatar || '👤';
@@ -1861,6 +2206,8 @@ async function loadUserProgress() {
     
     // Apply the loaded theme
     applyTheme(userProgress.theme, false); // false to prevent re-saving
+    // Update lifeline UI counts after loading progress
+    updateLifelineDisplay();
 
 }
 
@@ -2331,6 +2678,13 @@ function startDailyChallenge() {
     displayQuestion();
     startTimer();
     updateBookmarkButton(); // Add this line
+    // Hide chat and bot while the Daily Challenge is active
+    try {
+        const chatFab = document.getElementById('open-chat-fab');
+        const botFab = document.getElementById('open-help-bot-fab');
+        if (chatFab) chatFab.style.display = 'none';
+        if (botFab) botFab.style.display = 'none';
+    } catch (e) { /* Ignore if elements are not present */ }
     setupQuestionNumbers();
     showPage('quiz-page');
 }
@@ -2461,6 +2815,13 @@ function startAcademicDailyChallenge() {
     displayQuestion();
     startTimer();
     updateBookmarkButton();
+    // Hide chat and bot while the Academic Daily Challenge is active
+    try {
+        const chatFab = document.getElementById('open-chat-fab');
+        const botFab = document.getElementById('open-help-bot-fab');
+        if (chatFab) chatFab.style.display = 'none';
+        if (botFab) botFab.style.display = 'none';
+    } catch (e) { /* Ignore if elements are not present */ }
     setupQuestionNumbers();
     showPage('quiz-page');
 }
@@ -3887,26 +4248,40 @@ function populateQuizHistory() {
  * @param {object} attempt - The historical attempt object from userProgress.
  */
 function reviewHistoricalQuiz(attempt) {
-    // Find the full attempt data from userProgress using the precise date
+    // Try to locate the saved attempt data robustly.
     const progressKey = `${attempt.subject}_${attempt.chapter}_${attempt.setIndex}`;
-    const fullAttemptData = userProgress[progressKey]?.attempts.find(
+
+    // Primary lookup: direct key match
+    let fullAttemptData = userProgress[progressKey]?.attempts?.find(
         a => new Date(a.date).toISOString() === attempt.date.toISOString()
     );
 
+    // Fallback 1: search all progress entries for a matching attempt by ISO date
+    if (!fullAttemptData) {
+        for (const key in userProgress) {
+            const p = userProgress[key];
+            if (p && Array.isArray(p.attempts)) {
+                const found = p.attempts.find(a => new Date(a.date).toISOString() === attempt.date.toISOString());
+                if (found) {
+                    fullAttemptData = found;
+                    break;
+                }
+            }
+        }
+    }
+
     if (!fullAttemptData || !fullAttemptData.answers) {
-        showNotification('Could not find the answers for this quiz attempt.', 'error'); // This was step 1, but I've renumbered for clarity
+        showNotification('Could not find the answers for this quiz attempt.', 'error');
         return;
     }
 
-    // Find the correct set of questions for this attempt
+    // Find the correct set of questions for this attempt; be permissive in matching
     let questionSet = null;
+    const subjectId = attempt.subject;
+    const chapterName = attempt.chapter;
+    const setIndex = attempt.setIndex;
 
-    // NEW: Correctly parse subject and chapter from the attempt object
-    const subjectId = attempt.subject; // e.g., 'class9_math' or 'quantitative'
-    const chapterName = attempt.chapter; // e.g., 'Number Systems'
-    const setIndex = attempt.setIndex; // e.g., 0
-
-    // --- FIX: Always look for quiz data in the unified `allQuizData` from Firestore ---
+    // Primary attempt: find by exact subject id
     const subjectDoc = allQuizData.find(d => d.id === subjectId);
     if (subjectDoc) {
         const chapter = subjectDoc.chapters?.find(ch => ch.name === chapterName);
@@ -3915,12 +4290,38 @@ function reviewHistoricalQuiz(attempt) {
         }
     }
 
-    // 2. Set up the review page
-    const backBtn = document.getElementById('review-page-back-btn');
-    backBtn.onclick = displayProfilePage; // Set back button to go to the profile
-    document.getElementById('review-page-title').textContent = `Review: ${attempt.chapter} - Set ${attempt.setIndex + 1}`;
+    // Fallback 2: If not found, scan all subjects for a chapter name match (handles naming mismatches)
+    if (!questionSet) {
+        for (const doc of allQuizData) {
+            const matchChapter = doc.chapters?.find(ch => ch.name === chapterName);
+            if (matchChapter && matchChapter.sets && matchChapter.sets[setIndex]) {
+                questionSet = matchChapter.sets[setIndex].questions;
+                break;
+            }
+        }
+    }
 
-    // 3. Display the review with the historical data
+    // If still not found, create safe placeholders so the review page won't crash.
+    if (!questionSet) {
+        const placeholderQuestions = (fullAttemptData.answers || []).map(() => ({
+            question: 'Question content not available',
+            options: ['N/A', 'N/A', 'N/A', 'N/A'],
+            answer: 0,
+            imageUrl: ''
+        }));
+
+        const backBtn = document.getElementById('review-page-back-btn');
+        if (backBtn) backBtn.onclick = displayProfilePage;
+        document.getElementById('review-page-title').textContent = `Review: ${chapterName} - Set ${setIndex + 1}`;
+        displayReview(placeholderQuestions, fullAttemptData.answers);
+        showPage('review-page');
+        return;
+    }
+
+    // Render the full review normally
+    const backBtn = document.getElementById('review-page-back-btn');
+    if (backBtn) backBtn.onclick = displayProfilePage;
+    document.getElementById('review-page-title').textContent = `Review: ${chapterName} - Set ${setIndex + 1}`;
     displayReview(questionSet, fullAttemptData.answers);
     showPage('review-page');
 }
@@ -4421,6 +4822,9 @@ function updateLifelineDisplay() {
     document.getElementById('lifeline-5050-count').textContent = userProgress.lifelines?.fiftyFifty ?? 0;
     document.getElementById('lifeline-hint-count').textContent = userProgress.lifelines?.hint ?? 0;
     document.getElementById('lifeline-skip-count').textContent = userProgress.lifelines?.skip ?? 0;
+    // Time Freeze count (if present)
+    const freezeCountEl = document.getElementById('lifeline-freeze-count');
+    if (freezeCountEl) freezeCountEl.textContent = userProgress.lifelines?.timeFreeze ?? 0;
 }
 
 function useFiftyFifty() {
@@ -4486,4 +4890,99 @@ function useSkip() {
     updateLifelineDisplay();
 
     nextQuestion(); // Simply move to the next question
+}
+
+/**
+ * Time Freeze lifeline: pauses the quiz timer for FREEZE_DURATION seconds.
+ */
+function useTimeFreeze() {
+    if (!userProgress.lifelines || (userProgress.lifelines.timeFreeze || 0) <= 0) {
+        showNotification("You don't have any Time Freeze lifelines!", 'error');
+        return;
+    }
+
+    // Prevent multiple clicks
+    const freezeBtn = document.getElementById('lifeline-freeze');
+    if (freezeBtn) freezeBtn.disabled = true;
+
+    // Deduct lifeline and save
+    userProgress.lifelines.timeFreeze = (userProgress.lifelines.timeFreeze || 0) - 1;
+    saveUserProgress();
+    updateLifelineDisplay();
+
+    // If timer is already frozen, do nothing
+    if (isTimerFrozen) return;
+
+    // Pause the main timer if it's running
+    if (timer) {
+        clearInterval(timer);
+        timer = null;
+    }
+
+    isTimerFrozen = true;
+    freezeRemaining = FREEZE_DURATION;
+
+    // Show freeze indicator next to timer
+    const indicator = document.getElementById('freeze-indicator');
+    if (indicator) {
+        indicator.style.display = 'inline-block';
+        indicator.textContent = `Frozen: ${freezeRemaining}s`;
+    }
+
+    // Start freeze countdown
+    freezeInterval = setInterval(() => {
+        freezeRemaining--;
+        if (indicator) indicator.textContent = `Frozen: ${freezeRemaining}s`;
+
+        if (freezeRemaining <= 0) {
+            clearInterval(freezeInterval);
+            freezeInterval = null;
+            isTimerFrozen = false;
+
+            if (indicator) {
+                indicator.style.display = 'none';
+                indicator.textContent = '';
+            }
+
+            // Resume the quiz timer
+            startTimer();
+            showNotification('Time Freeze ended. Timer resumed.', 'info');
+        }
+    }, 1000);
+}
+
+/**
+ * NEW: Initializes the Image Viewer modal and its close handlers.
+ */
+function initializeImageViewer() {
+    const modal = document.getElementById('image-viewer-modal');
+    const closeBtn = document.getElementById('close-image-viewer-btn');
+    const imgEl = document.getElementById('image-viewer-img');
+    const titleEl = document.getElementById('image-viewer-title');
+
+    if (!modal || !closeBtn || !imgEl) return;
+
+    const closeModal = () => {
+        modal.classList.remove('visible');
+        // Clear src to release memory
+        imgEl.src = '';
+        imgEl.alt = '';
+        if (titleEl) titleEl.textContent = 'Image';
+    };
+
+    closeBtn.addEventListener('click', closeModal);
+
+    // Close when clicking the overlay outside modal-content
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+
+    // Expose a global helper to open the viewer
+    window.openImageViewer = function(url, title = 'Image') {
+        if (!modal || !imgEl) return;
+        imgEl.src = url;
+        imgEl.alt = title || 'Image';
+        if (titleEl) titleEl.textContent = title || 'Image';
+        modal.classList.add('visible');
+    };
 }
