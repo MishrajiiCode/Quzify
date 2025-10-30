@@ -20,37 +20,34 @@ const QuizifyFriends = {
      * @param {string} friendId - The user ID of the person to send a request to.
      */
     async sendFriendRequest(friendId) {
+        // Show a transient sending notice (will be cleared/updated on success or failure)
         this._app.showNotification('Sending request...', 'info');
         const currentUserId = this._app.getOrCreateUserId();
         if (currentUserId === friendId) return;
 
-        const currentUserRef = this._app.userProgressCollection.doc(currentUserId);
-        const friendUserRef = this._app.userProgressCollection.doc(friendId);
+        // Use the global Firestore references (these are initialized in app.js)
+        const currentUserRef = userProgressCollection.doc(currentUserId);
+        const friendUserRef = userProgressCollection.doc(friendId);
+
+    const actionsEl = document.getElementById('in-chat-profile-actions') || document.getElementById('chat-profile-actions');
 
         try {
-            const batch = this._app.db.batch();
+            const batch = db.batch();
             // Use set with merge to safely create/update the nested friends map
             batch.set(currentUserRef, { friends: { [friendId]: 'pending_sent' } }, { merge: true });
             batch.set(friendUserRef, { friends: { [currentUserId]: 'pending_received' } }, { merge: true });
 
-            // The old way using update would fail if the 'friends' map didn't exist yet.
-            // batch.update(currentUserRef, { [`friends.${friendId}`]: 'pending_sent' });
-            // batch.update(friendUserRef, { [`friends.${currentUserId}`]: 'pending_received' });
             await batch.commit();
 
             this._app.showNotification('Friend request sent!', 'success');
 
-            // NEW: Update local state for immediate UI refresh
+            // Update local state for immediate UI refresh
             if (!this._app.userProgress.friends) this._app.userProgress.friends = {};
             this._app.userProgress.friends[friendId] = 'pending_sent';
 
-            // Refresh the button in the in-chat profile modal
-            const actionsEl = document.getElementById('chat-profile-actions');
-            if (actionsEl) QuizifyChat.updateFriendStatusButton(actionsEl, friendId);
-
             // Refresh the main friends list and search results if they are visible
             const profilePage = document.getElementById('profile-page');
-            if (profilePage.classList.contains('active')) {
+            if (profilePage && profilePage.classList.contains('active')) {
                 this.displayFriends();
                 // Also refresh search results if the user was searching
                 this.displaySearchResults(this._app.userProgress.friends || {});
@@ -58,6 +55,9 @@ const QuizifyFriends = {
         } catch (error) {
             console.error("Error sending friend request:", error);
             this._app.showNotification('Could not send friend request.', 'error');
+        } finally {
+            // Always refresh the profile actions button to remove any transient spinner state
+            if (actionsEl) QuizifyChat.updateFriendStatusButton(actionsEl, friendId);
         }
     },
 
@@ -68,11 +68,11 @@ const QuizifyFriends = {
     async acceptFriendRequest(friendId) {
         const currentUserId = this._app.getOrCreateUserId();
 
-        const currentUserRef = this._app.userProgressCollection.doc(currentUserId);
-        const friendUserRef = this._app.userProgressCollection.doc(friendId);
+        const currentUserRef = userProgressCollection.doc(currentUserId);
+        const friendUserRef = userProgressCollection.doc(friendId);
 
         try {
-            const batch = this._app.db.batch();
+            const batch = db.batch();
             batch.update(currentUserRef, { [`friends.${friendId}`]: 'friend' });
             batch.update(friendUserRef, { [`friends.${currentUserId}`]: 'friend' });
             await batch.commit();
@@ -101,11 +101,11 @@ const QuizifyFriends = {
         const currentUserId = this._app.getOrCreateUserId();
         const FieldValue = firebase.firestore.FieldValue;
 
-        const currentUserRef = this._app.userProgressCollection.doc(currentUserId);
-        const friendUserRef = this._app.userProgressCollection.doc(friendId);
+        const currentUserRef = userProgressCollection.doc(currentUserId);
+        const friendUserRef = userProgressCollection.doc(friendId);
 
         try {
-            const batch = this._app.db.batch();
+            const batch = db.batch();
             // Use FieldValue.delete() to remove a specific key from a map
             batch.update(currentUserRef, { [`friends.${friendId}`]: FieldValue.delete() });
             batch.update(friendUserRef, { [`friends.${currentUserId}`]: FieldValue.delete() });
@@ -165,7 +165,7 @@ const QuizifyFriends = {
         for (const id of friendIds) {
             const status = friendsMap[id];
             try {
-                const userDoc = await this._app.userProgressCollection.doc(id).get();
+                const userDoc = await userProgressCollection.doc(id).get();
                 if (userDoc.exists) {
                     const userData = userDoc.data();
                     const itemHtml = this.createFriendCard(id, userData, status);
@@ -230,7 +230,7 @@ const QuizifyFriends = {
             // Firestore does not support case-insensitive or partial text search natively.
             // A simple approach is to fetch users and filter client-side.
             // For a large-scale app, a dedicated search service like Algolia would be better.
-            const snapshot = await this._app.userProgressCollection.get();
+            const snapshot = await userProgressCollection.get();
             const currentUserId = this._app.getOrCreateUserId();
             const friendsMap = this._app.userProgress.friends || {};
 
