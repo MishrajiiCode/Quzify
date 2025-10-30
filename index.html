@@ -3,6 +3,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -43,6 +44,25 @@
             </div>
         </div>
     </div>
+
+        <!-- NEW: Sample Paper Viewer Modal -->
+        <div id="sample-paper-modal" class="modal-overlay">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Sample Papers</h2>
+                    <button id="close-sample-paper-modal-btn" class="modal-close-btn" title="Close">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div id="sample-paper-list">
+                        <!-- Sample paper items injected by JS -->
+                    </div>
+                    <div id="sample-paper-preview" style="margin-top:12px;"></div>
+                </div>
+                <div class="modal-actions">
+                    <button id="open-sample-paper-new-tab-btn" class="btn btn--primary" style="display:none;">Open in new tab</button>
+                </div>
+            </div>
+        </div>
 
     <!-- NEW: PIN Reminder Modal -->
     <div id="pin-reminder-modal" class="modal-overlay">
@@ -155,6 +175,31 @@
                     <strong>Timed Quiz</strong><span>(Standard mode with timer and results at the end)</span></button>
                 <button id="start-practice-quiz-btn">
                     <strong>Practice Mode</strong><span>(No timer, instant feedback after each question)</span></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- NEW: Quiz Instructions Modal (shown after choosing mode) -->
+    <div id="quiz-instructions-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="quiz-instructions-title">Quiz Instructions</h2>
+                <button id="close-quiz-instructions-btn" class="modal-close-btn" title="Close">&times;</button>
+            </div>
+            <div class="modal-body" id="quiz-instructions-body">
+                <!-- Populated dynamically: subject, chapter, set, questions, estimated time, rules -->
+                <p id="quiz-instructions-summary"></p>
+                <ul id="quiz-instructions-rules">
+                    <li>Each correct answer awards <strong>2 marks</strong>.</li>
+                    <li>Wrong answers award <strong>0 marks</strong> (no negative marking in regular quizzes).</li>
+                    <li>Unanswered questions are not penalized.</li>
+                    <li>Use lifelines from the toolbar if available.</li>
+                    <li><em>Note:</em> Negative marking (−0.5 for incorrect answers) applies only to <strong>Mock Tests</strong>.</li>
+                </ul>
+            </div>
+            <div class="modal-actions">
+                <button id="cancel-quiz-instructions-btn" class="btn--secondary">Cancel</button>
+                <button id="start-quiz-from-instructions-btn" class="btn btn--primary">Start Quiz</button>
             </div>
         </div>
     </div>
@@ -680,6 +725,8 @@
                 </div>
                 <div class="quiz-info">
                     <div id="timer">20:00</div>
+                    <!-- Time Freeze indicator (shown while timer is frozen) -->
+                    <div id="freeze-indicator" style="display:none; margin-left:8px; font-size:0.9rem; color:var(--color-accent);"></div>
                 </div>
             </div>
 
@@ -691,6 +738,11 @@
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
                     </button>
                 </div>
+                <!-- Optional question image (shown only when admin provided imageUrl) -->
+                <img id="question-image" class="question-image" src="" alt="" aria-hidden="true">
+                <!-- Button to open the full image in a new tab / window -->
+                <button id="open-question-image-btn" class="open-image-btn" style="display:none; margin-top:8px;">Open Image</button>
+
                 <div id="options-container" class="options-container">
                     <!-- Options will be populated by JavaScript -->
                 </div>
@@ -713,6 +765,11 @@
                     Skip
                     <span id="lifeline-skip-count" class="lifeline-count">0</span>
                 </button>
+                    <!-- NEW: Time Freeze lifeline -->
+                    <button id="lifeline-freeze" class="lifeline-btn" title="Time Freeze: Pause timer for 30 seconds">
+                        ❄️ Freeze
+                        <span id="lifeline-freeze-count" class="lifeline-count">0</span>
+                    </button>
             </div>
 
             <div class="navigation-buttons">
@@ -869,8 +926,10 @@
                                 <!-- Featured item will be populated here by JS -->
                             </div>
         
-                            <div id="daily-deals-grid" class="store-item-grid">
-                                <!-- Daily deal items will be populated here -->
+                            <div class="store-items-scroll">
+                                <div id="daily-deals-grid" class="store-item-grid">
+                                    <!-- Daily deal items will be populated here -->
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1288,6 +1347,19 @@
                         <!-- YouTube Iframe or Video Element will be inserted here -->
                     </div>
                     <p id="video-player-description" class="video-player-description"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- NEW: Image Viewer Modal -->
+        <div id="image-viewer-modal" class="modal-overlay image-viewer-modal">
+            <div class="modal-content modal-content--narrow">
+                <div class="modal-header">
+                    <h2 id="image-viewer-title">Image</h2>
+                    <button id="close-image-viewer-btn" class="modal-close-btn" title="Close">&times;</button>
+                </div>
+                <div class="modal-body" style="text-align:center;">
+                    <img id="image-viewer-img" src="" alt="" style="max-width:100%; height:auto; border-radius:4px;" />
                 </div>
             </div>
         </div>
