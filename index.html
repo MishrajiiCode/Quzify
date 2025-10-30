@@ -12,7 +12,10 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="icon" type="image/png" href="img.png">
 </head>
-<body>    
+<body>
+    <!-- NEW: Audio element for chat notifications -->
+    <audio id="chat-notification-sound" src="https://cdn.pixabay.com/download/audio/2021/08/04/audio_bb63024098.mp3" preload="auto"></audio>
+
     <!-- Notification Toast -->
     <div id="notification-toast" class="notification-toast">
         <div id="toast-spinner" class="toast-spinner" style="display: none;">
@@ -281,6 +284,89 @@
         </div>
     </div>
 
+    <!-- NEW: Sell Confirmation Modal -->
+    <div id="store-sell-confirm-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h2 id="store-sell-title">Confirm Sale</h2>
+            <div id="store-sell-item-details" class="store-confirm-item-details">
+                <!-- Item details will be populated here -->
+            </div>
+            <p>Are you sure you want to sell this item? You will receive 30% of its original cost back.</p>
+            <div id="store-sell-balance-info" class="store-confirm-balance-info">
+                <p>Original Cost: <span class="coin-icon">💰</span><strong id="store-sell-item-cost">0</strong></p>
+                <p>Refund Amount: <span class="coin-icon">💰</span><strong id="store-sell-refund-amount">0</strong></p>
+                <p>Balance after sale: <span class="coin-icon">💰</span><span id="store-sell-new-balance"></span></p>
+            </div>
+            <div class="modal-actions">
+                <button id="cancel-sell-btn" class="btn--secondary">Cancel</button>
+                <button id="confirm-sell-btn" class="btn--danger">Confirm Sale</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- NEW: Global Chat Modal -->
+    <div id="global-chat-modal" class="chat-modal">
+        <div class="modal-header chat-header">
+            <div>
+                <h2>Global Chat</h2>
+                <span id="online-user-count"></span>
+            </div>
+            <!-- NEW: Back button for in-chat profile view -->
+            <button id="back-to-chat-btn" class="modal-close-btn" title="Back to Chat" style="display: none;">←</button>
+            <button id="close-chat-modal-btn" class="modal-close-btn" title="Close">&times;</button>
+        </div>
+
+        <!-- NEW: In-Chat User Profile View -->
+        <div id="in-chat-profile-view" class="modal-body" style="display: none;">
+            <div class="chat-profile-content-wrapper">
+                <h3 id="in-chat-profile-name">User Profile</h3>
+                <div id="in-chat-profile-content">
+                    <!-- Profile details will be loaded here by chat.js -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Chat View -->
+        <div id="chat-messages-wrapper" class="modal-body chat-messages-wrapper">
+            <div id="chat-messages" class="chat-messages">
+                <!-- Messages will be populated here -->
+            </div>
+            <div id="typing-indicator-container"></div>
+        </div>
+
+        <div id="chat-input-container" class="chat-input-container">
+            <div id="reply-indicator" class="reply-indicator" style="display: none;"></div>
+            <input type="text" id="chat-message-input" placeholder="Type a message..." maxlength="250">
+            <span id="char-counter">250</span>
+            <button id="send-chat-message-btn" class="btn--icon" title="Send">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- NEW: Emoji Picker Popover for Chat -->
+    <div id="emoji-picker" class="emoji-picker">
+        <div class="emoji-picker-content">
+            <!-- Emojis will be populated here -->
+        </div>
+    </div>
+
+    <!-- NEW: Help Bot Modal -->
+    <div id="help-bot-modal" class="chat-modal">
+        <div class="modal-header chat-header">
+            <h2>Quizify Help Bot 🤖</h2>
+            <button id="close-bot-modal-btn" class="modal-close-btn" title="Close">&times;</button>
+        </div>
+        <div id="bot-chat-messages" class="chat-messages">
+            <!-- Bot conversation will be populated here -->
+        </div>
+        <div class="chat-input-container">
+            <input type="text" id="bot-message-input" placeholder="Type your question...">
+            <button id="send-bot-message-btn" class="btn--icon" title="Send">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+            </button> 
+        </div>
+    </div>
 
     <div class="container">
         <!-- Page-level Background Animation -->
@@ -294,6 +380,17 @@
             <i></i><i></i><i></i><i></i><i></i>
             <i></i><i></i><i></i><i></i>
         </div>
+
+        <!-- NEW: Floating Action Buttons (FABs) for Chat and Bot -->
+        <div class="fab-container">
+            <button id="open-help-bot-fab" class="fab help-fab" title="Help Bot">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+            </button>
+            <button id="open-chat-fab" class="fab" title="Global Chat">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+            </button>
+        </div>
+
 
         <header class="app-header">
             <!-- Hamburger Menu Button -->
@@ -314,55 +411,63 @@
                 <button id="close-menu-btn" class="close-btn" aria-label="Close menu">&times;</button>
             </div>
             <div class="side-menu-content">
-                <button id="menu-home-btn" class="side-menu-item">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-                    <span>Home</span>
-                </button>
-                <button id="menu-profile-btn" class="side-menu-item">
-                    <span id="profile-notification-dot" class="notification-dot side-menu-dot" style="display: none;"></span>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                    <span>My Profile</span>
-                </button>
-                <button id="menu-leaderboard-btn" class="side-menu-item">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                        <path d="M12 10l-4 4 2 2 6-6-2-2-2 2z"></path>
-                    </svg>
-                    <span>Leaderboard</span>
-                </button>
-                <button id="menu-achievements-btn" class="side-menu-item">
-                    <span id="achievements-notification-dot" class="notification-dot side-menu-dot" style="display: none;"></span>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><path d="m9 12 2 2 4-4"></path></svg>
-                    <span>Achievements</span>
-                </button>
-                <button id="menu-bookmarks-btn" class="side-menu-item">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
-                    <span>Bookmarks</span>
-                </button>
-                <!-- NEW: Store Button -->
-                <button id="menu-store-btn" class="side-menu-item">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
-                    <span>Store</span>
-                </button>
-                <!-- NEW: Settings Button -->
-                <button id="menu-settings-btn" class="side-menu-item">
-                    <span id="settings-notification-dot" class="notification-dot side-menu-dot" style="display: none;"></span>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-                    <span>Settings</span>
-                </button>
-                <button id="menu-community-btn" class="side-menu-item">
-                    <span id="community-notification-dot" class="notification-dot side-menu-dot" style="display: none;"></span>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-                    <span>Community</span>
-                </button>
-                <button id="menu-about-us-btn" class="side-menu-item">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
-                    <span>About Us</span>
-                </button>
-                <a href="mailto:productionrtf@gmail.com?subject=Feedback for Quizify App" class="side-menu-item">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-                    <span>Feedback</span>
-                </a>
+                <div class="side-menu-group">
+                    <button id="menu-home-btn" class="side-menu-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                        <span>Home</span>
+                    </button>
+                    <button id="menu-profile-btn" class="side-menu-item">
+                        <span id="profile-notification-dot" class="notification-dot side-menu-dot" style="display: none;"></span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                        <span>My Profile</span>
+                    </button>
+                    <button id="menu-leaderboard-btn" class="side-menu-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><path d="M12 10l-4 4 2 2 6-6-2-2-2 2z"></path></svg>
+                        <span>Leaderboard</span>
+                    </button>
+                    <button id="menu-store-btn" class="side-menu-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                        <span>Store</span>
+                    </button>
+                    <button id="menu-videos-btn" class="side-menu-item">
+                        <span id="videos-notification-dot" class="notification-dot side-menu-dot" style="display: none;"></span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
+                        <span>Videos</span>
+                    </button>
+                </div>
+                <div class="side-menu-group">
+                    <h4 class="side-menu-group-title">Progress</h4>
+                    <button id="menu-achievements-btn" class="side-menu-item">
+                        <span id="achievements-notification-dot" class="notification-dot side-menu-dot" style="display: none;"></span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><path d="m9 12 2 2 4-4"></path></svg>
+                        <span>Achievements</span>
+                    </button>
+                    <button id="menu-bookmarks-btn" class="side-menu-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+                        <span>Bookmarks</span>
+                    </button>
+                    <button id="menu-community-btn" class="side-menu-item">
+                        <span id="community-notification-dot" class="notification-dot side-menu-dot" style="display: none;"></span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                        <span>Community</span>
+                    </button>
+                </div>
+                <div class="side-menu-group">
+                    <h4 class="side-menu-group-title">App</h4>
+                    <button id="menu-settings-btn" class="side-menu-item">
+                        <span id="settings-notification-dot" class="notification-dot side-menu-dot" style="display: none;"></span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                        <span>Settings</span>
+                    </button>
+                    <button id="menu-about-us-btn" class="side-menu-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                        <span>About Us</span>
+                    </button>
+                    <a href="mailto:productionrtf@gmail.com?subject=Feedback for Quizify App" class="side-menu-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                        <span>Feedback</span>
+                    </a>
+                </div>
             </div>
             <div class="side-menu-bottom">
                 <button id="logout-btn" class="side-menu-logout-btn">Logout</button>
@@ -454,6 +559,16 @@
                         <img src="https://cdn-icons-png.flaticon.com/512/3406/3406828.png" alt="Reasoning Icon" class="card-icon">
                         <h2>Reasoning</h2>
                         <p>Logical and analytical reasoning</p>
+                    </div>
+                    <div class="subject-card" data-subject="general_science">
+                        <img src="https://cdn-icons-png.flaticon.com/512/2497/2497939.png" alt="General Science Icon" class="card-icon">
+                        <h2>General Science</h2>
+                        <p>History, Geography, Polity & more</p>
+                    </div>
+                    <div class="subject-card" data-subject="mock_test" id="mock-test-card">
+                        <img src="https://cdn-icons-png.flaticon.com/512/3840/3840656.png" alt="Mock Test Icon" class="card-icon">
+                        <h2>Daily Mock Test</h2>
+                        <p class="mock-test-status">Attempt today's full-length mock test.</p>
                     </div>
                 </div>
             </div>
@@ -768,6 +883,103 @@
             </div>
         </div>
 
+        <!-- NEW: Mock Test Rules Modal -->
+        <div id="mock-test-rules-modal" class="modal-overlay">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Mock Test Rules & Instructions</h2>
+                    <button id="close-rules-modal-btn" class="modal-close-btn" title="Close">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <ul>
+                        <li>The test consists of <strong>100 questions</strong> across 4 sections.</li>
+                        <li>Total duration is <strong>60 minutes</strong>.</li>
+                        <li>Each correct answer awards <strong>2 marks</strong>.</li>
+                        <li>Each incorrect answer has a penalty of <strong>-0.5 marks</strong>.</li>
+                        <li>Unanswered questions will not be marked.</li>
+                        <li>You can switch between sections at any time.</li>
+                        <li>The test will be automatically submitted when the time is up.</li>
+                    </ul>
+                    <p><strong>Are you ready to begin?</strong></p>
+                </div>
+                <div class="modal-actions">
+                    <button id="start-mock-test-btn" class="btn btn--primary">Start Mock Test</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- NEW: Mock Test Page -->
+        <div id="mock-test-page" class="page">
+            <div class="quiz-header">
+                <div class="quiz-content-area">
+                    <h2>Mock Test</h2>
+                </div>
+                <div class="quiz-info">
+                    <div id="mock-timer">60:00</div>
+                </div>
+            </div>
+
+            <div class="mock-test-layout">
+                <div class="mock-test-main">
+                    <div id="mock-section-tabs" class="mock-section-tabs">
+                        <button class="mock-section-tab active" data-section="quantitative">Quantitative Aptitude</button>
+                        <button class="mock-section-tab" data-section="english">English</button>
+                        <button class="mock-section-tab" data-section="reasoning">Reasoning</button>
+                        <button class="mock-section-tab" data-section="general_science">General Science</button>
+                    </div>
+                    <div class="question-container">
+                        <div class="question-header-flex">
+                            <h3 id="mock-question-number">Question 1</h3>
+                        </div>
+                        <p id="mock-question-text">Question will appear here.</p>
+                        <div id="mock-options-container" class="options-container"></div>
+                    </div>
+                    <div class="navigation-buttons">
+                        <button id="mock-prev-btn">Previous</button>
+                        <button id="mock-next-btn">Next</button>
+                        <button id="mock-submit-btn" class="btn--danger">Submit Test</button>
+                    </div>
+                </div>
+                <div class="mock-test-sidebar">
+                    <h4>Question Palette</h4>
+                    <div id="mock-question-numbers" class="question-numbers"></div>
+                    <div class="palette-legend">
+                        <div><span class="q-legend current"></span> Current</div>
+                        <div><span class="q-legend answered"></span> Answered</div>
+                        <div><span class="q-legend not-answered"></span> Not Answered</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- NEW: Mock Test Results Page -->
+        <div id="mock-test-results-page" class="page">
+            <div class="results-container">
+                <h1>Mock Test Results</h1>
+                <div class="score-ring-container">
+                    <svg class="score-ring" width="160" height="160">
+                        <circle class="score-ring__background" stroke-width="12" r="74" cx="80" cy="80"></circle>
+                        <circle id="mock-score-ring-circle" class="score-ring__circle" stroke-width="12" r="74" cx="80" cy="80"></circle>
+                    </svg>
+                    <div class="score-circle-inner">
+                        <span id="mock-total-score">0.00</span> / <span id="mock-total-marks">200</span>
+                    </div>
+                </div>
+                <div id="mock-score-details-grid" class="score-details-grid">
+                    <div class="score-detail-item"><strong id="mock-total-questions-summary">100</strong><span>Questions</span></div>
+                    <div class="score-detail-item correct"><strong id="mock-correct-answers">0</strong><span>Correct</span></div>
+                    <div class="score-detail-item incorrect"><strong id="mock-incorrect-answers">0</strong><span>Incorrect</span></div>
+                    <div class="score-detail-item"><strong id="mock-unanswered">0</strong><span>Unanswered</span></div>
+                    <div class="score-detail-item time"><strong id="mock-time-taken">0m 0s</strong><span>Time Taken</span></div>
+                </div>
+                <div id="mock-section-wise-results" class="section-results-container">
+                    <!-- Section-wise results will be populated here -->
+                </div>
+                <button id="mock-results-home-btn" class="btn btn--primary">Back to Home</button>
+            </div>
+        </div>
+
+
         <!-- NEW: Profile Page -->
         <div id="profile-page" class="page">
             <button class="back-btn">← Back to Home</button>
@@ -804,6 +1016,8 @@
                     <button class="profile-tab-btn active" data-tab="profile-stats-tab">📊 Stats</button>
                     <button class="profile-tab-btn" data-tab="profile-analysis-tab">🔬 Analysis</button>
                     <button class="profile-tab-btn" data-tab="profile-history-tab">📜 History</button>
+                    <!-- NEW: Friends Tab Button -->
+                    <button class="profile-tab-btn" data-tab="profile-friends-tab">🧑‍🤝‍🧑 Friends</button>
                 </div>
     
                 <!-- NEW: Profile Page Tab Content -->
@@ -853,6 +1067,29 @@
                         </div>
                         <div id="history-list-container" class="history-list-container">
                             <!-- History items will be populated here by JS -->
+                        </div>
+                    </div>
+
+                    <!-- NEW: Friends Tab Content -->
+                    <div class="profile-tab-content" id="profile-friends-tab">
+                        <div class="friends-sub-section" id="friend-requests-section">
+                            <h3>Friend Requests</h3>
+                            <div id="friend-requests-container" class="friends-list-container">
+                                <!-- Pending friend requests will be populated here -->
+                            </div>
+                        </div>
+                        <div class="friends-sub-section" id="add-friend-section">
+                            <h3>Add Friends</h3>
+                            <div class="friend-search-container">
+                                <input type="text" id="add-friend-search-input" class="form-control" placeholder="Search for users by name...">
+                                <div id="friend-search-results" class="friend-search-results"></div>
+                            </div>
+                        </div>
+                        <div class="friends-sub-section" id="friends-list-section">
+                            <h3>My Friends</h3>
+                            <div id="friends-list-container" class="friends-list-container">
+                                <!-- Friends list will be populated here -->
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1010,6 +1247,52 @@
             </div>
         </div>
 
+        <!-- NEW: Videos Page -->
+        <div id="videos-page" class="page">
+            <button class="back-btn">← Back to Home</button>
+            <h1>Video Lectures</h1>
+            <p class="page-description">Browse our collection of video lectures to enhance your learning.</p>
+            <div class="video-page-content">
+                <input type="text" id="video-search-input" class="form-control video-search-bar" placeholder="Search for videos by title or topic...">
+                
+                <!-- MOVED: Latest Videos Section -->
+                <div id="latest-videos-section">
+                    <div class="section-header">
+                        <h2>✨ Latest Uploads</h2>
+                    </div>
+                    <div id="latest-videos-container" class="video-row"></div>
+                </div>
+
+                <!-- NEW: Video Category Tabs -->
+                <div class="profile-tabs" id="video-category-tabs">
+                    <button class="profile-tab-btn active" data-category="competitive">Competitive</button>
+                    <button class="profile-tab-btn" data-category="class_12">Class 12</button>
+                    <button class="profile-tab-btn" data-category="class_11">Class 11</button>
+                    <button class="profile-tab-btn" data-category="class_10">Class 10</button>
+                    <button class="profile-tab-btn" data-category="class_9">Class 9</button>
+                    <button class="profile-tab-btn" data-category="general">General</button>
+                </div>
+                <div id="video-list-container" class="profile-tab-content active"></div>
+            </div>
+        </div>
+
+        <!-- NEW: Video Player Modal -->
+        <div id="video-player-modal" class="modal-overlay video-player-modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="video-player-title"></h2>
+                    <button id="close-video-player-btn" class="modal-close-btn" title="Close">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div id="video-player-container" class="video-player-container">
+                        <!-- YouTube Iframe or Video Element will be inserted here -->
+                    </div>
+                    <p id="video-player-description" class="video-player-description"></p>
+                </div>
+            </div>
+        </div>
+
+
     </div>
     
 
@@ -1024,10 +1307,15 @@
 
     <script src="english.js"></script>
     <script src="reasoning.js"></script>
-    
+    <script src="generalscience.js"></script>
+
+    <script src="friends.js"></script> <!-- NEW: Include the friends script -->
+    <script src="videos.js"></script> <!-- NEW: Include the videos script -->
     <script src="store.js"></script> <!-- NEW: Include the store script -->
-    
-    <!-- Main application script -->
+    <script src="chat.js"></script>
+    <script src="bot.js"></script>
+    <script src="mock-test.js"></script>
+    <!-- Main application script --> 
     <script src="app.js"></script>
 
   <!-- Footer Section -->
