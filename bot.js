@@ -39,6 +39,48 @@ const QuizifyBot = {
         'search': 'Search Content', 'find': 'Search Content', 'look for': 'Search Content',
     },
 
+    // NEW: Simple question bank for random question generation and evaluation
+    QUESTION_BANK: {
+        english: [
+            {
+                id: 'eng-1',
+                question: 'Choose the correctly punctuated sentence.',
+                options: [
+                    'Its raining outside.',
+                    "It\'s raining outside.",
+                    'Its raining, outside',
+                    'Its raining; outside'
+                ],
+                answerIndex: 1,
+                explanation: "The correct contraction for 'it is' is 'it's'."
+            },
+            {
+                id: 'eng-2',
+                question: 'Select the antonym of \"ancient\".',
+                options: ['old', 'historic', 'modern', 'antique'],
+                answerIndex: 2,
+                explanation: 'Modern is the opposite (antonym) of ancient.'
+            }
+        ],
+        quantitative: [
+            {
+                id: 'quant-1',
+                question: 'What is 15% of 200?',
+                options: ['20', '25', '30', '15'],
+                answerIndex: 2,
+                explanation: '15% of 200 = 0.15 * 200 = 30.'
+            }
+        ],
+        reasoning: [],
+        math: [],
+        physics: [],
+        chemistry: [],
+        biology: []
+    },
+
+    // Tracks active question presented to the user (null when none)
+    _currentQuestion: null,
+
     // Pre-defined conversation tree for the bot
     CONVERSATION_TREE: {
         'start': {
@@ -125,18 +167,47 @@ const QuizifyBot = {
             if (e.key === 'Enter') this.handleUserInput();
         });
 
-        // Use event delegation for option buttons
+        // Use event delegation for option buttons and make it robust to clicks on inner elements
         this._chatContainer.addEventListener('click', (e) => {
-            if (e.target.classList.contains('bot-option-btn')) {
-                const choice = e.target.textContent;
+            // Option buttons (menu choices)
+            const optionBtn = e.target.closest('.bot-option-btn');
+            if (optionBtn && this._chatContainer.contains(optionBtn)) {
+                const choice = optionBtn.textContent;
                 this.addUserMessage(choice);
                 this.handleBotResponse(choice);
+                return;
             }
-            // NEW: Handle clicks on search result links
-            if (e.target.classList.contains('bot-search-result-btn')) {
-                const resultData = JSON.parse(e.target.dataset.result);
-                this.addUserMessage(`Go to "${resultData.chapterName}"`);
-                this.navigateToSearchResult(resultData);
+
+            // Question option buttons (answers)
+            const questionOption = e.target.closest('.bot-question-option');
+            if (questionOption && this._chatContainer.contains(questionOption)) {
+                const choiceIndex = parseInt(questionOption.dataset.index, 10);
+                this.addUserMessage(questionOption.textContent);
+                this.evaluateAnswer(choiceIndex);
+                return;
+            }
+
+            // Search result buttons
+            const searchBtn = e.target.closest('.bot-search-result-btn');
+            if (searchBtn && this._chatContainer.contains(searchBtn)) {
+                // Use getAttribute to retrieve the raw JSON string
+                const raw = searchBtn.getAttribute('data-result');
+                let resultData = null;
+                try {
+                    resultData = JSON.parse(raw);
+                } catch (err) {
+                    // If parsing fails, attempt a fallback by replacing single quotes with double quotes
+                    try {
+                        resultData = JSON.parse(raw.replace(/'/g, '"'));
+                    } catch (err2) {
+                        console.error('Failed to parse search result data:', err2, raw);
+                    }
+                }
+                if (resultData) {
+                    this.addUserMessage(`Go to "${resultData.chapterName}"`);
+                    this.navigateToSearchResult(resultData);
+                }
+                return;
             }
         });
     },
@@ -180,6 +251,22 @@ const QuizifyBot = {
             return;
         }
 
+        // NEW: detect requests for random questions like "give me a random question of english"
+        const lowerInput = userInput.toLowerCase();
+        if (/random|give me a question|ask me|one question|random question/.test(lowerInput)) {
+            // detect subject keyword
+            const subjects = Object.keys(this.QUESTION_BANK);
+            for (const subj of subjects) {
+                if (lowerInput.includes(subj)) {
+                    this.presentRandomQuestion(subj);
+                    return;
+                }
+            }
+            // no subject found: present a random question across all subjects
+            this.presentRandomQuestion();
+            return;
+        }
+
         const matchedIntent = this.getIntentFromInput(userInput);
         setTimeout(() => this.handleBotResponse(matchedIntent), 500);
     },
@@ -217,6 +304,11 @@ const QuizifyBot = {
     },
 
     handleBotResponse(key) {
+        // QUICK-HANDLE: provide another question when user clicks that option
+        if (key === 'Another question') {
+            this.presentRandomQuestion();
+            return;
+        }
         if (!key) return; // Do nothing if intent function handled it
 
         let response = this.CONVERSATION_TREE[key];
@@ -283,6 +375,73 @@ const QuizifyBot = {
         resultsHtml += '</ul><p>Click a result to navigate to it, or ask me something else.</p>';
 
         this.addBotMessage(resultsHtml, this.CONVERSATION_TREE['start'].options);
+    },
+
+    // NEW: Present a random question (optionally scoped to a subject)
+    presentRandomQuestion(subject = null) {
+        let pool = [];
+        if (subject && this.QUESTION_BANK[subject] && this.QUESTION_BANK[subject].length > 0) {
+            pool = this.QUESTION_BANK[subject];
+        } else {
+            // Merge all subjects into pool
+            for (const key in this.QUESTION_BANK) {
+                pool = pool.concat(this.QUESTION_BANK[key]);
+            }
+        }
+
+        if (pool.length === 0) {
+            this.addBotMessage("I don't have questions for that topic yet. Try another topic or ask for a random question.");
+            return;
+        }
+
+        const idx = Math.floor(Math.random() * pool.length);
+        const q = pool[idx];
+        this._currentQuestion = q;
+
+        // Render question with option buttons that include data-index
+        const messageDiv = this.addMessage(`<strong>${q.question}</strong>`, 'bot-message', true);
+        const optionsContainer = document.createElement('div');
+        optionsContainer.className = 'bot-options-container';
+        q.options.forEach((opt, i) => {
+            const btn = document.createElement('button');
+            btn.className = 'bot-question-option';
+            btn.textContent = opt;
+            btn.dataset.index = i;
+            optionsContainer.appendChild(btn);
+        });
+        messageDiv.querySelector('.chat-message-content').appendChild(optionsContainer);
+        this._chatContainer.scrollTop = this._chatContainer.scrollHeight;
+    },
+
+    // NEW: Evaluate selected answer for the current question
+    evaluateAnswer(choiceIndex) {
+        const q = this._currentQuestion;
+        if (!q) {
+            this.addBotMessage("There is no active question. Ask me to give a random question first.");
+            return;
+        }
+
+        const correct = choiceIndex === q.answerIndex;
+        if (correct) {
+            this.addBotMessage(`<strong>Correct!</strong> ${q.explanation || ''}`);
+            // Optionally give a small reward via main app
+            try {
+                if (this._app && typeof this._app.awardCoins === 'function') {
+                    this._app.awardCoins(5); // award 5 coins for correct answer
+                    this.addBotMessage('You earned 5 Quiz Coins for that correct answer!');
+                }
+            } catch (e) {}
+        } else {
+            const correctText = q.options[q.answerIndex];
+            this.addBotMessage(`<strong>Not quite.</strong> The correct answer is: <em>${correctText}</em>. ${q.explanation || ''}`);
+        }
+
+        // Clear current question
+        this._currentQuestion = null;
+
+        // Offer another question or go back to main menu
+        const mainMenu = this.CONVERSATION_TREE['Back to main menu'];
+        this.addBotMessage('Would you like another question or go back to the menu?', ['Another question', ...mainMenu.options]);
     },
 
     // NEW: Navigate to a search result
