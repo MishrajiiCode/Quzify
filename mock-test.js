@@ -163,6 +163,13 @@ const MockTest = {
         this.renderQuestionGrid();
         this.updateSectionTabs();
         this.startTimer();
+        // Hide chat and bot while the mock test is active
+        try {
+            const chatFab = document.getElementById('open-chat-fab');
+            const botFab = document.getElementById('open-help-bot-fab');
+            if (chatFab) chatFab.style.display = 'none';
+            if (botFab) botFab.style.display = 'none';
+        } catch (e) { /* Ignore if elements not present */ }
     },
 
     startTimer() {
@@ -315,6 +322,13 @@ const MockTest = {
         this.saveResults(results);
 
         this._app.showPage('mock-test-results-page');
+        // Restore chat and bot visibility after mock test submission
+        try {
+            const chatFab = document.getElementById('open-chat-fab');
+            const botFab = document.getElementById('open-help-bot-fab');
+            if (chatFab) chatFab.style.display = 'inline-flex';
+            if (botFab) botFab.style.display = 'inline-flex';
+        } catch (e) { /* Ignore if elements not present */ }
     },
 
     calculateResults() {
@@ -408,9 +422,8 @@ const MockTest = {
 
     saveResults(results) {
         const today = new Date().toISOString().split('T')[0];
-        const progressKey = `mock_test_${today}`; // This key identifies today's mock attempt
+        const dateKey = `mock_test_${today}`; // Key for grouping mock attempts by date
 
-        // NEW: Create a more detailed attempt object as requested
         const attemptData = {
             score: results.totalScore,
             date: new Date().toISOString(),
@@ -424,12 +437,44 @@ const MockTest = {
             mockId: `Mock ${today}` // Example: Mock 2025-10-29
         };
 
-        if (!this._app.userProgress.mockHistory) {
-            this._app.userProgress.mockHistory = {};
+        // Ensure a dedicated container for mock tests exists
+        this._app.userProgress.mockTests = this._app.userProgress.mockTests || {};
+
+        if (!this._app.userProgress.mockTests[dateKey]) {
+            this._app.userProgress.mockTests[dateKey] = { attempts: [] };
         }
 
-        // Store the latest attempt for the day
-        this._app.userProgress.mockHistory[progressKey] = attemptData;
+        // Append attempt to the day's attempts array
+        this._app.userProgress.mockTests[dateKey].attempts.push(attemptData);
+
+        // Keep an easy-to-read summary list for global history (for profile/history views)
+        this._app.userProgress.quizHistory = this._app.userProgress.quizHistory || [];
+        this._app.userProgress.quizHistory.push({
+            type: 'mock',
+            date: attemptData.date,
+            score: attemptData.score,
+            timeTaken: attemptData.timeTaken,
+            totalQuestions: attemptData.totalQuestions,
+            mockId: attemptData.mockId
+        });
+
+        // ALSO store a quick lookup for the day's latest mock attempt in `mockHistory`.
+        // Other parts of the app (e.g., checkAndDisplayDailyMock) expect `userProgress.mockHistory`.
+        this._app.userProgress.mockHistory = this._app.userProgress.mockHistory || {};
+        // Save the most recent attempt summary for the date so UI can show "Attempted Today" etc.
+        this._app.userProgress.mockHistory[dateKey] = {
+            score: attemptData.score,
+            date: attemptData.date,
+            timeTaken: attemptData.timeTaken,
+            totalQuestions: attemptData.totalQuestions,
+            mockId: attemptData.mockId
+        };
+
+        // Optionally, keep a bestScore for the day
+        const day = this._app.userProgress.mockTests[dateKey];
+        day.bestScore = Math.max(...day.attempts.map(a => a.score));
+
+        // Save progress (Firestore/localStorage depending on user)
         this._app.saveUserProgress();
     },
 
