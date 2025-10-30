@@ -1,6 +1,4 @@
 
-
-
 // app.js - Complete Quiz Platform with Class and Competitive Exam functionality
 // Only business logic - questions stored in separate data files
 // ===================== APP CHANGELOG =====================
