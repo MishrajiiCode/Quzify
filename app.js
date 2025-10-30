@@ -4,7 +4,23 @@
 // app.js - Complete Quiz Platform with Class and Competitive Exam functionality
 // Only business logic - questions stored in separate data files
 // ===================== APP CHANGELOG =====================
+const APP_VERSION = '2.0.0'; // NEW: Stable Release Version
+
 const COMMUNITY_POSTS = {
+    '2.0.0': {
+        date: 'Oct 22, 2025',
+        type: 'major_update', // A new type for major releases
+        changes: [
+            '<strong>Official Stable Release!</strong> Quizify is now out of Beta, bringing a more polished, secure, and feature-rich experience.',
+            '<strong>Complete English Overhaul:</strong> All English chapters and question sets have been fully reviewed, corrected, and expanded for accuracy.',
+            '<strong>Quizify Help Bot:</strong> Get instant answers to your questions about the app with our new intelligent assistant.',
+            '<strong>Online Leaderboard & Profiles:</strong> Compete with others! Your best scores are saved online. View your rank and detailed stats on the new Profile page.',
+            '<strong>Friends System:</strong> Connect with friends, send requests, and get ready for future social features.',
+            '<strong>Redesigned Store:</strong> Discover the new look of the store with purchasable themes and avatars.',
+            '<strong>Quiz Instructions:</strong> A new instruction screen appears before every quiz to ensure you are ready.'
+        ],
+        note: "Thank you for being part of our journey from Beta to the official release! We're excited to bring you even more features and content. Happy quizzing!"
+    },
     '1.7.2-Beta.': {
         date: 'Oct 21, 2025',
         type: 'update',
@@ -70,7 +86,6 @@ const COMMUNITY_POSTS = {
     }
 };
 // ===================== APP CONFIGURATION =====================
-const APP_VERSION = '1.7.2-Beta.'; // Increment this to show an update notification
 
 // NEW: Configuration for the informational/festive popup
 const INFO_POPUP_CONFIG = {
@@ -130,18 +145,9 @@ let dailyChallengeMode = false;
 let quizTimerSetting = 60; // NEW: Default time per question in seconds
 
 
-// ===================== DATA MAPPING =====================
-// Competitive exam data mapping (loaded from external files)
-const subjectData = {
-    quantitative: window.quantitativeData || null,
-    english: window.englishData || null,
-    reasoning: window.reasoningData || null
-};
-
-// Academic class data (loaded from classes folder)
-const classData = window.classesData || null;
-
-// ===================== FIREBASE SETUP =====================
+// ===================== DATA & FIREBASE SETUP =====================
+let allQuizData = []; // NEW: This will be populated from Firestore
+let isGeneralScienceMode = false; // NEW: Flag for General Science sub-subject navigation
  // Your web app's Firebase configuration
   const firebaseConfig = {
     apiKey: "AIzaSyAy-7QGZ05wNf0fLG1-AY2FxJy_fdILdoM",
@@ -157,15 +163,17 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const resultsCollection = db.collection("quizResults");
 const leaderboardCollection = db.collection("leaderboard"); // NEW: Collection for best scores
+const quizzesCollection = db.collection("quizzes"); // NEW: Collection for all quiz questions
 const userProgressCollection = db.collection("userProgress"); // NEW: Collection for user progress
 
 
 // ===================== INITIALIZATION =====================
-document.addEventListener('DOMContentLoaded', function() {
-    // NEW: Make the initialization asynchronous to handle data loading properly
-    async function main() {
-        await checkUserProfile(); // This now waits for user data to load
-        checkForUpdates();
+document.addEventListener('DOMContentLoaded', async function() { // Make async
+    // NEW: Use an object-oriented approach for better organization
+    const QuizifyApp = {
+        async init() {
+            await this.checkUserProfile(); // This now waits for user data to load
+            this.checkForUpdates();
         initializeSideMenu();
         initializeUpdateDetailsModal();
         initializeHomepageSearch();
@@ -181,30 +189,74 @@ document.addEventListener('DOMContentLoaded', function() {
         initializeSparkles();
         initializePurchaseSuccessModal(); // NEW
         initializeEventListeners();
-        initializeDailyCoinModal(); // NEW
-        initializeStoreUpdatesModal(); // NEW: Add event listeners for the store updates modal
-        // NEW: Initialize the store module
-        QuizifyStore.init({
-            // Pass the necessary state and functions to the store
-            get quizCoins() { return userProgress.quizCoins || 0; }, // Read directly from userProgress
-            get userProgress() { return userProgress; }, // Pass the whole object
-            // NEW: Pass purchased items for store logic
-            get purchasedItems() { return userProgress.purchasedItems || { themes: [], avatars: [] }; },
-            set purchasedItems(value) { userProgress.purchasedItems = value; },
+            this.initializeDailyCoinModal(); // NEW
+            this.initializeStoreUpdatesModal(); // NEW: Add event listeners for the store updates modal
 
-            saveUserProgress,
-            updateCoinDisplay,
-            updateLifelineDisplay,
-            showNotification,
-            showPage,
-            showPurchaseSuccessModal // NEW
-        });
+            // NEW: Initialize the store module with the app context
+            QuizifyStore.init(this);
+
+            // NEW: Initialize the chat module with the app context
+            QuizifyChat.init(this, db, userProgressCollection);
+
+            // NEW: Initialize the friends module
+            QuizifyFriends.init(this);
+
+            // NEW: Initialize the bot module
+            QuizifyBot.init(this);
+
+            // NEW: Initialize the Mock Test module
+            MockTest.init(this, allQuizData);
+
+            // NEW: Initialize the videos module
+            QuizifyVideos.init(this, db);
+
+            // NEW: Add event listener for the videos menu button
+            document.getElementById('menu-videos-btn').addEventListener('click', () => this.displayVideosPage());
+            
         initializeLogoutConfirmation();
-        initializeInfoPopup();
-        checkAndShowPinReminder();
-    }
-    main();
+            this.initializeInfoPopup();
+            this.checkAndShowPinReminder();
+        },
+
+        // Expose necessary properties and methods for other modules
+        get quizCoins() { return userProgress.quizCoins || 0; },
+        get userProgress() { return userProgress; },
+        get purchasedItems() { return userProgress.purchasedItems || { themes: ['system', 'light', 'dark'], avatars: ['👤'] }; },
+        set purchasedItems(value) { userProgress.purchasedItems = value; },
+        performGlobalSearch, // NEW: Expose search function for the bot
+        APP_VERSION, // NEW: Expose app version for the bot
+        getSubjectTitle, // NEW: Expose title function for the bot
+        saveUserProgress, updateCoinDisplay, updateLifelineDisplay, showNotification, showPage, showPurchaseSuccessModal, goToHome, closeSideMenu,
+        displayVideosPage() { // NEW: Method to display the videos page
+            QuizifyVideos.displayVideosPage();
+            this.closeSideMenu();
+        },
+        seededShuffle, // NEW: Expose shuffle function for the mock test module
+        checkUserProfile, checkForUpdates, initializeDailyCoinModal, initializeStoreUpdatesModal, initializeInfoPopup, checkAndShowPinReminder, getOrCreateUserId, showFeatureComingSoonModal
+    };
+
+    QuizifyApp.init();
+    await loadAllQuizData(); // Load all quiz data from Firestore on startup
 });
+
+/**
+ * NEW: Function to load all quiz data from Firestore.
+ * This is now a standalone function called at startup.
+ */
+async function loadAllQuizData() {
+    // NEW: Show the spinner before fetching data.
+    showSpinnerModal(true, 'Loading Quizzes...', 'Fetching the latest content for you.');
+    try {
+        const snapshot = await quizzesCollection.get();
+        allQuizData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        console.log("All quiz data loaded from Firestore.");
+        showSpinnerModal(false); // Hide spinner on success
+    } catch (error) {
+        console.error("Failed to load quiz data from Firestore:", error);
+        showSpinnerModal(false); // Hide spinner on error
+        showNotification("Could not load quiz content. Please refresh.", "error");
+    }
+}
 
 function initializeApp() {
     showPage('home-page');
@@ -234,6 +286,8 @@ function initializeEventListeners() {
     document.querySelector('[data-subject="quantitative"]').addEventListener('click', () => selectSubject('quantitative'));
     document.querySelector('[data-subject="english"]').addEventListener('click', () => selectSubject('english'));
     document.querySelector('[data-subject="reasoning"]').addEventListener('click', () => selectSubject('reasoning'));
+    document.querySelector('[data-subject="general_science"]').addEventListener('click', () => selectSubject('general_science')); // NEW
+    document.querySelector('[data-subject="mock_test"]').addEventListener('click', () => MockTest.showRules());
 
     // Academic Section
     document.querySelector('[data-class="9"]').addEventListener('click', () => selectClass('9'));
@@ -288,6 +342,13 @@ function initializeEventListeners() {
     document.getElementById('lifeline-5050').addEventListener('click', useFiftyFifty);
     document.getElementById('lifeline-hint').addEventListener('click', useHint);
     document.getElementById('lifeline-skip').addEventListener('click', useSkip);
+    // NEW: Re-add chat button event listeners
+    document.getElementById('send-chat-message-btn').addEventListener('click', () => QuizifyChat.sendChatMessage());
+    document.getElementById('open-chat-fab').addEventListener('click', () => QuizifyChat.openGlobalChat());
+    document.getElementById('close-chat-modal-btn').addEventListener('click', () => QuizifyChat.closeGlobalChat());
+    // NEW: Add bot button event listeners
+    document.getElementById('open-help-bot-fab').addEventListener('click', () => QuizifyBot.openHelpBot());
+    document.getElementById('close-bot-modal-btn').addEventListener('click', () => QuizifyBot.closeHelpBot());
 
 
     document.getElementById('class-content').addEventListener('click', (e) => {
@@ -295,36 +356,6 @@ function initializeEventListeners() {
         if (subjectCard && subjectCard.dataset.subject) {
             selectClassSubject(subjectCard.dataset.subject);
         }
-    });
-}
-
-/**
- * NEW: Initializes event listeners for the store updates modal.
- * This was missing, causing the buttons to be unresponsive.
- */
-function initializeStoreUpdatesModal() {
-    const modal = document.getElementById('store-updates-modal');
-    const closeBtn = document.getElementById('close-store-updates-btn');
-    const laterBtn = document.getElementById('later-store-updates-btn');
-    const goToStoreBtn = document.getElementById('go-to-store-updates-btn');
-
-    if (!modal || !closeBtn || !laterBtn || !goToStoreBtn) {
-        return; // Exit if elements are not found
-    }
-
-    const closeModal = () => {
-        modal.classList.remove('visible');
-    };
-
-    // Close button and "Maybe Later" button should just close the modal
-    closeBtn.addEventListener('click', closeModal);
-    laterBtn.addEventListener('click', closeModal);
-
-    // "Go to Store" button should close the modal and navigate to the store page
-    goToStoreBtn.addEventListener('click', () => {
-        closeModal();
-        // The QuizifyStore object handles the logic for displaying the store page
-        QuizifyStore.displayStorePage();
     });
 }
 
@@ -377,7 +408,10 @@ function goToHome() {
     currentClass = '';
     currentStream = '';
     currentSubject = '';
+    isGeneralScienceMode = false; // NEW: Reset General Science mode
     academicDailyChallenge = false;
+    document.getElementById('open-chat-fab').style.display = 'block'; // NEW: Show chat button on home
+    document.getElementById('open-help-bot-fab').style.display = 'block'; // NEW: Ensure help bot button is also shown
     QuizifyStore.stopDealsCountdown(); // NEW: Stop the deals timer
     currentChapter = '';    
     updateCoinDisplay(); // NEW: Update coin display on home
@@ -392,6 +426,7 @@ function goToHome() {
     // Re-check status only if the user is in competitive mode
     if (userFocus === 'competitive') {
         checkDailyChallengeStatus();
+        MockTest.checkAndDisplayDailyMock(); // NEW: Check mock test status
     }
 }
 
@@ -427,10 +462,16 @@ function goBack() {
                 goToHome();
             }
         }
+    } else if (isGeneralScienceMode) {
+        if (currentSubject) {
+            selectSubject('general_science'); // Go back to sub-subject list
+        } else {
+            goToHome();
+        }
     } else if (currentSubject) {
         // From competitive chapter list back to competitive subject list
-        currentSubject = '';
-        showPage('home-page');
+        // Using goToHome() resets the state and shows the subject selection.
+        goToHome();
     } else {
         // Default fallback to home
         showPage('home-page');
@@ -441,6 +482,7 @@ function goToClass() {
     if (classMode && currentClass) {
         displaySubjectsForClass();
         showPage('class-page');
+        document.getElementById('open-chat-fab').style.display = 'block'; // NEW: Show chat button
         // Re-check status when returning to class page
         checkAcademicDailyChallengeStatus();
     } else {
@@ -457,6 +499,7 @@ function goToSubject() {
         currentChapter = '';
         displayChapters(currentSubject);
     }
+    document.getElementById('open-chat-fab').style.display = 'block'; // NEW: Show chat button
     showPage('subject-page');
 }
 
@@ -475,11 +518,13 @@ function goToChapter() {
         return; // Stop further execution
     }
     displayChapterInfo(); // This will handle both class and competitive modes
+    document.getElementById('open-chat-fab').style.display = 'block'; // NEW: Show chat button
     showPage('chapter-page');
 }
 
 function goToResults() {
     showPage('results-page');
+    document.getElementById('open-chat-fab').style.display = 'block'; // NEW: Show chat button
 }
 
 function goToPracticeResults() {
@@ -525,19 +570,32 @@ function initializeQuizModeModal() {
  * @returns {boolean} True if the chapter has at least one question, false otherwise.
  */
 function chapterHasQuestions(chapter) {
-    if (!chapter || !chapter.sets || !Array.isArray(chapter.sets)) return false;
-    return chapter.sets.some(set => Array.isArray(set) && set.length > 0);
+    if (!chapter || !chapter.sets || !Array.isArray(chapter.sets)) return false;    
+    return chapter.sets.some(set => set.questions && Array.isArray(set.questions) && set.questions.length > 0);
 }
 
 // ===================== COMPETITIVE EXAM FUNCTIONS (ORIGINAL) =====================
 function selectSubject(subject) {
     dailyChallengeMode = false;
     classMode = false;
+    isGeneralScienceMode = false; // Reset this flag
     currentSubject = subject;
     currentClass = '';
     currentStream = '';
     const subjectTitle = getSubjectTitle(subject);
     document.getElementById('search-chapters').value = ''; // Clear search bar
+
+    // NEW: Handle General Science sub-subject display
+    if (subject === 'general_science') {
+        isGeneralScienceMode = true;
+        currentSubject = ''; // Clear subject to show sub-subjects
+        document.getElementById('subject-title').textContent = 'General Science';
+        displayGeneralScienceSubSubjects();
+        showPage('subject-page');
+        return;
+    }
+
+    // Original logic for other subjects
     document.getElementById('subject-title').textContent = subjectTitle;
     displayChapters(subject);
     showPage('subject-page');
@@ -551,7 +609,19 @@ function getSubjectTitle(subject) {
         math: 'Mathematics',
         physics: 'Physics',
         chemistry: 'Chemistry',
-        biology: 'Biology'
+        biology: 'Biology',
+        accounts: 'Accounts',
+        business: 'Business Studies',
+        economics: 'Economics',
+        history: 'History',
+        geography: 'Geography',
+        polity: 'Polity',
+        static_gk: 'Static GK',
+        // NEW: Handle General Science sub-subject keys
+        'gs_history': 'History',
+        'gs_geography': 'Geography',
+        'gs_polity': 'Polity',
+        'gs_economics': 'Economics'
     };
     return titles[subject] || subject;
 }
@@ -560,15 +630,21 @@ function displayChapters(subject) {
     const chaptersGrid = document.getElementById('chapters-grid');
     chaptersGrid.innerHTML = '';
     
-    const data = subjectData[subject];
+    // NEW: Determine the category based on the mode
+    let category = 'competitive';
+    if (isGeneralScienceMode) {
+        category = 'general_science';
+    }
+
+    const data = allQuizData.find(d => d.id === subject && d.category === category);
     if (!data || !data.chapters) {
         chaptersGrid.innerHTML = '<p>No chapters available. Please check back later.</p>';
         return;
     }
-    
+
     data.chapters.forEach((chapter, index) => {
         const hasQuestions = chapterHasQuestions(chapter);
-        const chapterCard = document.createElement('div');
+        const chapterCard = document.createElement('div'); // This was step 1, but I've renumbered for clarity
         chapterCard.className = `chapter-card ${!hasQuestions ? 'locked' : ''}`;
         chapterCard.innerHTML = `
             <h3>${chapter.name}</h3>
@@ -589,6 +665,40 @@ function displayChapters(subject) {
     });
 }
 
+/**
+ * NEW: Displays the sub-subjects for the General Science category.
+ */
+function displayGeneralScienceSubSubjects() {
+    const chaptersGrid = document.getElementById('chapters-grid');
+    chaptersGrid.innerHTML = ''; // This grid will be used for sub-subjects
+
+    const subSubjects = allQuizData.filter(d => d.category === 'general_science');
+
+    if (subSubjects.length === 0) {
+        chaptersGrid.innerHTML = '<p>No sub-subjects available. Please check back later.</p>';
+        return;
+    }
+
+    subSubjects.forEach(subSubject => {
+        const hasContent = subSubject.chapters && subSubject.chapters.some(chapterHasQuestions);
+        const card = document.createElement('div');
+        // Re-using chapter-card style for consistency
+        card.className = `chapter-card ${!hasContent ? 'locked' : ''}`;
+        card.innerHTML = `
+            <h3>${subSubject.subjectName}</h3>
+            <p>Quizzes on ${subSubject.subjectName}</p>
+            ${!hasContent ? '<div class="set-status">Coming Soon</div>' : ''}
+        `;
+
+        if (hasContent) {
+            card.onclick = () => selectSubSubject(subSubject.id);
+        } else {
+            card.onclick = showLockedContentMessage;
+        }
+        chaptersGrid.appendChild(card);
+    });
+}
+
 // ===================== NEW: CLASS-BASED FUNCTIONS =====================
 function selectClass(cls) {
     dailyChallengeMode = false;
@@ -597,11 +707,6 @@ function selectClass(cls) {
     currentSubject = '';
     currentChapter = '';
     currentStream = '';
-    
-    if (!classData) {
-        showNotification('Class data not available. Please ensure data files are loaded.', 'error');
-        return;
-    }
     
     if (cls === '9' || cls === '10') {
         // Direct subject selection for class 9 and 10
@@ -622,13 +727,13 @@ function displaySubjectsForClass() {
     grid.innerHTML = '';
     grid.className = 'subjects-grid';
     
-    // NEW: Add Daily Challenge card for academic classes
+    // Add Daily Challenge card for academic classes
     const dailyChallengeCard = document.createElement('div');
     dailyChallengeCard.id = `academic-daily-challenge-card-${currentClass}`;
     dailyChallengeCard.className = 'subject-card daily-challenge-card';
     const today = new Date();
     const options = { day: 'numeric', month: 'short', year: 'numeric' };
-    const formattedDate = today.toLocaleDateString('en-GB', options);
+    const formattedDate = today.toLocaleDateString('en-GB', options); // This was step 1, but I've renumbered for clarity
 
     dailyChallengeCard.innerHTML = `
         <div class="daily-challenge-header">
@@ -645,11 +750,13 @@ function displaySubjectsForClass() {
     grid.appendChild(dailyChallengeCard);
 
     let subjects = [];
+    const classSubjects = allQuizData.filter(d => d.category === 'academic' && d.id.startsWith(`class${currentClass}_`));
+
     if (currentClass === '9' || currentClass === '10') {
-        subjects = classData[currentClass]?.subjects || [];
+        subjects = classSubjects.map(s => s.id.replace(`class${currentClass}_`, ''));
     } else if (currentClass === '11' || currentClass === '12') {
         if (!currentStream) return;
-        subjects = classData[currentClass]?.streams?.[currentStream] || [];
+        subjects = classSubjects.filter(s => s.streams?.includes(currentStream)).map(s => s.id.replace(`class${currentClass}_`, ''));
     }
     
     if (!subjects || subjects.length === 0) {
@@ -658,7 +765,8 @@ function displaySubjectsForClass() {
     }
     
     subjects.forEach(subject => {
-        const subjectChapters = classData[currentClass]?.chapters?.[subject] || [];
+        const subjectDoc = allQuizData.find(d => d.id === `class${currentClass}_${subject}` && d.category === 'academic');
+        const subjectChapters = subjectDoc?.chapters || [];
         const hasContent = subjectChapters && subjectChapters.some(chapterHasQuestions);
 
         const card = document.createElement('div');
@@ -670,7 +778,11 @@ function displaySubjectsForClass() {
             science: 'https://cdn-icons-png.flaticon.com/512/3000/3000774.png',
             physics: 'https://cdn-icons-png.flaticon.com/512/3000/3000774.png',
             chemistry: 'https://cdn-icons-png.flaticon.com/512/4341/4341094.png',
-            biology: 'https://cdn-icons-png.flaticon.com/512/2783/2783988.png'
+            biology: 'https://cdn-icons-png.flaticon.com/512/2783/2783988.png',
+            accounts: 'https://cdn-icons-png.flaticon.com/512/2621/2621853.png',
+            business: 'https://cdn-icons-png.flaticon.com/512/3059/3059953.png',
+            economics: 'https://cdn-icons-png.flaticon.com/512/1029/1029183.png',
+            history: 'https://cdn-icons-png.flaticon.com/512/3067/3067559.png'
         };
         
         card.innerHTML = `
@@ -698,7 +810,8 @@ function displayStreamsForClass() {
     
     grid.innerHTML = '';
     
-    const streams = Object.keys(classData[currentClass]?.streams || {});
+    // Get unique streams for the class from the data
+    const streams = [...new Set(allQuizData.filter(d => d.id.startsWith(`class${currentClass}_`) && d.streams).flatMap(d => d.streams))];
     
     if (streams.length === 0) {
         grid.innerHTML = '<p>No streams available for this class.</p>';
@@ -712,12 +825,14 @@ function displayStreamsForClass() {
         const streamTitles = {
             pcm: 'Physics, Chemistry, Mathematics',
             pcb: 'Physics, Chemistry, Biology',
-            pcmb: 'Physics, Chemistry, Math, Biology'
+            pcmb: 'Physics, Chemistry, Math, Biology',
+            commerce: 'Accounts, Business, Economics',
+            art: 'History, Economics, Political Science'
         };
         
         streamCard.innerHTML = `
             <h2>${stream.toUpperCase()}</h2>
-            <p>${streamTitles[stream] || classData[currentClass].streams[stream].map(getSubjectTitle).join(', ')}</p>
+            <p>${streamTitles[stream] || `${stream.charAt(0).toUpperCase() + stream.slice(1)} Stream`}</p>
         `;
         streamCard.onclick = function() {
             currentStream = stream;
@@ -738,6 +853,19 @@ function selectStream(stream) {
     showPage('class-page');
 }
 
+/**
+ * NEW: Handles selection of a sub-subject within General Science.
+ * @param {string} subSubjectId - The ID of the sub-subject (e.g., 'history').
+ */
+function selectSubSubject(subSubjectId) {
+    isGeneralScienceMode = true; // Ensure this flag is set
+    currentSubject = subSubjectId; // Now, currentSubject is 'history', 'geography', etc.
+    const subjectData = allQuizData.find(d => d.id === subSubjectId);
+    document.getElementById('subject-title').textContent = subjectData.subjectName;
+    displayChapters(subSubjectId); // Reuse the existing displayChapters function
+    showPage('subject-page'); // Stay on the same page, but show chapters now
+}
+
 function selectClassSubject(subject) {
     currentSubject = subject;
     document.getElementById('search-chapters').value = ''; // Clear search bar
@@ -750,7 +878,8 @@ function displayChaptersForClass() {
     const grid = document.getElementById('chapters-grid');
     grid.innerHTML = '';
     
-    const chapters = classData[currentClass]?.chapters?.[currentSubject] || [];
+    const subjectDoc = allQuizData.find(d => d.id === `class${currentClass}_${currentSubject}` && d.category === 'academic');
+    const chapters = subjectDoc?.chapters || [];
     
     if (chapters.length === 0) {
         grid.innerHTML = '<p>No chapters available for this subject. Please check back later.</p>';
@@ -815,33 +944,39 @@ function displayChapterInfo() {
     let totalQuestions = 0;
     
     if (classMode) {
-        chapterData = classData[currentClass]?.chapters?.[currentSubject]?.find(ch => ch.name === currentChapter);
+        chapterData = allQuizData.find(d => d.id === `class${currentClass}_${currentSubject}` && d.category === 'academic')?.chapters.find(ch => ch.name === currentChapter);
+    } else if (isGeneralScienceMode) { // NEW: Handle General Science mode
+        chapterData = allQuizData.find(d => d.id === currentSubject && d.category === 'general_science')?.chapters.find(ch => ch.name === currentChapter);
     } else {
-        const data = subjectData[currentSubject];
-        chapterData = data?.chapters?.find(ch => ch.name === currentChapter);
+        chapterData = allQuizData.find(d => d.id === currentSubject)?.chapters.find(ch => ch.name === currentChapter);
     }
     
     if (chapterData && chapterData.sets) {
-        totalQuestions = chapterData.sets.reduce((sum, set) => sum + set.length, 0);
+        // FIX: Correctly calculate total questions from the new Firestore data structure.
+        // The old `set.length` was incorrect as each `set` is now an object `{ questions: [...] }`.
+        totalQuestions = chapterData.sets.reduce((sum, set) => sum + (set.questions ? set.questions.length : 0), 0);
     }
-    
+
     document.getElementById('total-questions').textContent = totalQuestions;
     
     // Calculate progress
+    const totalSetsInChapter = chapterData?.sets?.length || 0; // NEW: Get the actual number of sets.
     let completedSets = 0;
     let totalScore = 0;
     
-    for (let i = 0; i < 5; i++) {
+    // NEW: Loop through the actual number of sets, not a fixed number.
+    for (let i = 0; i < totalSetsInChapter; i++) {
         const progressKey = `${currentSubject}_${currentChapter}_${i}`;
-        if (userProgress[progressKey] && userProgress[progressKey].score >= 40) { // FIX: Use 40% to correctly count completed sets
+        if (userProgress[progressKey] && userProgress[progressKey].score >= 40) {
             completedSets++;
             totalScore += userProgress[progressKey].score;
         }
     }
     
     const averageScore = completedSets > 0 ? Math.round(totalScore / completedSets) : 0;
-    
-    document.getElementById('completed-sets').textContent = `${completedSets}/5`;
+
+    // NEW: Display progress based on the actual number of sets.
+    document.getElementById('completed-sets').textContent = `${completedSets}/${totalSetsInChapter}`;
     document.getElementById('average-score').textContent = `${averageScore}%`;
     
     // Display practice sets
@@ -852,8 +987,9 @@ function displayChapterInfo() {
 function displayPracticeSets(chapterData) {
     const setsGrid = document.getElementById('sets-grid');
     setsGrid.innerHTML = '';
+    const totalSets = chapterData?.sets?.length || 0;
     
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < totalSets; i++) {
         const setCard = document.createElement('div');
         setCard.className = 'set-card';
         
@@ -863,10 +999,10 @@ function displayPracticeSets(chapterData) {
         let setStatus = 'Not Started';
         let cardClass = '';
         
-        const hasQuestions = chapterData && chapterData.sets && chapterData.sets[i] && chapterData.sets[i].length > 0;
+        const hasQuestions = chapterData?.sets?.[i]?.questions?.length > 0;
 
         if (progress) {
-            if (progress.score >= 40) { // FIX: Use 40% as the passing criteria
+            if (progress.score >= 40) {
                 setStatus = `Passed (${progress.score}%)`;
                 cardClass = 'completed';
             } else {
@@ -879,7 +1015,7 @@ function displayPracticeSets(chapterData) {
         if (i > 0) {
             const prevProgressKey = `${currentSubject}_${currentChapter}_${i-1}`;
             const prevProgress = userProgress[prevProgressKey];
-            if (!prevProgress || prevProgress.score < 40) { // FIX: Use 40% to unlock the next set
+            if (!prevProgress || prevProgress.score < 40) {
                 setStatus = 'Locked';
                 cardClass = 'locked locked-progress'; // Add a specific class for progress-locked sets
             }
@@ -958,10 +1094,12 @@ function promptQuizMode(setIndex) {
 
 function displayProgressInfo(completedSets, averageScore) {
     const progressInfo = document.getElementById('progress-info');
+    const totalSetsInChapter = document.getElementById('completed-sets').textContent.split('/')[1] || 0;
+    const progressPercentage = totalSetsInChapter > 0 ? (completedSets / totalSetsInChapter * 100).toFixed(0) : 0;
     progressInfo.innerHTML = `
-        <p><strong>Completed Sets:</strong> ${completedSets}/5</p>
+        <p><strong>Completed Sets:</strong> ${completedSets}/${totalSetsInChapter}</p>
         <p><strong>Average Score:</strong> ${averageScore}%</p>
-        <p><strong>Chapter Progress:</strong> ${(completedSets / 5 * 100).toFixed(0)}%</p>
+        <p><strong>Chapter Progress:</strong> ${progressPercentage}%</p>
     `;
 }
 
@@ -976,18 +1114,20 @@ function startQuiz(setIndex) {
     // Get quiz data based on mode
     let chapterData = null;
     if (classMode && !academicDailyChallenge) {
-        chapterData = classData[currentClass]?.chapters?.[currentSubject]?.find(ch => ch.name === currentChapter);
+        chapterData = allQuizData.find(d => d.id === `class${currentClass}_${currentSubject}` && d.category === 'academic')?.chapters.find(ch => ch.name === currentChapter);
+    } else if (isGeneralScienceMode && !dailyChallengeMode) { // FIX: Added check for General Science mode
+        chapterData = allQuizData.find(d => d.id === currentSubject && d.category === 'general_science')?.chapters.find(ch => ch.name === currentChapter);
     } else if (!classMode && !dailyChallengeMode) {
-        const data = subjectData[currentSubject];
-        chapterData = data?.chapters?.find(ch => ch.name === currentChapter);
+        // This now correctly handles only the main competitive subjects
+        chapterData = allQuizData.find(d => d.id === currentSubject && d.category === 'competitive')?.chapters.find(ch => ch.name === currentChapter);
     }
     
     // FIX: The quizData was not being assigned for regular quizzes, causing an error on submission.
     // This was because the check was exiting before quizData could be set.
-    if (dailyChallengeMode) {
+    if (dailyChallengeMode || academicDailyChallenge) {
         // Daily challenge data is already set, so we do nothing here.
-    } else if (chapterData && chapterData.sets[setIndex] && chapterData.sets[setIndex].length > 0) {
-        quizData = chapterData.sets[setIndex];
+    } else if (chapterData?.sets?.[setIndex]?.questions?.length > 0) {
+        quizData = chapterData.sets[setIndex].questions;
     } else {
         showNotification('This set is not available yet. Please check back later.', 'warning');
         return;
@@ -1001,6 +1141,8 @@ function startQuiz(setIndex) {
     
     displayQuestion();
     startTimer();
+    document.getElementById('open-chat-fab').style.display = 'none'; // NEW: Hide chat button during quiz
+    document.getElementById('open-help-bot-fab').style.display = 'none'; // NEW: Hide bot button during quiz
     setupQuestionNumbers();
     showPage('quiz-page');
 }
@@ -1015,24 +1157,24 @@ function startPracticeMode(setIndex) {
     // Get quiz data based on mode
     let chapterData = null;
     if (classMode) {
-        chapterData = classData[currentClass]?.chapters?.[currentSubject]?.find(ch => ch.name === currentChapter);
+        chapterData = allQuizData.find(d => d.id === `class${currentClass}_${currentSubject}` && d.category === 'academic')?.chapters.find(ch => ch.name === currentChapter);
     } else {
-        const data = subjectData[currentSubject];
-        chapterData = data?.chapters?.find(ch => ch.name === currentChapter);
+        chapterData = allQuizData.find(d => d.id === currentSubject && d.category === 'competitive')?.chapters.find(ch => ch.name === currentChapter);
     }
 
-    if (!chapterData || !chapterData.sets[setIndex] || chapterData.sets[setIndex].length === 0) {
+    if (!chapterData?.sets?.[setIndex]?.questions?.length > 0) {
         showNotification('This set is not available for practice yet.', 'warning');
         return;
     }
 
-    // Use questions from the selected set
-    quizData = chapterData.sets[setIndex];
+    quizData = chapterData.sets[setIndex].questions;
 
     // Initialize user answers array
     userAnswers = new Array(quizData.length).fill(null);
 
     displayQuestion();
+    document.getElementById('open-chat-fab').style.display = 'none'; // NEW: Hide chat button during quiz
+    document.getElementById('open-help-bot-fab').style.display = 'none'; // NEW: Hide bot button during quiz
     // DO NOT start the timer for practice mode
     setupQuestionNumbers();
     showPage('quiz-page');
@@ -1253,6 +1395,21 @@ function hasPreviouslyFailed(progressKey) {
     return false;
 }
 
+/**
+ * NEW: Checks if a chapter is completed and awards a bonus if it's the first time.
+ */
+function checkAndAwardChapterBonus() {
+    const chapterCompletionKey = `chapter_completed_${currentSubject}_${currentChapter}`;
+    if (userProgress[chapterCompletionKey]) return; // Bonus already awarded
+
+    const chapterData = allQuizData.find(d => d.id === currentSubject)?.chapters.find(ch => ch.name === currentChapter);
+    const totalSets = chapterData?.sets?.length || 0;
+    const completedSets = (userProgress.stats?.[currentSubject]?.[currentChapter]?.completedSets) || 0;
+
+    if (totalSets > 0 && completedSets === totalSets) {
+        unlockAchievement('chapter_master'); // Also trigger the achievement
+    }
+}
 function submitQuiz() {
     if (timer) {
         clearInterval(timer);
@@ -1292,20 +1449,6 @@ function submitQuiz() {
         saveUserProgress();
         updateStreak(results.passed); // NEW: Update streak
     } else {
-        // NEW: Award coins for regular quiz completion
-        let coinsEarned = 0;
-        if (results.passed) {
-            coinsEarned += 10; // 10 coins for passing
-            if (results.percentage === 100) {
-                coinsEarned += 25; // Bonus for a perfect score
-            }
-        }
-        if (coinsEarned > 0) {
-            quizCoins += coinsEarned;
-            showNotification(`You earned ${coinsEarned} Quiz Coins! 💰`, 'success');
-            updateCoinDisplay();
-        }
-
         // Save progress for regular chapter sets
         const progressKey = `${currentSubject}_${currentChapter}_${currentSet}`;
 
@@ -1333,7 +1476,35 @@ function submitQuiz() {
                 showNotification('New high score saved!', 'success');
             }
         }
+
+        // --- NEW: Refined Coin Award Logic ---
+        let coinsEarned = 0;
+        let notificationMessages = [];
+
+        // 1. Award 10 coins for passing, but only once.
+        if (results.passed && !userProgress[progressKey].passBonusAwarded) {
+            coinsEarned += 10;
+            notificationMessages.push('You passed and earned 10 coins!');
+            userProgress[progressKey].passBonusAwarded = true;
+        }
+
+        // 2. Award 25 bonus coins for a perfect score, but only once.
+        if (results.percentage === 100 && !userProgress[progressKey].perfectScoreBonusAwarded) {
+            coinsEarned += 25;
+            notificationMessages.push('Perfect score! You earned a bonus of 25 coins!');
+            userProgress[progressKey].perfectScoreBonusAwarded = true;
+        }
+
+        // 3. Update user coins and show a combined notification.
+        if (coinsEarned > 0) {
+            userProgress.quizCoins = (userProgress.quizCoins || 0) + coinsEarned;
+            const finalMessage = `${notificationMessages.join(' ')} Total earned: ${coinsEarned} 💰`;
+            showNotification(finalMessage, 'success');
+        }
+        // --- End of New Coin Logic ---
+
         saveUserProgress(); // Save the updated progress with the full history
+        checkAndAwardChapterBonus(); // NEW: Check for chapter completion bonus
     }
 
     // NEW: After any quiz, recalculate and save the overall profile stats.
@@ -1346,6 +1517,7 @@ function submitQuiz() {
 
     // NEW: Check for achievements AFTER displaying results and saving progress.
     checkAchievements(results, timeTaken);
+    updateCoinDisplay(); // NEW: Update coin display after potential earnings
     updateStreakDisplay(); // NEW: Update streak display after a quiz
 }
 
@@ -1497,9 +1669,11 @@ function retakeQuiz() {
     // Find other available (un-passed) sets in the same chapter to avoid repetition.
     let chapterData;
     if (classMode) {
-        chapterData = classData[currentClass]?.chapters?.[currentSubject]?.find(ch => ch.name === currentChapter);
+        chapterData = allQuizData.find(d => d.id === `class${currentClass}_${currentSubject}` && d.category === 'academic')?.chapters.find(ch => ch.name === currentChapter);
+    } else if (isGeneralScienceMode) {
+        chapterData = allQuizData.find(d => d.id === currentSubject && d.category === 'general_science')?.chapters.find(ch => ch.name === currentChapter);
     } else {
-        chapterData = subjectData[currentSubject]?.chapters?.find(ch => ch.name === currentChapter);
+        chapterData = allQuizData.find(d => d.id === currentSubject && d.category === 'competitive')?.chapters.find(ch => ch.name === currentChapter);
     }
 
     if (!chapterData || !chapterData.sets) {
@@ -1511,7 +1685,7 @@ function retakeQuiz() {
     const availableSets = [];
 
     for (let i = 0; i < totalSets; i++) {
-        if (chapterData.sets[i] && chapterData.sets[i].length > 0) {
+        if (chapterData.sets[i]?.questions?.length > 0) {
             const progressKey = `${currentSubject}_${currentChapter}_${i}`;
             const progress = userProgress[progressKey];
             if (!progress || progress.score < 40) {
@@ -1751,13 +1925,6 @@ function saveQuizSettings() {
 
 // ===================== UTILITY FUNCTIONS =====================
 /**
- * Applies a staggered animation to a list of elements.
- * @param {string} selector The CSS selector for the elements to animate.
- */
-function applyStaggeredAnimation(selector) {
-}
-
-/**
  * Animates a number from a start to an end value.
  * @param {string} id The ID of the element to update.
  * @param {number} start The starting number.
@@ -1930,6 +2097,7 @@ async function saveAccountChanges() {
         // Migrate both userProgress and leaderboard data
         await migrateFirestoreDocument(userProgressCollection, oldUserId, newUserId);
         await migrateFirestoreDocument(leaderboardCollection, oldUserId, newUserId, { name: newName });
+        await userProgressCollection.doc(newUserId).update({ userName: newName }); // Explicitly update the name
 
         // Update localStorage with new details
         localStorage.setItem('userName', newName);
@@ -2176,7 +2344,7 @@ function startDailyChallenge() {
  * @param {number} seed The seed for the random number generator.
  * @returns {Array} The shuffled array.
  */
-function seededShuffle(array, seed) {
+function seededShuffle(array, seed) { // This function is now exposed globally
     let currentIndex = array.length, randomIndex;
     const pseudoRandom = () => {
         const x = Math.sin(seed++) * 10000;
@@ -2192,13 +2360,13 @@ function seededShuffle(array, seed) {
 
 function generateDailyChallengeQuestions() {
     const getQuestionsForSubject = (subjectKey) => {
-        const questions = [];
-        subjectData[subjectKey]?.chapters?.forEach(chapter => {
-            chapter.sets?.forEach(set => {
-                if (Array.isArray(set) && set.length > 0) questions.push(...set);
-            });
-        });
-        return questions;
+        const subjectDoc = allQuizData.find(d => d.id === subjectKey);
+        if (!subjectDoc) return [];
+        return subjectDoc.chapters.flatMap(chapter =>
+            chapter.sets.flatMap(set =>
+                set.questions || [] // Handle sets that might not have a questions property
+            ).map(q => ({ ...q, subject: subjectKey, chapter: chapter.name })) // Add context
+        );
     };
 
     const today = new Date();
@@ -2301,15 +2469,15 @@ function startAcademicDailyChallenge() {
 
 function generateAcademicDailyChallengeQuestions() {
     const allQuestions = [];
-    const subjects = classData[currentClass]?.subjects || [];
+    const classSubjects = allQuizData.filter(d => d.category === 'academic' && d.class === currentClass);
 
-    subjects.forEach(subjectKey => {
-        classData[currentClass]?.chapters?.[subjectKey]?.forEach(chapter => {
-            chapter.sets?.forEach(set => {
-                if (Array.isArray(set) && set.length > 0) {
-                    allQuestions.push(...set);
+    classSubjects.forEach(subjectDoc => {
+        subjectDoc.chapters.forEach(chapter => {
+            chapter.sets.forEach(set => {
+                if (set.questions && set.questions.length > 0) { // Check if questions array exists and is not empty
+                    allQuestions.push(...set.questions);
                 }
-            });
+            })
         });
     });
 
@@ -2326,7 +2494,7 @@ function generateAcademicDailyChallengeQuestions() {
 // ===================== NEW: ONBOARDING & PERSONALIZATION =====================
 async function checkUserProfile() { // NEW: Make this function async
     const userName = localStorage.getItem('userName');
-    const userPin = localStorage.getItem('userPin'); // NEW: Check for PIN
+    const userPin = localStorage.getItem('userPin');
     const userFocus = localStorage.getItem('userFocus');
 
     if (!userName || !userFocus || !userPin) { // NEW: Check for PIN
@@ -2336,13 +2504,14 @@ async function checkUserProfile() { // NEW: Make this function async
     } else {
         document.getElementById('onboarding-modal').classList.remove('visible');
         document.getElementById('logout-btn').style.display = 'inline-flex';
-        await loadUserProgress(); // NEW: Wait for progress to load from Firestore
+        await loadUserProgress();
         personalizeHomepage(userName, userFocus);
+    initializeLogoutConfirmation(); // FIX: Initialize after user profile is confirmed
     }
     // NEW: These are now called after user data is loaded, ensuring they have the correct data.
     initializeTheme();
     initializeInfoPopup();
-    QuizifyStore.showStoreUpdatesModal(); // NEW: Moved here to ensure it runs after user data is loaded.
+    QuizifyStore.showStoreUpdatesModal();
     checkDailyCoinReward(); // NEW: Check for daily coin reward
     updateStreakDisplay();
     document.getElementById('app-version').textContent = `v${APP_VERSION}`;
@@ -2351,9 +2520,9 @@ async function checkUserProfile() { // NEW: Make this function async
 
 function saveUserPreferences(focus) {
     const nameInput = document.getElementById('user-name-input');
-    const pinInput = document.getElementById('user-pin-input'); // NEW: Get PIN input
+    const pinInput = document.getElementById('user-pin-input');
     const userName = nameInput.value.trim();
-    const userPin = pinInput.value.trim(); // NEW: Get PIN value
+    const userPin = pinInput.value.trim();
 
     if (!userName) {
         showNotification('Please enter your name.', 'error');
@@ -2368,8 +2537,9 @@ function saveUserPreferences(focus) {
     }
 
     localStorage.setItem('userName', userName);
-    localStorage.setItem('userPin', userPin); // NEW: Save PIN
+    localStorage.setItem('userPin', userPin);
     localStorage.setItem('userFocus', focus);
+    userProgress.userName = userName;
 
     // NEW: Set a flag to show the PIN reminder after the page reloads.
     sessionStorage.setItem('showPinReminder', 'true');
@@ -2459,11 +2629,12 @@ function setDailyChallengeDate() {
 }
 
 function logout() {
+    // FIX: Close the side menu for a smoother experience
+    closeSideMenu();
     // Close the side menu for a smoother experience
     if (timer) {
         clearInterval(timer);
     }
-    closeSideMenu();
     // Show the custom confirmation modal instead of the browser's confirm dialog
     document.getElementById('logout-confirm-modal').classList.add('visible');
 }
@@ -2549,6 +2720,9 @@ function initializeLogoutConfirmation() {
     const confirmBtn = document.getElementById('confirm-logout-btn');
     const cancelBtn = document.getElementById('cancel-logout-btn');
 
+    // FIX: Close side menu when logout process starts
+    closeSideMenu();
+    if (!modal || !confirmBtn || !cancelBtn) return;
     const closeModal = () => {
         modal.classList.remove('visible');
     };
@@ -2556,7 +2730,7 @@ function initializeLogoutConfirmation() {
     confirmBtn.addEventListener('click', () => {
         localStorage.removeItem('userName');
         localStorage.removeItem('userFocus');
-        localStorage.removeItem('userPin'); // NEW: Clear PIN on logout
+        localStorage.removeItem('userPin');
     userProgress.activeAvatar = '👤'; // Reset avatar
         window.location.reload();
     });
@@ -2633,7 +2807,7 @@ window.addEventListener('error', function(event) {
 
 // Check if required data is loaded
 function checkDataAvailability() {
-    if (!window.classesData && !window.quantitativeData && !window.englishData && !window.reasoningData) {
+    if (allQuizData.length === 0) {
         console.warn('No quiz data loaded. Please ensure data files are included.');
     }
 }
@@ -2706,37 +2880,21 @@ function generateContentMap() {
     // Helper to process chapters
     const processChapters = (chapters, subjectKey) => {
         if (!chapters) return;
-        chapters.forEach(chapter => {
+        chapters.forEach((chapter) => {
             if (chapter && chapter.name && chapter.sets) {
-                const nonEmptySets = chapter.sets.filter(set => set.length > 0).length;
+                const nonEmptySets = chapter.sets.filter(set => set.questions?.length > 0).length;
                 if (nonEmptySets > 0) {
                     const key = `${subjectKey}_${chapter.name}`;
-                    contentMap[key] = { name: chapter.name, count: nonEmptySets };
+                    contentMap[key] = { name: chapter.name, count: nonEmptySets, subject: subjectKey };
                 }
             }
         });
     };
 
     // 1. Process competitive exams
-    for (const subjectKey in subjectData) {
-        if (subjectData[subjectKey] && subjectData[subjectKey].chapters) {
-            processChapters(subjectData[subjectKey].chapters, subjectKey);
-        }
-    }
-
-    // 2. Process academic classes
-    if (classData) {
-        Object.values(classData).forEach(cls => {
-            const classKey = Object.keys(classData).find(key => classData[key] === cls);
-            if (cls && cls.chapters) {
-                Object.values(cls.chapters).forEach(subjectChapters => {
-                    const subjectKey = Object.keys(cls.chapters).find(key => cls.chapters[key] === subjectChapters);
-                    const prefix = `class${classKey}_${subjectKey}`;
-                    processChapters(subjectChapters, prefix);
-                });
-            }
-        });
-    }
+    allQuizData.forEach(subjectDoc => {
+        processChapters(subjectDoc.chapters, subjectDoc.id);
+    });
 
     return contentMap;
 }
@@ -2854,6 +3012,7 @@ function initializeSideMenu() {
     const menuProfileBtn = document.getElementById('menu-profile-btn'); // NEW
     const menuStoreBtn = document.getElementById('menu-store-btn'); // NEW
     const menuLeaderboardBtn = document.getElementById('menu-leaderboard-btn');
+    const menuVideosBtn = document.getElementById('menu-videos-btn'); // NEW
     const menuOverlay = document.getElementById('menu-overlay');
     
     const openMenu = () => {
@@ -2902,6 +3061,11 @@ function initializeSideMenu() {
         displayLeaderboard();
         closeSideMenu();
     });
+    menuVideosBtn.addEventListener('click', () => { // NEW
+        QuizifyVideos.displayVideosPage();
+        closeSideMenu();
+    });
+
     menuOverlay.addEventListener('click', closeSideMenu);
 }
 
@@ -2941,35 +3105,31 @@ function initializeHomepageSearch() {
 function performGlobalSearch(query) {
     const results = [];
 
-    // 1. Search Competitive Exams
-    for (const subjectKey in subjectData) {
-        subjectData[subjectKey]?.chapters.forEach(chapter => {
-            if (chapter.name.toLowerCase().includes(query)) {
-                results.push({
-                    chapterName: chapter.name,
-                    subject: subjectKey,
-                    type: 'competitive'
-                });
-            }
-        });
-    }
+    // NEW: Search all data from Firestore
+    allQuizData.forEach(subjectDoc => {
+        const isAcademic = subjectDoc.id.startsWith('class');
+        const subjectChapters = isAcademic ? Object.values(subjectDoc.chapters).flat() : subjectDoc.chapters;
 
-    // 2. Search Academic Classes
-    for (const classKey in classData) {
-        const classInfo = classData[classKey];
-        for (const subjectKey in classInfo.chapters) {
-            classInfo.chapters[subjectKey].forEach(chapter => {
+        // NEW: Handle General Science sub-subjects
+        if (subjectDoc.category === 'general_science') {
+            // The structure is already { chapters: [...] }
+        }
+
+        if (subjectChapters) {
+            subjectChapters.forEach(chapter => {
                 if (chapter.name.toLowerCase().includes(query)) {
-                    results.push({
+                    const result = {
                         chapterName: chapter.name,
-                        subject: subjectKey,
-                        class: classKey,
-                        type: 'academic'
-                    });
+                        subject: subjectDoc.id, // Use the document ID as the subject key
+                        type: isAcademic ? 'academic' : 'competitive',
+                        class: isAcademic ? subjectDoc.id.replace('class', '').match(/\d+/)[0] : '',
+                        isGeneralScience: subjectDoc.category === 'general_science' // NEW: Flag for GS
+                    };
+                    results.push(result);
                 }
             });
         }
-    }
+    });
     return results;
 }
 
@@ -2988,12 +3148,20 @@ function displayHomepageSearchResults(results, query) {
             const chapterName = result.chapterName;
             const highlightedName = chapterName.replace(new RegExp(query, 'gi'), (match) => `<mark>${match}</mark>`);
 
-            const context = result.type === 'academic' ? `(Class ${result.class} - ${getSubjectTitle(result.subject)})` : `(${getSubjectTitle(result.subject)})`;
+            let context = '';
+            if (result.isGeneralScience) {
+                context = `(General Science - ${getSubjectTitle(result.subject)})`;
+            } else if (result.type === 'academic') {
+                context = `(Class ${result.class} - ${getSubjectTitle(result.subject)})`;
+            } else {
+                context = `(${getSubjectTitle(result.subject)})`;
+            }
             item.innerHTML = `${highlightedName} <span>${context}</span>`;
             
             item.onclick = () => {
                 currentChapter = result.chapterName;
                 currentSubject = result.subject;
+                isGeneralScienceMode = result.isGeneralScience; // NEW: Set GS mode
                 classMode = result.type === 'academic';
                 currentClass = result.class || '';
                 // Note: Stream is not needed here as we navigate directly to the chapter
@@ -3162,7 +3330,7 @@ function displayCommunityPosts() {
         // NEW: Add a separate developer note section if it exists
         if (post.note) {
             bodyHtml += `<div class="developer-note"><strong>Developer's Note:</strong> ${post.note}</div>`;
-        }
+        } 
 
         // NEW: Updated card structure for the timeline design
         postCard.innerHTML = `
@@ -3339,8 +3507,14 @@ function displayProfilePage() {
     const topicAnalysis = analyzeTopicStrength();
     displayTopicStrength(topicAnalysis);
 
+    // NEW: Populate the friends tab
+    QuizifyFriends.displayFriends();
+
     // NEW: Initialize all history filters and populate the history list
     initializeHistoryFilters();
+
+    // NEW: Populate the friends tab
+    QuizifyFriends.displayFriends();
 
 
 
@@ -3366,7 +3540,7 @@ function calculateOverallStats() {
             if (!subjectStats[subject]) {
                 subjectStats[subject] = { totalScore: 0, count: 0 };
             }
-            subjectStats[subject].totalScore += userProgress[key].score;
+            subjectStats[subject].totalScore += userProgress[key].score; // FIX: Use score from the current quiz entry
             subjectStats[subject].count++;
         }
     }
@@ -3530,16 +3704,23 @@ function initializeHistoryFilters() {
     const chapterFilter = document.getElementById('history-chapter-filter');
     const statusFilter = document.getElementById('history-status-filter');
 
-    if (!subjectFilter || !chapterFilter || !statusFilter) return;
+    if (!subjectFilter || !chapterFilter || !statusFilter) return; // Add a guard clause
 
     // --- 1. Populate Subject Filter ---
-    const attemptedSubjects = new Set();
+    const attemptedSubjects = new Set(); // This was step 1, but I've renumbered for clarity
     for (const key in userProgress) {
         if (key.includes('_') && !key.startsWith('daily_challenge')) {
-            const subjectKey = key.split('_')[0];
-            // Check if it's a valid subject from our data to avoid adding junk keys
-            if (subjectData[subjectKey] || Object.values(classData).some(c => c.subjects.includes(subjectKey))) {
-                attemptedSubjects.add(subjectKey);
+            const isAcademic = key.startsWith('class');
+            let subjectKey;
+            if (isAcademic) {
+                const parts = key.split('_');
+                subjectKey = `${parts[0]}_${parts[1]}`; // e.g., 'class9_math'
+            } else {
+                subjectKey = key.split('_')[0];
+            }
+            // NEW FIX: Check against the loaded Firestore data (allQuizData)
+            if (allQuizData.some(d => d.id === subjectKey)) {
+                 attemptedSubjects.add(subjectKey);
             }
         }
     }
@@ -3591,7 +3772,7 @@ function populateChapterFilter() {
     for (const key in userProgress) {
         if (key.startsWith(selectedSubject + '_') && userProgress[key] && Array.isArray(userProgress[key].attempts)) {
             const chapterName = key.split('_')[1];
-            attemptedChapters.add(chapterName);
+            attemptedChapters.add(key.substring(key.indexOf('_') + 1, key.lastIndexOf('_')));
         }
     }
 
@@ -3627,8 +3808,20 @@ function populateQuizHistory() {
     for (const key in userProgress) {
         // Check for a valid quiz progress key (e.g., 'subject_chapter_setIndex')
         if (key.includes('_') && !key.startsWith('daily_challenge') && userProgress[key] && Array.isArray(userProgress[key].attempts)) {
-            const [subject, chapter, setIndex] = key.split('_');
-            
+            const setIndex = key.substring(key.lastIndexOf('_') + 1);
+            let subject, chapter;
+
+            const isAcademic = key.startsWith('class');
+            if (isAcademic) {
+                const parts = key.split('_');
+                // FIX: Correctly construct the academic subject ID (e.g., 'class9_math')
+                subject = `class${parts[0].replace('class', '')}_${parts[1]}`;
+                chapter = parts.slice(2, -1).join('_'); // Re-join chapter name if it has underscores
+            } else {
+                subject = key.substring(0, key.indexOf('_'));
+                chapter = key.substring(key.indexOf('_') + 1, key.lastIndexOf('_'));
+            }
+
             userProgress[key].attempts.forEach(attempt => {
                 allAttempts.push({
                     subject,
@@ -3710,36 +3903,18 @@ function reviewHistoricalQuiz(attempt) {
     // Find the correct set of questions for this attempt
     let questionSet = null;
 
-    // Check if it's a competitive subject
-    const subjectKey = attempt.subject;
-    const chapterName = attempt.chapter;
-    const setIndex = attempt.setIndex;
+    // NEW: Correctly parse subject and chapter from the attempt object
+    const subjectId = attempt.subject; // e.g., 'class9_math' or 'quantitative'
+    const chapterName = attempt.chapter; // e.g., 'Number Systems'
+    const setIndex = attempt.setIndex; // e.g., 0
 
-    // Try to find in competitive data first
-    if (subjectData[subjectKey]) {
-        const chapter = subjectData[subjectKey].chapters?.find(ch => ch.name === chapterName);
-        if (chapter && chapter.sets[setIndex]) {
-            questionSet = chapter.sets[setIndex];
+    // --- FIX: Always look for quiz data in the unified `allQuizData` from Firestore ---
+    const subjectDoc = allQuizData.find(d => d.id === subjectId);
+    if (subjectDoc) {
+        const chapter = subjectDoc.chapters?.find(ch => ch.name === chapterName);
+        if (chapter && chapter.sets && chapter.sets[setIndex]) {
+            questionSet = chapter.sets[setIndex].questions;
         }
-    }
-
-    // If not found, search in academic data
-    if (!questionSet && classData) {
-        for (const classKey in classData) {
-            const classInfo = classData[classKey];
-            if (classInfo.chapters && classInfo.chapters[subjectKey]) {
-                const chapter = classInfo.chapters[subjectKey].find(ch => ch.name === chapterName);
-                if (chapter && chapter.sets[setIndex]) {
-                    questionSet = chapter.sets[setIndex];
-                    break; // Found it, no need to search other classes
-                }
-            }
-        }
-    }
-
-    if (!questionSet) {
-        showNotification('Could not load questions for this historical attempt.', 'error');
-        return;
     }
 
     // 2. Set up the review page
@@ -3892,7 +4067,7 @@ function initializeLeaderboard() {
  * @returns {string} The user's unique ID.
  */
 function getOrCreateUserId() {
-    const userName = localStorage.getItem('userName'); 
+    const userName = localStorage.getItem('userName');
     const userPin = localStorage.getItem('userPin'); // NEW: Get PIN
 
     if (!userName || !userPin) {
@@ -3914,7 +4089,7 @@ function getOrCreateUserId() {
  * @param {object} [updateData={}] - Optional data to merge into the new document.
  */
 async function migrateFirestoreDocument(collection, oldId, newId, updateData = {}) {
-    if (oldId === newId) return; // No migration needed
+    if (oldId === newId) return; // No migration needed if IDs are the same
 
     const oldDocRef = collection.doc(oldId);
     const oldDoc = await oldDocRef.get();
@@ -4035,6 +4210,12 @@ function unlockAchievement(id, achievementData = null) {
 
     userProgress.achievements.push({ id, name: achievement.name, date: new Date().toISOString() });
     unlockedAchievements.add(id); // Track for this session
+
+    // NEW: Award bonus coins for specific achievements
+    if (id.startsWith('chapter_master')) {
+        userProgress.quizCoins = (userProgress.quizCoins || 0) + 100; // 100 coin bonus
+        showNotification(`Chapter Master! You earned a 100 coin bonus! 💰`, 'success');
+    }
 
     // Show the unlock modal
     const modal = document.getElementById('achievement-unlocked-modal');
