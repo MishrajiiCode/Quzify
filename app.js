@@ -2,9 +2,23 @@
 // app.js - Complete Quiz Platform with Class and Competitive Exam functionality
 // Only business logic - questions stored in separate data files
 // ===================== APP CHANGELOG =====================
-const APP_VERSION = '2.0.1'; // NEW: Stable Release Version
+const APP_VERSION = '2.1.0'; // NEW: Stable Release Version
 
 const COMMUNITY_POSTS = {
+    '2.1.0': {
+        date: 'Jan 01, 2026',
+        type: 'feature_update', // New features & improvements
+        changes: [
+            '<strong>New Achievement System:</strong> Unlock badges as you learn! Earn achievements for streaks, high scores, speed, consistency, and dedication.',
+            '<strong>Streak & Consistency Tracking:</strong> Daily learning streaks are now tracked with special rewards for maintaining consistency.',
+            '<strong>Improved User Motivation:</strong> Added milestone-based achievements like Quiz Grinder, Quiz Legend, Early Bird, and Night Owl to keep learning engaging.',
+            '<strong>Performance-Based Rewards:</strong> New achievements for accuracy, speed, perfect scores, and comeback attempts.',
+            '<strong>UI Enhancements:</strong> Achievement icons, popups, and progress indicators have been visually refined for a smoother experience.',
+            '<strong>Stability Improvements:</strong> Minor bug fixes and performance optimizations for faster load times and smoother gameplay.'
+        ],
+        note: 'This update focuses on motivation, engagement, and consistency. Keep learning daily, unlock achievements, and level up your Quizify journey in 2026 🎉'
+    },
+    
     '2.0.0': {
         date: 'Oct 22, 2025',
         type: 'major_update', // A new type for major releases
@@ -5033,4 +5047,5 @@ function initializeImageViewer() {
         modal.classList.add('visible');
     };
 }
+
 
