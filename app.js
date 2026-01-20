@@ -87,16 +87,21 @@ const COMMUNITY_POSTS = {
 
 // NEW: Configuration for the informational/festive popup
 const INFO_POPUP_CONFIG = {
-    id: 'diwali_wish_2025', // Change this ID for a new message to make it reappear for users.
-    // NEW: Set a date range for the popup to appear. Format: YYYY-MM-DD.
-    // Set both to null or remove them to disable the popup. It will only show once per session per ID.
-    startDate: '2024-01-01', // A past date to ensure it's active for testing.
-    endDate: '2025-10-25',   // Example: End date for Diwali week
-    icon: '🪔',
-    title: 'Happy Diwali!',
-    message: 'Wishing you a festival of lights filled with joy, prosperity, and success. May you and your family have a sparkling celebration!',
-    subtext: 'Keep learning and shining bright!'
+    id: 'new_year_wish_2026', // New ID so it shows again for users
+
+    // Date range for New Year 2026
+    // Format: YYYY-MM-DD
+    startDate: '2025-12-25', // Start showing a few days before New Year
+    endDate: '2026-01-07',   // End after the first week of Jan
+
+    icon: '🎉',
+    title: 'Happy New Year 2026!',
+
+    message: 'Wishing you a joyful, successful, and prosperous New Year 2026. May this year bring new opportunities, growth, and happiness in your life!',
+
+    subtext: 'Thank you for being with us — keep learning, growing, and shining ✨'
 };
+
 
 // NEW: Achievements Configuration
 const ACHIEVEMENTS = {
@@ -110,7 +115,49 @@ const ACHIEVEMENTS = {
     speed_demon: { name: 'Speed Demon', description: 'Pass a quiz with an average of <30s per question.', icon: '⚡' },
     comeback_kid: { name: 'Comeback Kid', description: 'Pass a quiz set you previously failed.', icon: '💪' },
     dedicated_learner: { name: 'Dedicated Learner', description: 'Complete 10 quizzes.', icon: '📖' },
-    quiz_master: { name: 'Quiz Master', description: 'Complete 50 quizzes.', icon: '👑' }
+    quiz_master: { name: 'Quiz Master', description: 'Complete 50 quizzes.', icon: '👑' },
+      // 🟢 Beginner
+    first_quiz: { name: 'First Step', description: 'Complete your first quiz.', icon: '🎓' },
+    first_pass: { name: 'Getting Started', description: 'Pass your first quiz.', icon: '🥳' },
+
+    // 🟡 Performance
+    passed_quiz: { name: 'Achiever', description: 'Pass your first quiz with 40% or more.', icon: '✅' },
+    high_scorer: { name: 'High Scorer', description: 'Score 80% or more in any quiz.', icon: '🏆' },
+    perfect_score: { name: 'Perfectionist', description: 'Get a 100% score on any quiz.', icon: '🎯' },
+    accuracy_master: { name: 'Accuracy Master', description: 'Answer 20 questions correctly in a row.', icon: '🎯' },
+
+    // 🔵 Speed & Skill
+    speed_demon: { name: 'Speed Demon', description: 'Pass a quiz with an average of <30s per question.', icon: '⚡' },
+    lightning_fast: { name: 'Lightning Fast', description: 'Answer 5 questions correctly in under 10 seconds each.', icon: '⚡' },
+
+    // 📚 Progress & Mastery
+    chapter_master: { name: 'Chapter Master', description: 'Pass all 5 sets in any chapter.', icon: '📚' },
+    subject_expert: { name: 'Subject Expert', description: 'Pass all sets in a whole subject.', icon: '🧠' },
+    syllabus_champion: { name: 'Syllabus Champion', description: 'Complete all chapters in a subject.', icon: '🏅' },
+
+    // 🔥 Consistency & Streaks
+    streak_3: { name: 'Consistent', description: 'Maintain a 3-day learning streak.', icon: '🔥' },
+    streak_5: { name: 'On a Roll!', description: 'Maintain a 5-day streak.', icon: '🔥' },
+    streak_10: { name: 'Unstoppable', description: 'Maintain a 10-day streak.', icon: '🚀' },
+    streak_30: { name: 'Legendary Streak', description: 'Maintain a 30-day learning streak.', icon: '🌟' },
+
+    // 💪 Comeback & Effort
+    comeback_kid: { name: 'Comeback Kid', description: 'Pass a quiz set you previously failed.', icon: '💪' },
+    never_give_up: { name: 'Never Give Up', description: 'Attempt the same quiz 3 times.', icon: '🛡️' },
+
+    // 📖 Volume & Dedication
+    dedicated_learner: { name: 'Dedicated Learner', description: 'Complete 10 quizzes.', icon: '📖' },
+    quiz_grinder: { name: 'Quiz Grinder', description: 'Complete 25 quizzes.', icon: '⚙️' },
+    quiz_master: { name: 'Quiz Master', description: 'Complete 50 quizzes.', icon: '👑' },
+    quiz_legend: { name: 'Quiz Legend', description: 'Complete 100 quizzes.', icon: '🏆' },
+
+    // 🕒 Engagement
+    early_bird: { name: 'Early Bird', description: 'Complete a quiz before 7 AM.', icon: '🌅' },
+    night_owl: { name: 'Night Owl', description: 'Complete a quiz after 11 PM.', icon: '🌙' },
+
+    // 🎉 Special
+    daily_challenger: { name: 'Daily Challenger', description: 'Complete quizzes on 7 different days.', icon: '📆' },
+    knowledge_seeker: { name: 'Knowledge Seeker', description: 'Attempt quizzes from 3 different subjects.', icon: '🔍' }
 };
 
 
@@ -4986,3 +5033,4 @@ function initializeImageViewer() {
         modal.classList.add('visible');
     };
 }
+
