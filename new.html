@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CINIVIX</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: #0b0f19;
+    color: white;
+}
+
+/* 🎬 Splash Screen */
+#splash {
+    position: fixed;
+    inset: 0;
+    background: black;
+    z-index: 9999;
+}
+
+#splash video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Header */
+header {
+    text-align: center;
+    padding: 20px;
+}
+
+header h1 {
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+#searchBar {
+    width: 90%;
+    max-width: 400px;
+    padding: 12px;
+    border-radius: 8px;
+    border: none;
+    outline: none;
+}
+
+/* Player Section */
+.player-wrapper {
+    display: none;
+    padding: 10px;
+}
+
+.video-container {
+    width: 100%;
+    aspect-ratio: 16/9;
+    background: black;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.video-container iframe,
+.video-container video {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+/* Controls */
+.controls {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+    gap: 10px;
+}
+
+.controls button,
+.controls a {
+    flex: 1;
+    padding: 10px;
+    background: #2563eb;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    text-align: center;
+    cursor: pointer;
+}
+
+/* Gallery */
+.video-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px,1fr));
+    gap: 15px;
+    padding: 15px;
+}
+
+.video-card {
+    background: #1e293b;
+    border-radius: 10px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.video-card:hover {
+    transform: scale(1.05);
+}
+
+.video-card img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+}
+
+.video-card .info {
+    padding: 10px;
+}
+
+.video-card h4 {
+    font-size: 15px;
+}
+/* --- Mobile Responsive Player Controls --- */
+@media (max-width: 600px) {
+    .video-controls {
+        padding: 10px;
+    }
+
+    /* Puts the progress bar on its own line at the very top */
+    .progress-container {
+        width: 100%;
+        margin: 0 0 10px 0; 
+        order: -1; 
+    }
+
+    /* Reduces the gaps between buttons slightly */
+    .controls-left, .controls-right {
+        gap: 10px;
+    }
+
+    /* Makes the text and sliders slightly smaller to fit better */
+    .control-btn {
+        font-size: 16px; 
+    }
+    
+    #timeDisplay {
+        font-size: 12px;
+    }
+
+    #volumeSlider {
+        width: 60px; 
+    }
+}
+
+/* Mobile */
+@media(max-width:600px){
+    header h1 {
+        font-size: 20px;
+    }
+
+    .video-gallery {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<!-- 🎬 Splash -->
+<div id="splash">
+    <video autoplay muted>
+        <source src="v.mp4" type="video/mp4">
+    </video>
+</div>
+
+<header>
+    <h1>🎬 Quizify OTT Platform</h1>
+    <input type="text" id="searchBar" placeholder="Search videos...">
+</header>
+
+<!-- 🎥 Player -->
+<div class="player-wrapper" id="playerWrapper">
+
+    <button onclick="closePlayer()">⬅ Back</button>
+
+    <div class="video-container" id="videoContainer"></div>
+
+    <div class="controls">
+        <button onclick="bookmarkVideo()">❤️ Bookmark</button>
+        <a id="downloadBtn" target="_blank">⬇ Download</a>
+    </div>
+
+</div>
+
+<!-- 🎞 Gallery -->
+<div class="video-gallery" id="videoGallery"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+import { getFirestore, collection, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+/* Firebase Config */
+const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "quizifyapp-4c5ca.firebaseapp.com",
+    projectId: "quizifyapp-4c5ca"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+/* DOM Elements */
+const gallery = document.getElementById("videoGallery");
+const player = document.getElementById("playerWrapper");
+const container = document.getElementById("videoContainer");
+const downloadBtn = document.getElementById("downloadBtn");
+
+let currentTitle = "";
+
+/* 🎬 Splash hide */
+setTimeout(()=>{
+    document.getElementById("splash").style.display="none";
+},12000);
+
+/* 🔍 Search */
+document.getElementById("searchBar").addEventListener("input",(e)=>{
+    const value = e.target.value.toLowerCase();
+    document.querySelectorAll(".video-card").forEach(card=>{
+        card.style.display = card.innerText.toLowerCase().includes(value) ? "block" : "none";
+    });
+});
+
+/* ❤️ Bookmark */
+window.bookmarkVideo = function(){
+    let list = JSON.parse(localStorage.getItem("bookmarks")) || [];
+    list.push(currentTitle);
+    localStorage.setItem("bookmarks", JSON.stringify(list));
+    alert("Bookmarked!");
+}
+
+/* ⬅ Close Player */
+window.closePlayer = function(){
+    player.style.display = "none";
+    gallery.style.display = "grid";
+    container.innerHTML = "";
+}
+
+/* 🎥 Get Video URL */
+function getVideoURL(data){
+
+    if(data.platform === "youtube"){
+        return `https://www.youtube.com/embed/${data.videoId}`;
+    }
+
+    if(data.driveVideoId){
+        return `https://drive.google.com/file/d/${data.driveVideoId}/preview`;
+    }
+
+    if(data.videoUrl){
+        return data.videoUrl;
+    }
+
+    return null;
+}
+
+/* 📡 Fetch Videos */
+const q = query(collection(db,"videos"), orderBy("createdAt","desc"));
+
+onSnapshot(q,(snapshot)=>{
+    gallery.innerHTML = "";
+
+    snapshot.forEach(doc=>{
+        const data = doc.data();
+
+        const card = document.createElement("div");
+        card.className = "video-card";
+
+        card.innerHTML = `
+            <img src="${data.thumbnail}" />
+            <div class="info">
+                <h4>${data.title}</h4>
+            </div>
+        `;
+
+        card.onclick = ()=>{
+            const url = getVideoURL(data);
+            currentTitle = data.title;
+
+            gallery.style.display = "none";
+            player.style.display = "block";
+
+            if(url.includes("youtube") || url.includes("drive")){
+                container.innerHTML = `<iframe src="${url}" allowfullscreen></iframe>`;
+            } else {
+                container.innerHTML = `
+                    <video controls autoplay>
+                        <source src="${url}">
+                    </video>`;
+            }
+
+            downloadBtn.href = url;
+
+            window.scrollTo({top:0,behavior:"smooth"});
+        };
+
+        gallery.appendChild(card);
+    });
+});
+</script>
+
+</body>
+</html>
