@@ -245,7 +245,7 @@ document.addEventListener('DOMContentLoaded', async function() { // Make async
         initializeLockedContentModal();
         initializeSettingsPage();
         initializeQuizModeModal();
-            initializeImageViewer();
+        initializeImageViewer();
         initializeLeaderboard();
         initializeProfilePage();
         initializeAchievements(); // NEW
@@ -255,7 +255,7 @@ document.addEventListener('DOMContentLoaded', async function() { // Make async
         initializePurchaseSuccessModal(); // NEW
         initializeEventListeners();
             this.initializeDailyCoinModal(); // NEW
-            this.initializeStoreUpdatesModal(); // NEW: Add event listeners for the store updates modal
+            // this.initializeStoreUpdatesModal(); // REMOVED: This is now handled by QuizifyStore.init()
 
             // NEW: Initialize the store module with the app context
             QuizifyStore.init(this);
@@ -264,7 +264,7 @@ document.addEventListener('DOMContentLoaded', async function() { // Make async
             QuizifyChat.init(this, db, userProgressCollection);
 
             // NEW: Initialize the friends module
-            QuizifyFriends.init(this);
+            QuizifyFriends.init(this, db);
 
             // NEW: Initialize the bot module
             QuizifyBot.init(this);
@@ -281,6 +281,72 @@ document.addEventListener('DOMContentLoaded', async function() { // Make async
         initializeLogoutConfirmation();
             this.initializeInfoPopup();
             this.checkAndShowPinReminder();
+            this.updateSubjectProgress(); // Update progress rings on initialization
+        },
+
+        // Update subject progress rings based on user progress
+        updateSubjectProgress() {
+            const subjects = ['quantitative', 'english', 'reasoning', 'general_science'];
+            subjects.forEach(subject => {
+                const progress = this.calculateSubjectProgress(subject);
+                this.updateProgressRing(subject, progress);
+            });
+            
+            // Update mock test progress separately
+            this.updateMockTestProgress();
+        },
+
+        // Calculate progress percentage for a subject
+        calculateSubjectProgress(subject) {
+            if (!userProgress || !userProgress[subject]) return 0;
+            
+            const subjectData = userProgress[subject];
+            let totalQuestions = 0;
+            let answeredQuestions = 0;
+            
+            // Count total and answered questions across all chapters
+            Object.values(subjectData).forEach(chapter => {
+                if (chapter && typeof chapter === 'object') {
+                    Object.values(chapter).forEach(questionSet => {
+                        if (Array.isArray(questionSet)) {
+                            totalQuestions += questionSet.length;
+                            answeredQuestions += questionSet.filter(q => q.answered).length;
+                        }
+                    });
+                }
+            });
+            
+            return totalQuestions > 0 ? Math.round((answeredQuestions / totalQuestions) * 100) : 0;
+        },
+
+        // Update progress ring for a subject
+        updateProgressRing(subject, percentage) {
+            const ring = document.getElementById(`${subject}-progress`);
+            const text = ring?.parentElement?.querySelector('.progress-text');
+            
+            if (ring && text) {
+                const circumference = 163.28; // 2 * π * 26
+                const offset = circumference - (percentage / 100) * circumference;
+                ring.style.strokeDashoffset = offset;
+                text.textContent = `${percentage}%`;
+            }
+        },
+
+        // Update mock test progress ring
+        updateMockTestProgress() {
+            // For mock test, show completion status of today's test
+            const today = new Date().toDateString();
+            const mockTestHistory = userProgress.mockTestHistory || [];
+            const todayTest = mockTestHistory.find(test => 
+                new Date(test.date).toDateString() === today
+            );
+            
+            let progress = 0;
+            if (todayTest && todayTest.completed) {
+                progress = 100;
+            }
+            
+            this.updateProgressRing('mock-test', progress);
         },
 
         // Expose necessary properties and methods for other modules
@@ -342,47 +408,88 @@ function initializeApp() {
 /**
  * Centralizes all event listeners for the application, separating behavior from HTML.
  */
+function addEventListenerSafe(selector, event, handler) {
+    const element = document.querySelector(selector);
+    if (element) element.addEventListener(event, handler);
+}
+
 function initializeEventListeners() {
     // --- Modals ---
-    document.querySelector('#onboarding-modal .onboarding-choices button:nth-child(1)').addEventListener('click', () => saveUserPreferences('competitive'));
-    document.querySelector('#onboarding-modal .onboarding-choices button:nth-child(2)').addEventListener('click', () => saveUserPreferences('academic'));
+    addEventListenerSafe('#onboarding-modal .onboarding-choices button:nth-child(1)', 'click', () => saveUserPreferences('competitive'));
+    addEventListenerSafe('#onboarding-modal .onboarding-choices button:nth-child(2)', 'click', () => saveUserPreferences('academic'));
 
     // --- Side Menu ---
-    document.getElementById('logout-btn').addEventListener('click', logout);
+    addEventListenerSafe('#logout-btn', 'click', logout);
 
     // --- Home Page ---
-    // Note: Event listeners for dynamically created cards are handled via event delegation below.
-    // Use event delegation for dynamically added cards if needed, but direct binding is fine here.
-    document.querySelector('.daily-challenge-card').addEventListener('click', startDailyChallenge);
+    addEventListenerSafe('.daily-challenge-card', 'click', startDailyChallenge);
 
-    // Competitive Section
-    document.querySelector('[data-subject="quantitative"]').addEventListener('click', () => selectSubject('quantitative'));
-    document.querySelector('[data-subject="english"]').addEventListener('click', () => selectSubject('english'));
-    document.querySelector('[data-subject="reasoning"]').addEventListener('click', () => selectSubject('reasoning'));
-    document.querySelector('[data-subject="general_science"]').addEventListener('click', () => selectSubject('general_science')); // NEW
-    document.querySelector('[data-subject="mock_test"]').addEventListener('click', () => MockTest.showRules());
+    // Competitive Section: Use delegation to avoid brittle selector failures
+    const competitiveSection = document.querySelector('#competitive-section .subjects-grid');
+    if (competitiveSection) {
+        competitiveSection.addEventListener('click', (e) => {
+            const subjectCard = e.target.closest('.subject-card[data-subject]');
+            if (!subjectCard) return;
+            const selectedSubject = subjectCard.dataset.subject;
 
-    // Academic Section
-    document.querySelector('[data-class="9"]').addEventListener('click', () => selectClass('9'));
-    document.querySelector('[data-class="10"]').addEventListener('click', () => selectClass('10'));
-    document.querySelector('[data-class="11"]').addEventListener('click', () => selectClass('11'));
-    document.querySelector('[data-class="12"]').addEventListener('click', () => selectClass('12'));
+            if (selectedSubject === 'mock_test' && typeof MockTest !== 'undefined' && MockTest.showRules) {
+                MockTest.showRules();
+            } else if (selectedSubject) {
+                selectSubject(selectedSubject);
+            }
+        });
+    }
+
+    // Fallback direct binding for subject cards (in case delegation misses due layout changes)
+    document.querySelectorAll('.subject-card[data-subject]').forEach((card) => {
+        card.addEventListener('click', (e) => {
+            const subject = card.dataset.subject;
+            if (!subject) return;
+            if (subject === 'mock_test' && typeof MockTest !== 'undefined' && MockTest.showRules) {
+                MockTest.showRules();
+            } else {
+                selectSubject(subject);
+            }
+        });
+    });
+
+    // Academic Section: separate delegation for class cards
+    const academicSection = document.querySelector('#academic-section .subjects-grid');
+    if (academicSection) {
+        academicSection.addEventListener('click', (e) => {
+            const classCard = e.target.closest('.subject-card[data-class]');
+            if (!classCard) return;
+            const selectedClass = classCard.dataset.class;
+            if (selectedClass) selectClass(selectedClass);
+        });
+    }
 
     // --- Page-Level Back Buttons ---
-    document.querySelector('#stream-page .back-btn').addEventListener('click', goToHome);
-    document.querySelector('#class-page .back-btn').addEventListener('click', goBack);
-    document.querySelector('#subject-page .back-btn').addEventListener('click', goBack);
-    document.querySelector('#chapter-page .back-btn').addEventListener('click', goToSubject);
-    document.querySelector('#store-page .back-btn').addEventListener('click', goToHome); // NEW
-    document.querySelector('#results-page .action-buttons button:nth-child(3)').addEventListener('click', goToChapter);
-    document.querySelector('#review-page .back-btn').addEventListener('click', goToResults);
-    document.querySelector('#bookmarks-page .back-btn').addEventListener('click', goToHome);
-    document.querySelector('#community-page .back-btn').addEventListener('click', goToHome);
-    document.querySelector('#about-us-page .back-btn').addEventListener('click', goToHome); // NEW
-    document.querySelector('#profile-page .back-btn').addEventListener('click', goToHome); // NEW
-    document.querySelector('#leaderboard-page .back-btn').addEventListener('click', goToHome);
-    document.querySelector('#achievements-page .back-btn').addEventListener('click', goToHome); // NEW
-    document.querySelector('#settings-page .back-btn').addEventListener('click', goToHome);
+    const backButtonActions = {
+        'stream-page': goToHome,
+        'class-page': goBack,
+        'subject-page': goBack,
+        'chapter-page': goToSubject,
+        'store-page': goToHome,
+        'review-page': goToResults,
+        'bookmarks-page': goToHome,
+        'community-page': goToHome,
+        'about-us-page': goToHome,
+        'profile-page': goToHome,
+        'leaderboard-page': goToHome,
+        'achievements-page': goToHome,
+        'settings-page': goToHome,
+    };
+
+    document.querySelectorAll('.page .back-btn').forEach((backBtn) => {
+        backBtn.addEventListener('click', () => {
+            const page = backBtn.closest('.page');
+            const action = page ? backButtonActions[page.id] : goToHome;
+            if (typeof action === 'function') action();
+        });
+    });
+
+    addEventListenerSafe('#results-page .action-buttons button:nth-child(3)', 'click', goToChapter);
 
     // --- Search ---
     document.getElementById('search-chapters').addEventListener('keyup', filterChapters);
@@ -396,35 +503,36 @@ function initializeEventListeners() {
     document.getElementById('review-answers-btn').addEventListener('click', reviewAnswers);
 
     // --- Retake Confirmation Modal ---
-    document.getElementById('confirm-retake-btn').addEventListener('click', () => {
-        // This now handles confirmation from both the results page and the chapter page.
-        handleRetakeConfirmation();
-    });
-    document.getElementById('cancel-retake-btn').addEventListener('click', () => document.getElementById('retake-confirm-modal').classList.remove('visible'));
+    addEventListenerSafe('#confirm-retake-btn', 'click', handleRetakeConfirmation);
+    addEventListenerSafe('#cancel-retake-btn', 'click', () => document.getElementById('retake-confirm-modal')?.classList.remove('visible'));
 
     // --- Dynamic Content Event Delegation ---
-    // For elements that are created dynamically (like stream cards), we use event delegation.
-    document.getElementById('streams-grid').addEventListener('click', (e) => {
-        const streamCard = e.target.closest('.stream-card');
-        if (streamCard && streamCard.dataset.stream) {
-            selectStream(streamCard.dataset.stream);
-        }
-    });
+    const streamsGrid = document.getElementById('streams-grid');
+    if (streamsGrid) {
+        streamsGrid.addEventListener('click', (e) => {
+            const streamCard = e.target.closest('.stream-card');
+            if (streamCard && streamCard.dataset.stream) {
+                selectStream(streamCard.dataset.stream);
+            }
+        });
+    }
 
     // --- Lifeline Buttons ---
-    document.getElementById('lifeline-5050').addEventListener('click', useFiftyFifty);
-    document.getElementById('lifeline-hint').addEventListener('click', useHint);
-    document.getElementById('lifeline-skip').addEventListener('click', useSkip);
+    addEventListenerSafe('#lifeline-5050', 'click', useFiftyFifty);
+    addEventListenerSafe('#lifeline-hint', 'click', useHint);
+    addEventListenerSafe('#lifeline-skip', 'click', useSkip);
+
     // NEW: Time Freeze lifeline
     const freezeBtn = document.getElementById('lifeline-freeze');
     if (freezeBtn) freezeBtn.addEventListener('click', useTimeFreeze);
+
     // NEW: Re-add chat button event listeners
-    document.getElementById('send-chat-message-btn').addEventListener('click', () => QuizifyChat.sendChatMessage());
-    document.getElementById('open-chat-fab').addEventListener('click', () => QuizifyChat.openGlobalChat());
-    document.getElementById('close-chat-modal-btn').addEventListener('click', () => QuizifyChat.closeGlobalChat());
+    addEventListenerSafe('#send-chat-message-btn', 'click', () => QuizifyChat?.sendChatMessage && QuizifyChat.sendChatMessage());
+    addEventListenerSafe('#open-chat-fab', 'click', () => QuizifyChat?.openGlobalChat && QuizifyChat.openGlobalChat());
+    addEventListenerSafe('#close-chat-modal-btn', 'click', () => QuizifyChat?.closeGlobalChat && QuizifyChat.closeGlobalChat());
     // NEW: Add bot button event listeners
-    document.getElementById('open-help-bot-fab').addEventListener('click', () => QuizifyBot.openHelpBot());
-    document.getElementById('close-bot-modal-btn').addEventListener('click', () => QuizifyBot.closeHelpBot());
+    addEventListenerSafe('#open-help-bot-fab', 'click', () => QuizifyBot?.openHelpBot && QuizifyBot.openHelpBot());
+    addEventListenerSafe('#close-bot-modal-btn', 'click', () => QuizifyBot?.closeHelpBot && QuizifyBot.closeHelpBot());
 
 
     document.getElementById('class-content').addEventListener('click', (e) => {
@@ -467,29 +575,8 @@ function initializeEventListeners() {
  * This was missing, causing the buttons to be unresponsive.
  */
 function initializeStoreUpdatesModal() {
-    const modal = document.getElementById('store-updates-modal');
-    const closeBtn = document.getElementById('close-store-updates-btn');
-    const laterBtn = document.getElementById('later-store-updates-btn');
-    const goToStoreBtn = document.getElementById('go-to-store-updates-btn');
-
-    if (!modal || !closeBtn || !laterBtn || !goToStoreBtn) {
-        return; // Exit if elements are not found
-    }
-
-    const closeModal = () => {
-        modal.classList.remove('visible');
-    };
-
-    // Close button and "Maybe Later" button should just close the modal
-    closeBtn.addEventListener('click', closeModal);
-    laterBtn.addEventListener('click', closeModal);
-
-    // "Go to Store" button should close the modal and navigate to the store page
-    goToStoreBtn.addEventListener('click', () => {
-        closeModal();
-        // The QuizifyStore object handles the logic for displaying the store page
-        QuizifyStore.displayStorePage();
-    });
+    // REMOVED: This function is now handled by store.js to avoid conflicts
+    // The store.js initializeUpdatesModal() function handles this properly
 }
 
 // ===================== NAVIGATION FUNCTIONS =====================
@@ -513,9 +600,9 @@ function goToHome() {
     currentSubject = '';
     isGeneralScienceMode = false; // NEW: Reset General Science mode
     academicDailyChallenge = false;
-    document.getElementById('open-chat-fab').style.display = 'block'; // NEW: Show chat button on home
-    document.getElementById('open-help-bot-fab').style.display = 'block'; // NEW: Ensure help bot button is also shown
-    QuizifyStore.stopDealsCountdown(); // NEW: Stop the deals timer
+    document.getElementById('open-chat-fab')?.style.setProperty('display', 'block');
+    document.getElementById('open-help-bot-fab')?.style.setProperty('display', 'block');
+    QuizifyStore?.stopDealsCountdown?.();
     currentChapter = '';    
     updateCoinDisplay(); // NEW: Update coin display on home
 
@@ -530,7 +617,9 @@ function goToHome() {
     if (userFocus === 'competitive') {
         checkDailyChallengeStatus();
         MockTest.checkAndDisplayDailyMock(); // NEW: Check mock test status
+        checkStreakCelebration(); // NEW: Check for streak celebrations
     }
+    updateDailyGoal(); // NEW: Update daily goal progress for all users
 }
 
 function goBack() {
@@ -2206,6 +2295,10 @@ async function saveUserProgress() {
     try {
         await userProgressCollection.doc(userId).set(userProgress);
         console.log("User progress saved to Firestore.");
+        // Update subject progress rings after saving
+        if (window.QuizifyApp) {
+            window.QuizifyApp.updateSubjectProgress();
+        }
     } catch (error) {
         console.error("Error saving progress to Firestore: ", error);
         // Fallback to localStorage on error
@@ -2269,6 +2362,11 @@ async function loadUserProgress() {
     applyTheme(userProgress.theme, false); // false to prevent re-saving
     // Update lifeline UI counts after loading progress
     updateLifelineDisplay();
+    
+    // Update subject progress rings after loading progress
+    if (window.QuizifyApp) {
+        window.QuizifyApp.updateSubjectProgress();
+    }
 
 }
 
@@ -2357,8 +2455,19 @@ function initializeSettingsPage() {
     const editBtn = document.getElementById('edit-account-btn');    
     const applyAvatarBtn = document.getElementById('apply-avatar-btn');
 
-    // FIX: Check for all required elements to prevent errors.
-    if (!saveAccountBtn || !saveQuizBtn || !durationInput || !nameInput || !pinInput || !deleteBtn || !editBtn || !applyAvatarBtn) return;
+    // Hide account management section and disable user/pin editing to avoid errors and remove the old migration path.
+    const accountTab = document.getElementById('settings-account-tab');
+    if (accountTab) {
+        accountTab.style.display = 'none';
+    }
+
+    const accountDisplayName = document.getElementById('account-display-name');
+    const accountDisplayPin = document.getElementById('account-display-pin');
+    if (accountDisplayName) accountDisplayName.textContent = 'Disabled';
+    if (accountDisplayPin) accountDisplayPin.textContent = 'Disabled';
+
+    // We only require minimal settings elements now
+    if (!saveQuizBtn || !durationInput || !applyAvatarBtn) return;
     
     // Populate fields when settings page is opened
     const menuSettingsBtn = document.getElementById('menu-settings-btn');
@@ -2373,7 +2482,14 @@ function initializeSettingsPage() {
             loadQuizSettings(); // Load latest settings
             durationInput.value = quizTimerSetting;
             nameInput.value = localStorage.getItem('userName') || '';
-            pinInput.value = localStorage.getItem('userPin') || '';
+            pinInput.value = '';
+            
+            // Populate account display info
+            const displayName = document.getElementById('account-display-name');
+            const displayPin = document.getElementById('account-display-pin');
+            if (displayName) displayName.textContent = localStorage.getItem('userName') || 'Not Set';
+            if (displayPin) displayPin.textContent = 'Disabled';
+            
             goToSettings();
             closeSideMenu();
             // NEW: Populate customization options when settings are opened
@@ -2386,10 +2502,10 @@ function initializeSettingsPage() {
     pinInput.disabled = true;
     loadQuizSettings();
     document.getElementById('avatar-actions').style.display = 'none'; // Hide apply avatar button
-    saveAccountBtn.style.display = 'none'; // Hide save button initially
+    if (saveAccountBtn) saveAccountBtn.style.display = 'none'; // Hide save button initially
     durationInput.value = quizTimerSetting;
     nameInput.value = localStorage.getItem('userName') || '';
-    pinInput.value = localStorage.getItem('userPin') || '';
+    pinInput.value = '';
 
     // NEW: Event listener for saving ONLY quiz settings
     saveQuizBtn.addEventListener('click', () => {
@@ -2403,14 +2519,16 @@ function initializeSettingsPage() {
         showNotification('Quiz settings saved!', 'success');
     });
 
-    // NEW: Event listener for saving ONLY account settings
-    saveAccountBtn.addEventListener('click', () => {
-        saveAccountChanges();
-    });
+    // NEW: Event listener for saving ONLY account settings (disabled as account management is removed)
+    if (saveAccountBtn) {
+        saveAccountBtn.addEventListener('click', () => {
+            showNotification('Account editing is disabled for now.', 'info');
+        });
+    }
 
-    // Add event listeners for delete and edit buttons
-    deleteBtn.addEventListener('click', confirmAccountDeletion);
-    editBtn.addEventListener('click', confirmAccountEdit);
+    // Add event listeners for delete and edit buttons (no-op, account management disabled)
+    if (deleteBtn) deleteBtn.addEventListener('click', () => showNotification('Account deletion is disabled.', 'info'));
+    if (editBtn) editBtn.addEventListener('click', () => showNotification('Account editing is disabled.', 'info'));
 
     // NEW: Event listener for the Apply Avatar button
     applyAvatarBtn.addEventListener('click', () => {
@@ -2449,81 +2567,16 @@ document.getElementById('settings-page').addEventListener('click', (e) => {
  * NEW: Shows a confirmation modal before allowing the user to edit account details.
  */
 function confirmAccountEdit() {
-    const modal = document.getElementById('edit-account-confirm-modal');
-    const proceedBtn = document.getElementById('proceed-edit-account-btn');
-    const cancelBtn = document.getElementById('cancel-edit-account-btn');
-    
-    modal.classList.add('visible');
-
-    const closeModal = () => modal.classList.remove('visible');
-
-    cancelBtn.onclick = closeModal;
-    proceedBtn.onclick = () => {
-        closeModal();
-        document.getElementById('account-name-input').disabled = false;
-        document.getElementById('account-pin-input').disabled = false;
-        document.getElementById('account-name-input').focus();
-        document.getElementById('save-account-btn').style.display = 'block'; // Show save button
-    };
+    showNotification('Account editing is currently disabled.', 'info');
+    return;
 }
 
 /**
  * Handles updating user account details (name/PIN) and migrating their data in Firestore.
  */
 async function saveAccountChanges() {
-    const newName = document.getElementById('account-name-input').value.trim();
-    const newPin = document.getElementById('account-pin-input').value.trim();
-    const oldName = localStorage.getItem('userName');
-    const oldPin = localStorage.getItem('userPin');
-
-    if (!newName || !newPin || newPin.length !== 4 || !/^\d{4}$/.test(newPin)) {
-        showNotification('To save, please enter a valid name and 4-digit PIN.', 'error');
-        return;
-    }
-
-    if (newName === oldName && newPin === oldPin) {
-        showNotification('No changes were made to your account details.', 'info');
-        // No need to reload or navigate away
-        return;
-    }
-
-    // NEW: Show the full-screen updating modal
-    const updateModal = document.getElementById('spinner-modal');
-    const titleEl = document.getElementById('spinner-modal-title');
-    const messageEl = document.getElementById('spinner-modal-message');
-    const spinnerContainer = document.getElementById('spinner-modal-spinner-container');
-    const successContainer = document.getElementById('spinner-modal-success-container');
-
-    if (updateModal) showSpinnerModal(true, 'Updating Account...', 'Please wait while we migrate your data.');
-    
-    const oldUserId = getOrCreateUserId(); // Gets ID based on old localStorage values
-    const newUserId = `user_${newName.toLowerCase().replace(/[^a-z0-9]/g, '')}_${newPin}`;
-
-    try {
-        // Migrate both userProgress and leaderboard data
-        await migrateFirestoreDocument(userProgressCollection, oldUserId, newUserId);
-        await migrateFirestoreDocument(leaderboardCollection, oldUserId, newUserId, { name: newName });
-        await userProgressCollection.doc(newUserId).update({ userName: newName }); // Explicitly update the name
-
-        // Update localStorage with new details
-        localStorage.setItem('userName', newName);
-        localStorage.setItem('userPin', newPin);
-
-        // NEW: Show success state in the modal
-        if (updateModal) {
-            titleEl.textContent = 'Account Updated!';
-            messageEl.textContent = 'Your details have been saved. The app will now reload.';
-            spinnerContainer.style.display = 'none';
-            successContainer.innerHTML = `<svg class="success-checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52"><circle class="checkmark-circle" cx="26" cy="26" r="25" fill="none"/><path class="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/></svg>`;
-            successContainer.style.display = 'block';
-        }
-
-        setTimeout(() => window.location.reload(), 1500);
-    } catch (error) {
-        console.error("Error updating account:", error);
-        if (updateModal) showSpinnerModal(false); // Hide modal on failure
-        showNotification('Failed to update account. Please try again.', 'error');
-    }
+    showNotification('Account management is currently disabled.', 'info');
+    return;
 }
 
 /**
@@ -2552,56 +2605,8 @@ function showSpinnerModal(show, title = '', message = '') {
  * NEW: Handles the account deletion process.
  */
 function confirmAccountDeletion() {
-    const modal = document.getElementById('delete-confirm-modal');
-    const title = document.getElementById('delete-confirm-title');
-    const message = document.getElementById('delete-confirm-message');
-    const confirmBtn = document.getElementById('confirm-delete-btn');
-    const cancelBtn = document.getElementById('cancel-delete-btn');
-
-    // --- Step 1: Initial Warning ---
-    title.textContent = 'Delete Account';
-    message.textContent = 'This is a permanent action. Are you sure you want to proceed with deleting your account?';
-    confirmBtn.textContent = 'Proceed';
-    modal.classList.add('visible');
-
-    const closeInitialModal = () => modal.classList.remove('visible');
-    cancelBtn.onclick = closeInitialModal;
-
-    confirmBtn.onclick = () => {
-        closeInitialModal();
-        // --- Step 2: Show Credential Modal ---
-        const credentialModal = document.getElementById('delete-credential-modal');
-        credentialModal.classList.add('visible');
-
-        document.getElementById('cancel-credential-btn').onclick = () => credentialModal.classList.remove('visible');
-        document.getElementById('confirm-credential-btn').onclick = () => {
-            const enteredName = document.getElementById('delete-account-name-input').value.trim();
-            const enteredPin = document.getElementById('delete-account-pin-input').value.trim();
-            const storedName = localStorage.getItem('userName');
-            const storedPin = localStorage.getItem('userPin');
-
-            if (enteredName === storedName && enteredPin === storedPin) {
-                credentialModal.classList.remove('visible');
-                // --- Step 3: Final Confirmation ---
-                title.textContent = 'Final Confirmation';
-                message.textContent = 'This will permanently erase all your quiz progress and leaderboard scores. This action cannot be undone. Delete your account?';
-                confirmBtn.textContent = 'Delete Permanently';
-                modal.classList.add('visible');
-
-                confirmBtn.onclick = () => {
-                    modal.classList.remove('visible');
-                    deleteAccount(); // Proceed with deletion
-                };
-                cancelBtn.onclick = () => modal.classList.remove('visible');
-
-            } else {
-                showNotification('Invalid credentials. Please try again.', 'error');
-                // Clear inputs for re-entry
-                document.getElementById('delete-account-name-input').value = '';
-                document.getElementById('delete-account-pin-input').value = '';
-            }
-        };
-    }
+    showNotification('Account deletion is currently disabled.', 'info');
+    return;
 }
 
 async function deleteAccount() {
@@ -2914,10 +2919,9 @@ function generateAcademicDailyChallengeQuestions() {
 // ===================== NEW: ONBOARDING & PERSONALIZATION =====================
 async function checkUserProfile() { // NEW: Make this function async
     const userName = localStorage.getItem('userName');
-    const userPin = localStorage.getItem('userPin');
     const userFocus = localStorage.getItem('userFocus');
 
-    if (!userName || !userFocus || !userPin) { // NEW: Check for PIN
+    if (!userName || !userFocus) {
         document.getElementById('onboarding-modal').classList.add('visible');
         document.getElementById('logout-btn').style.display = 'none';
         initializeTheme(); // Initialize with default theme for new users
@@ -2926,49 +2930,73 @@ async function checkUserProfile() { // NEW: Make this function async
         document.getElementById('logout-btn').style.display = 'inline-flex';
         await loadUserProgress();
         personalizeHomepage(userName, userFocus);
-    initializeLogoutConfirmation(); // FIX: Initialize after user profile is confirmed
+        initializeLogoutConfirmation(); // FIX: Initialize after user profile is confirmed
     }
     // NEW: These are now called after user data is loaded, ensuring they have the correct data.
     initializeTheme();
     initializeInfoPopup();
-    QuizifyStore.showStoreUpdatesModal();
-    checkDailyCoinReward(); // NEW: Check for daily coin reward
+    // REMOVED: QuizifyStore.showStoreUpdatesModal(); // Now shown after 5 minutes if store not opened
+    // REMOVED: checkDailyCoinReward(); // Now shown after 5 minutes if coins not collected
+    setupDelayedPopups(); // NEW: Set up timers for popups
     updateStreakDisplay();
     document.getElementById('app-version').textContent = `v${APP_VERSION}`;
     document.getElementById('menu-app-version').textContent = `v${APP_VERSION}`;
 }
 
+/**
+ * NEW: Sets up delayed popups that appear after 5 minutes if conditions aren't met
+ */
+function setupDelayedPopups() {
+    const FIVE_MINUTES = 5 * 60 * 1000; // 5 minutes in milliseconds
+    
+    // Set up store updates popup timer
+    setTimeout(() => {
+        // Only show if user hasn't opened the store yet
+        if (!sessionStorage.getItem('storeOpened')) {
+            QuizifyStore.showStoreUpdatesModal();
+        }
+    }, FIVE_MINUTES);
+    
+    // Set up daily coin popup timer
+    setTimeout(() => {
+        // Only show if user hasn't collected daily coins today
+        const today = new Date().toISOString().split('T')[0];
+        const lastCollectionDate = userProgress.lastDailyCoinCollectionDate;
+        
+        if (lastCollectionDate !== today) {
+            showDailyCoinModal();
+        }
+    }, FIVE_MINUTES);
+}
+
 function saveUserPreferences(focus) {
     const nameInput = document.getElementById('user-name-input');
-    const pinInput = document.getElementById('user-pin-input');
     const userName = nameInput.value.trim();
-    const userPin = pinInput.value.trim();
 
     if (!userName) {
         showNotification('Please enter your name.', 'error');
         nameInput.focus();
         return;
     }
-    // NEW: Validate the PIN
-    if (!userPin || userPin.length !== 4 || !/^\d{4}$/.test(userPin)) {
-        showNotification('Please enter a valid 4-digit PIN.', 'error');
-        pinInput.focus();
-        return;
-    }
 
     localStorage.setItem('userName', userName);
-    localStorage.setItem('userPin', userPin);
     localStorage.setItem('userFocus', focus);
-    userProgress.userName = userName;
 
-    // NEW: Set a flag to show the PIN reminder after the page reloads.
-    sessionStorage.setItem('showPinReminder', 'true');
+    // Generate pre-seeded userId if not present (for stable storage key)
+    let userId = localStorage.getItem('userId');
+    if (!userId) {
+        userId = `user_${userName.toLowerCase().replace(/[^a-z0-9]/g, '')}_${Date.now()}`;
+        localStorage.setItem('userId', userId);
+    }
+
+    userProgress.userName = userName;
 
     document.getElementById('onboarding-modal').classList.remove('visible');
     document.getElementById('logout-btn').style.display = 'inline-flex';
     personalizeHomepage(userName, focus);
-    window.location.reload(); // Reload to re-initialize the app with the new user ID and load their progress
+    // Do not reload; this avoids accidental interruption
 }
+
 
 function personalizeHomepage(userName, userFocus) {
     // NEW: Animate the welcome message
@@ -3013,28 +3041,9 @@ function personalizeHomepage(userName, userFocus) {
  * and displays a modal with the user's PIN.
  */
 function checkAndShowPinReminder() {
-    if (sessionStorage.getItem('showPinReminder') === 'true') {
-        const pin = localStorage.getItem('userPin');
-        if (pin) {
-            const modal = document.getElementById('pin-reminder-modal');
-            const pinDisplay = document.getElementById('reminder-pin-display');
-            const closeBtn = document.getElementById('close-pin-reminder-btn');
-
-            if (modal && pinDisplay && closeBtn) {
-                pinDisplay.textContent = pin;
-                modal.classList.add('visible');
-
-                const closeModal = () => {
-                    modal.classList.remove('visible');
-                    // Remove the flag so it doesn't show again in this session.
-                    sessionStorage.removeItem('showPinReminder');
-                };
-
-                closeBtn.addEventListener('click', closeModal);
-            }
-        }
-    }
+    // PIN reminders are disabled because the old name/PIN account model is removed.
 }
+
 /**
  * Sets the current date on the Daily Challenge card.
  */
@@ -3150,8 +3159,8 @@ function initializeLogoutConfirmation() {
     confirmBtn.addEventListener('click', () => {
         localStorage.removeItem('userName');
         localStorage.removeItem('userFocus');
-        localStorage.removeItem('userPin');
-    userProgress.activeAvatar = '👤'; // Reset avatar
+        localStorage.removeItem('userId');
+        userProgress.activeAvatar = '👤'; // Reset avatar
         window.location.reload();
     });
 
@@ -3434,54 +3443,83 @@ function initializeSideMenu() {
     const menuLeaderboardBtn = document.getElementById('menu-leaderboard-btn');
     const menuVideosBtn = document.getElementById('menu-videos-btn'); // NEW
     const menuOverlay = document.getElementById('menu-overlay');
+
+    if (!menuToggleBtn || !closeMenuBtn || !menuOverlay) {
+        console.warn('Side menu initialization skipped: missing required elements.');
+        return;
+    }
+    // Check if the button exists and add the click event
+    if (menuVideosBtn) {
+        menuVideosBtn.addEventListener('click', () => {
+            closeSideMenu();
+            window.location.href = 'new.html'; // Opens your Cinevix page!
+        });
+    }
+
     
     const openMenu = () => {
-        document.getElementById('side-menu').classList.add('open');
-        document.getElementById('menu-overlay').classList.add('visible');
-        document.getElementById('menu-toggle-btn').classList.add('is-active');
+        const sideMenu = document.getElementById('side-menu');
+        if (!sideMenu) {
+            console.warn('Side menu element not found during openMenu.');
+            return;
+        }
+        sideMenu.classList.add('open');
+        menuOverlay.classList.add('visible');
+        menuToggleBtn.classList.add('is-active');
         updateCoinDisplay(); // FIX: Update coin display when menu opens
         checkCommunityUpdates(); // Re-check to ensure dot is visible if menu was closed
     };
 
     menuToggleBtn.addEventListener('click', openMenu);
     closeMenuBtn.addEventListener('click', closeSideMenu);
-    menuHomeBtn.addEventListener('click', () => {
+    menuHomeBtn?.addEventListener('click', () => {
         goToHome();
         closeSideMenu();
     });
-    menuBookmarksBtn.addEventListener('click', () => {
+    menuBookmarksBtn?.addEventListener('click', () => {
         displayBookmarkedQuestions();
         closeSideMenu();
     });
-    menuCommunityBtn.addEventListener('click', () => {
+    menuCommunityBtn?.addEventListener('click', () => {
         displayCommunityPosts();
+        if (typeof showPage === 'function') {
+            showPage('community-page');
+        }
         closeSideMenu();
     });
-    menuAboutUsBtn.addEventListener('click', () => { // NEW
+    menuAboutUsBtn?.addEventListener('click', () => { // NEW
         displayAboutUsPage();
         closeSideMenu();
     });
-    menuAchievementsBtn.addEventListener('click', () => { // NEW
+    menuAchievementsBtn?.addEventListener('click', () => { // NEW
         displayAchievements();
         closeSideMenu();
     });
-    menuSettingsBtn.addEventListener('click', () => { // NEW
+    menuSettingsBtn?.addEventListener('click', () => { // NEW
         goToSettings();
         closeSideMenu();
     });
-    menuProfileBtn.addEventListener('click', () => { // NEW
+    menuProfileBtn?.addEventListener('click', () => { // NEW
         displayProfilePage();
         closeSideMenu();
     });
-    menuStoreBtn.addEventListener('click', () => { // NEW
-        QuizifyStore.displayStorePage(); // Use the new store module
-        closeSideMenu();
+    menuStoreBtn?.addEventListener('click', () => { // NEW
+        try {
+            if (typeof QuizifyStore !== 'undefined' && QuizifyStore.displayStorePage) {
+                QuizifyStore.displayStorePage();
+            }
+        } catch (error) {
+            console.error('Error opening store:', error);
+            showNotification('Unable to open store right now. Please try again.', 'error');
+        } finally {
+            closeSideMenu();
+        }
     });
-    menuLeaderboardBtn.addEventListener('click', () => {
+    menuLeaderboardBtn?.addEventListener('click', () => {
         displayLeaderboard();
         closeSideMenu();
     });
-    menuVideosBtn.addEventListener('click', () => { // NEW
+    menuVideosBtn?.addEventListener('click', () => { // NEW
         QuizifyVideos.displayVideosPage();
         closeSideMenu();
     });
@@ -3711,7 +3749,15 @@ function checkCommunityUpdates() {
 }
 
 function displayCommunityPosts() {
+    if (typeof showPage === 'function') {
+        showPage('community-page');
+    }
+
     const container = document.getElementById('community-posts-container');
+    if (!container) {
+        console.warn('Community posts container missing');
+        return;
+    }
     container.innerHTML = '';
 
     const latestPostVersion = Object.keys(COMMUNITY_POSTS)[0];
@@ -3725,6 +3771,11 @@ function displayCommunityPosts() {
     const timelineContainer = document.createElement('div');
     timelineContainer.className = 'timeline';
     container.appendChild(timelineContainer);
+
+    // Refresh community stats whenever the community page content is shown
+    if (typeof QuizifyFriends !== 'undefined' && QuizifyFriends.loadCommunityStats) {
+        QuizifyFriends.loadCommunityStats().catch(err => console.error('Failed to refresh community stats:', err));
+    }
 
     versions.forEach(version => {
         const post = COMMUNITY_POSTS[version];
@@ -3911,6 +3962,7 @@ function displayProfilePage() {
     document.getElementById('profile-user-focus').textContent = userFocus.charAt(0).toUpperCase() + userFocus.slice(1);
 
     const stats = calculateOverallStats();
+    const userLevel = calculateUserLevel(stats.totalQuizzes);
 
     // NEW: Update avatar on profile page display
     const avatarDisplay = document.getElementById('profile-avatar-display');
@@ -3919,6 +3971,21 @@ function displayProfilePage() {
     document.getElementById('profile-quizzes-taken').textContent = stats.totalQuizzes;
     document.getElementById('profile-average-score').textContent = `${stats.averageScore.toFixed(0)}%`;
     document.getElementById('profile-quizzes-passed').textContent = stats.quizzesPassed;
+    
+    // NEW: Display user level
+    document.getElementById('profile-user-level').textContent = `Level ${userLevel.level}`;
+    document.getElementById('profile-level-progress').textContent = `${userLevel.currentXP}/${userLevel.nextLevelXP} XP`;
+    
+    // NEW: Update XP progress bar
+    const progressBar = document.getElementById('profile-level-progress-bar');
+    if (progressBar) {
+        const progressPercent = (userLevel.currentXP / userLevel.nextLevelXP) * 100;
+        progressBar.style.width = `${progressPercent}%`;
+    }
+
+    // NEW: Display user badges
+    const userBadges = getUserBadges(stats);
+    displayBadges(userBadges);
 
     // Create or update the performance chart
     createOrUpdatePerformanceChart(stats.subjectStats);
@@ -3971,6 +4038,134 @@ function calculateOverallStats() {
     saveProfileStats({ totalQuizzes, quizzesPassed, averageScore });
 
     return { totalQuizzes, quizzesPassed, averageScore, subjectStats };
+}
+
+/**
+ * Calculates user level based on total quizzes completed.
+ * Level increases every 10 quizzes, with XP system.
+ */
+function calculateUserLevel(totalQuizzes) {
+    const xpPerQuiz = 10;
+    const xpForLevelUp = 100; // XP needed per level
+    
+    const totalXP = totalQuizzes * xpPerQuiz;
+    const level = Math.floor(totalXP / xpForLevelUp) + 1;
+    const currentLevelXP = totalXP % xpForLevelUp;
+    const nextLevelXP = xpForLevelUp;
+    
+    return {
+        level: level,
+        currentXP: currentLevelXP,
+        nextLevelXP: nextLevelXP,
+        totalXP: totalXP
+    };
+}
+
+/**
+ * Gets all badges that the user has earned.
+ */
+function getUserBadges(stats) {
+    const badges = [];
+    
+    // First Quiz Badge
+    if (stats.totalQuizzes >= 1) {
+        badges.push({
+            id: 'first-quiz',
+            name: 'First Steps',
+            description: 'Completed your first quiz',
+            icon: '🎯',
+            earned: true
+        });
+    }
+    
+    // Quiz Master Badge (10 quizzes)
+    if (stats.totalQuizzes >= 10) {
+        badges.push({
+            id: 'quiz-master',
+            name: 'Quiz Master',
+            description: 'Completed 10 quizzes',
+            icon: '👑',
+            earned: true
+        });
+    }
+    
+    // Scholar Badge (25 quizzes)
+    if (stats.totalQuizzes >= 25) {
+        badges.push({
+            id: 'scholar',
+            name: 'Scholar',
+            description: 'Completed 25 quizzes',
+            icon: '🎓',
+            earned: true
+        });
+    }
+    
+    // Perfect Score Badge
+    const hasPerfectScore = Object.values(userProgress).some(quiz => 
+        quiz && typeof quiz.score === 'number' && quiz.score === 100
+    );
+    if (hasPerfectScore) {
+        badges.push({
+            id: 'perfect-score',
+            name: 'Perfectionist',
+            description: 'Achieved a perfect score',
+            icon: '💎',
+            earned: true
+        });
+    }
+    
+    // Streak Master Badge
+    const currentStreak = userProgress.streak || 0;
+    if (currentStreak >= 7) {
+        badges.push({
+            id: 'streak-master',
+            name: 'Streak Master',
+            description: 'Maintained a 7-day streak',
+            icon: '🔥',
+            earned: true
+        });
+    }
+    
+    // High Scorer Badge
+    if (stats.averageScore >= 80) {
+        badges.push({
+            id: 'high-scorer',
+            name: 'High Scorer',
+            description: 'Maintained 80%+ average',
+            icon: '⭐',
+            earned: true
+        });
+    }
+    
+    return badges;
+}
+
+/**
+ * Displays user badges in the profile page.
+ */
+function displayBadges(badges) {
+    const container = document.getElementById('badges-container');
+    if (!container) return;
+    
+    container.innerHTML = '';
+    
+    if (badges.length === 0) {
+        container.innerHTML = '<p style="text-align: center; color: #666;">No badges earned yet. Keep taking quizzes to unlock achievements!</p>';
+        return;
+    }
+    
+    badges.forEach(badge => {
+        const badgeElement = document.createElement('div');
+        badgeElement.className = `badge-item ${badge.earned ? 'earned' : 'locked'}`;
+        badgeElement.innerHTML = `
+            <div class="badge-icon">${badge.icon}</div>
+            <div class="badge-info">
+                <h4>${badge.name}</h4>
+                <p>${badge.description}</p>
+            </div>
+        `;
+        container.appendChild(badgeElement);
+    });
 }
 
 function saveProfileStats(stats) {
@@ -4527,18 +4722,16 @@ function initializeLeaderboard() {
  * @returns {string} The user's unique ID.
  */
 function getOrCreateUserId() {
-    const userName = localStorage.getItem('userName');
-    const userPin = localStorage.getItem('userPin'); // NEW: Get PIN
-
-    if (!userName || !userPin) {
-        // Fallback for anonymous or error states, though this shouldn't happen in normal flow.
-        return 'user_anonymous_' + Date.now();
+    let userId = localStorage.getItem('userId');
+    if (userId) {
+        return userId;
     }
 
-    // NEW: Create a unique ID from the combination of the sanitized name and the PIN.
-    // e.g., "Raj Mishra" + "1234" -> "user_rajmishra_1234"
+    const userName = localStorage.getItem('userName') || 'anonymous';
     const sanitizedName = userName.toLowerCase().replace(/[^a-z0-9]/g, '');
-    return `user_${sanitizedName}_${userPin}`;
+    userId = `user_${sanitizedName}_${Date.now()}`;
+    localStorage.setItem('userId', userId);
+    return userId;
 }
 
 /**
@@ -4731,9 +4924,15 @@ function initializeDailyCoinModal() {
     const collectBtn = document.getElementById('collect-daily-coin-btn');
     const closeBtn = document.getElementById('close-daily-coin-btn');
 
-    if (!modal || !collectBtn || !closeBtn) return;
+    if (!modal || !collectBtn || !closeBtn) {
+        console.error('Daily coin modal elements not found:', { modal, collectBtn, closeBtn });
+        return;
+    }
 
+    console.log('Attaching daily coin modal event listeners');
+    console.log('Attaching daily coin modal event listeners');
     collectBtn.addEventListener('click', () => {
+        console.log('Daily coin collect button clicked');
         quizCoins += 2;
         const today = new Date().toISOString().split('T')[0];
         userProgress.lastDailyCoinCollectionDate = today;
@@ -4751,10 +4950,24 @@ function initializeDailyCoinModal() {
         showNotification('You collected 2 daily coins! 💰', 'success');
     });
 
-    closeBtn.addEventListener('click', () => {
+    const handleCloseClick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
         modal.classList.remove('visible');
-        // The reminder interval is handled in showDailyCoinModal
-    });
+        // Start reminder interval when user closes without collecting
+        if (!dailyCoinReminderInterval) {
+            dailyCoinReminderInterval = setInterval(() => {
+                const today = new Date().toISOString().split('T')[0];
+                const lastCollectionDate = userProgress.lastDailyCoinCollectionDate;
+                if (lastCollectionDate !== today) {
+                    showDailyCoinModal();
+                }
+            }, 2 * 60 * 1000); // 2 minutes
+        }
+    };
+    
+    closeBtn.addEventListener('click', handleCloseClick);
+    closeBtn.addEventListener('touchend', handleCloseClick);
 }
 
 function checkDailyCoinReward() {
@@ -4768,10 +4981,7 @@ function checkDailyCoinReward() {
 
 function showDailyCoinModal() {
     document.getElementById('daily-coin-modal').classList.add('visible');
-    // If user closes it, remind them every 2 minutes until collected
-    if (!dailyCoinReminderInterval) {
-        dailyCoinReminderInterval = setInterval(showDailyCoinModal, 2 * 60 * 1000); // 2 minutes
-    }
+    // REMOVED: Reminder interval is now only set when user closes without collecting
 }
 
 // ===================== NEW: CUSTOMIZATION FUNCTIONS =====================
@@ -5048,4 +5258,131 @@ function initializeImageViewer() {
     };
 }
 
+// ===== NEW ENGAGEMENT FEATURES =====
+
+/**
+ * Updates the daily goal progress display.
+ */
+function updateDailyGoal() {
+    const today = new Date().toISOString().split('T')[0];
+    const dailyGoalSection = document.getElementById('daily-goal-section');
+    const goalCompletedEl = document.getElementById('daily-goal-completed');
+    const goalProgressEl = document.getElementById('daily-goal-progress');
+    
+    if (!dailyGoalSection || !goalCompletedEl || !goalProgressEl) return;
+    
+    // Get today's quiz attempts
+    const todayQuizzes = (userProgress.quizHistory || []).filter(quiz => 
+        quiz.date && quiz.date.startsWith(today) && quiz.type !== 'mock'
+    );
+    
+    const completedToday = todayQuizzes.length;
+    const goalTarget = 5;
+    const progressPercent = Math.min((completedToday / goalTarget) * 100, 100);
+    
+    // Update display
+    goalCompletedEl.textContent = completedToday;
+    goalProgressEl.style.strokeDashoffset = 251.2 - (251.2 * progressPercent / 100);
+    
+    // Always show daily goal section
+    dailyGoalSection.style.display = 'block';
+}
+
+/**
+ * Shows goal completion celebration.
+ */
+function showGoalCelebration() {
+    const celebration = document.createElement('div');
+    celebration.className = 'achievement-popup';
+    celebration.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+            <span style="font-size: 24px;">🎯</span>
+            <h3 style="margin: 0;">Daily Goal Completed!</h3>
+        </div>
+        <p>You've completed 5 quizzes today! Here's your reward:</p>
+        <div style="font-weight: bold; color: #10b981;">+25 Quiz Coins + Special Badge</div>
+    `;
+    
+    document.body.appendChild(celebration);
+    
+    // Award coins
+    userProgress.quizCoins = (userProgress.quizCoins || 0) + 25;
+    updateCoinDisplay();
+    saveUserProgress();
+    
+    // Remove after 5 seconds
+    setTimeout(() => {
+        if (celebration.parentNode) {
+            celebration.remove();
+        }
+    }, 5000);
+}
+
+/**
+ * Checks for streak celebrations.
+ */
+function checkStreakCelebration() {
+    const currentStreak = userProgress.streak || 0;
+    const lastStreakCheck = localStorage.getItem('lastStreakCheck') || 0;
+    
+    if (currentStreak > lastStreakCheck && currentStreak > 1) {
+        // New streak milestone reached
+        showStreakCelebration(currentStreak);
+        localStorage.setItem('lastStreakCheck', currentStreak);
+        
+        // Award bonus coins for streak
+        userProgress.quizCoins = (userProgress.quizCoins || 0) + 10;
+        updateCoinDisplay();
+        saveUserProgress();
+    }
+}
+
+/**
+ * Shows streak celebration.
+ */
+function showStreakCelebration(streak) {
+    const celebrationEl = document.getElementById('streak-celebration');
+    if (!celebrationEl) return;
+    
+    celebrationEl.style.display = 'block';
+    
+    // Hide after 5 seconds
+    setTimeout(() => {
+        celebrationEl.style.display = 'none';
+    }, 5000);
+}
+
+/**
+ * Adds social sharing functionality.
+ */
+function shareAchievement(type, data) {
+    let shareText = '';
+    let shareUrl = window.location.origin;
+    
+    switch(type) {
+        case 'quiz_complete':
+            shareText = `I just completed a ${data.score}% quiz in ${data.subject} on Quizify! 🧠✨`;
+            break;
+        case 'streak':
+            shareText = `I'm on a ${data.streak}-day streak on Quizify! 🔥 Keep learning!`;
+            break;
+        case 'mock_test':
+            shareText = `Scored ${data.score}% on today's Mock Test! 📊 Quizify is awesome!`;
+            break;
+        default:
+            shareText = 'Check out Quizify - the best quiz app for learning! 📚';
+    }
+    
+    if (navigator.share) {
+        navigator.share({
+            title: 'Quizify Achievement',
+            text: shareText,
+            url: shareUrl
+        });
+    } else {
+        // Fallback: copy to clipboard
+        navigator.clipboard.writeText(`${shareText} ${shareUrl}`);
+        showNotification('Achievement link copied to clipboard!', 'success');
+    }
+}
 
