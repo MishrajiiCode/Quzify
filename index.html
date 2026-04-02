@@ -4,6 +4,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -471,14 +472,19 @@
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><path d="M12 10l-4 4 2 2 6-6-2-2-2 2z"></path></svg>
                         <span>Leaderboard</span>
                     </button>
+                    <button id="menu-videos-btn" class="side-menu-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33 2.78 2.78 0 0 0 1.94 2c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.33 29 29 0 0 0-.46-5.33z"></path><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon></svg>
+                        <span>Cinevix</span>
+                    </button>
+                    <button id="menu-community-btn" class="side-menu-item">
+                        <span id="community-notification-dot" class="notification-dot side-menu-dot" style="display: none;"></span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                        <span>Community</span>
+                    </button>
                     <button id="menu-store-btn" class="side-menu-item">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
                         <span>Store</span>
                     </button>
-                    <a href="new.html" class="side-menu-item" style="text-decoration: none; color: inherit;">
-                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33 2.78 2.78 0 0 0 1.94 2c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.33 29 29 0 0 0-.46-5.33z"></path><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon></svg>
-                         <span>Cinevix</span>
-                    </a>
                 </div>
                 <div class="side-menu-group">
                     <h4 class="side-menu-group-title">Progress</h4>
@@ -490,11 +496,6 @@
                     <button id="menu-bookmarks-btn" class="side-menu-item">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
                         <span>Bookmarks</span>
-                    </button>
-                    <button id="menu-community-btn" class="side-menu-item">
-                        <span id="community-notification-dot" class="notification-dot side-menu-dot" style="display: none;"></span>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-                        <span>Community</span>
                     </button>
                 </div>
                 <div class="side-menu-group">
@@ -571,6 +572,34 @@
                 </div>
             </div>
 
+            <!-- Daily Goal Section -->
+            <div id="daily-goal-section" class="daily-goal-card">
+                <div class="goal-header">
+                    <span class="goal-icon">🎯</span>
+                    <h3>Daily Goal</h3>
+                </div>
+                <p>Complete 5 quizzes today to earn bonus rewards!</p>
+                <div class="progress-ring">
+                    <svg class="progress-ring-circle" width="80" height="80">
+                        <circle class="progress-ring-bg" cx="40" cy="40" r="36"></circle>
+                        <circle class="progress-ring-fill" cx="40" cy="40" r="36" id="daily-goal-progress"></circle>
+                    </svg>
+                    <div class="progress-text">
+                        <span id="daily-goal-completed">0</span>/<span>5</span>
+                    </div>
+                </div>
+                <p class="goal-reward">Reward: 25 Quiz Coins + Special Badge</p>
+            </div>
+
+            <!-- Streak Celebration (shown when streak increases) -->
+            <div id="streak-celebration" class="streak-celebration" style="display: none;">
+                <div class="celebration-content">
+                    <h3>🔥 Amazing Streak!</h3>
+                    <p>You're on fire! Keep up the great work!</p>
+                    <div class="streak-reward">+10 Bonus Coins Earned!</div>
+                </div>
+            </div>
+
             <!-- NEW: Personal Best Score Section -->
             <div id="personal-best-section" class="personal-best-card" style="display: none;">
                 <div class="personal-best-icon">🏆</div>
@@ -591,29 +620,99 @@
                 </div>
                 <div class="subjects-grid">
                     <div class="subject-card" data-subject="quantitative">
+                        <div class="card-progress-ring">
+                            <svg class="progress-ring-circle" width="60" height="60">
+                                <circle class="progress-ring-bg" cx="30" cy="30" r="26"></circle>
+                                <circle class="progress-ring-fill" cx="30" cy="30" r="26" id="quantitative-progress"></circle>
+                            </svg>
+                            <div class="progress-text">0%</div>
+                        </div>
                         <img src="https://cdn-icons-png.flaticon.com/512/1048/1048925.png" alt="Quantitative Aptitude Icon" class="card-icon">
                         <h2>Quantitative Aptitude</h2>
                         <p>Mathematics and numerical ability</p>
+                        <div class="card-particles">
+                            <div class="particle"></div>
+                            <div class="particle"></div>
+                            <div class="particle"></div>
+                            <div class="particle"></div>
+                            <div class="particle"></div>
+                        </div>
                     </div>
                     <div class="subject-card" data-subject="english">
+                        <div class="card-progress-ring">
+                            <svg class="progress-ring-circle" width="60" height="60">
+                                <circle class="progress-ring-bg" cx="30" cy="30" r="26"></circle>
+                                <circle class="progress-ring-fill" cx="30" cy="30" r="26" id="english-progress"></circle>
+                            </svg>
+                            <div class="progress-text">0%</div>
+                        </div>
                         <img src="https://cdn-icons-png.flaticon.com/512/201/201605.png" alt="English Icon" class="card-icon">
                         <h2>English</h2>
                         <p>Grammar, vocabulary, and comprehension</p>
+                        <div class="card-particles">
+                            <div class="particle"></div>
+                            <div class="particle"></div>
+                            <div class="particle"></div>
+                            <div class="particle"></div>
+                            <div class="particle"></div>
+                        </div>
                     </div>
                     <div class="subject-card" data-subject="reasoning">
+                        <div class="card-progress-ring">
+                            <svg class="progress-ring-circle" width="60" height="60">
+                                <circle class="progress-ring-bg" cx="30" cy="30" r="26"></circle>
+                                <circle class="progress-ring-fill" cx="30" cy="30" r="26" id="reasoning-progress"></circle>
+                            </svg>
+                            <div class="progress-text">0%</div>
+                        </div>
                         <img src="https://cdn-icons-png.flaticon.com/512/3406/3406828.png" alt="Reasoning Icon" class="card-icon">
                         <h2>Reasoning</h2>
                         <p>Logical and analytical reasoning</p>
+                        <div class="card-particles">
+                            <div class="particle"></div>
+                            <div class="particle"></div>
+                            <div class="particle"></div>
+                            <div class="particle"></div>
+                            <div class="particle"></div>
+                        </div>
                     </div>
                     <div class="subject-card" data-subject="general_science">
+                        <div class="card-progress-ring">
+                            <svg class="progress-ring-circle" width="60" height="60">
+                                <circle class="progress-ring-bg" cx="30" cy="30" r="26"></circle>
+                                <circle class="progress-ring-fill" cx="30" cy="30" r="26" id="general_science-progress"></circle>
+                            </svg>
+                            <div class="progress-text">0%</div>
+                        </div>
                         <img src="https://cdn-icons-png.flaticon.com/512/2497/2497939.png" alt="General Science Icon" class="card-icon">
                         <h2>General Science</h2>
                         <p>History, Geography, Polity & more</p>
+                        <div class="card-particles">
+                            <div class="particle"></div>
+                            <div class="particle"></div>
+                            <div class="particle"></div>
+                            <div class="particle"></div>
+                            <div class="particle"></div>
+                        </div>
                     </div>
                     <div class="subject-card" data-subject="mock_test" id="mock-test-card">
+                        <div class="card-progress-ring">
+                            <svg class="progress-ring-circle" width="60" height="60">
+                                <circle class="progress-ring-bg" cx="30" cy="30" r="26"></circle>
+                                <circle class="progress-ring-fill" cx="30" cy="30" r="26" id="mock-test-progress"></circle>
+                            </svg>
+                            <div class="progress-text">0%</div>
+                        </div>
                         <img src="https://cdn-icons-png.flaticon.com/512/3840/3840656.png" alt="Mock Test Icon" class="card-icon">
                         <h2>Daily Mock Test</h2>
                         <p class="mock-test-status">Attempt today's full-length mock test.</p>
+                        <div class="card-particles">
+                            <div class="particle"></div>
+                            <div class="particle"></div>
+                            <div class="particle"></div>
+                            <div class="particle"></div>
+                            <div class="particle"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -840,9 +939,71 @@
         <!-- Community Page -->
         <div id="community-page" class="page">
             <button class="back-btn">← Back to Home</button>
-            <h1>Community Updates</h1>
-            <div id="community-posts-container" class="community-posts-container">
-                <!-- Community posts will be populated by JavaScript -->
+            <div class="community-header">
+                <h1>🌟 Community Hub</h1>
+                <p>Connect, share, and learn together!</p>
+                <div class="community-stats">
+                    <div class="stat-item">
+                        <span class="stat-icon">👥</span>
+                        <span id="community-user-count">0</span>
+                        <span>Members</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-icon">📝</span>
+                        <span id="community-post-count">0</span>
+                        <span>Posts</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-icon">💬</span>
+                        <span id="community-comment-count">0</span>
+                        <span>Comments</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="community-tabs">
+                <button class="community-tab-btn active" data-tab="feed">📱 Feed</button>
+                <button class="community-tab-btn" data-tab="leaderboard">🏆 Leaderboard</button>
+                <button class="community-tab-btn" data-tab="challenges">🎯 Challenges</button>
+                <button class="community-tab-btn" data-tab="discussions">💭 Discussions</button>
+            </div>
+
+            <div class="community-content">
+                <div class="community-tab-content active" id="feed">
+                    <div id="community-posts-container" class="community-posts-container">
+                        <!-- Community posts will be populated by JavaScript -->
+                    </div>
+                </div>
+
+                <div class="community-tab-content" id="leaderboard">
+                    <div class="community-leaderboard">
+                        <h2>🏆 Community Leaderboard</h2>
+                        <p>Top performers this week</p>
+                        <div id="community-leaderboard-list" class="leaderboard-list">
+                            <!-- Leaderboard will be populated by JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="community-tab-content" id="challenges">
+                    <div class="community-challenges">
+                        <h2>🎯 Active Challenges</h2>
+                        <p>Join community challenges to earn bonus coins!</p>
+                        <div id="community-challenges-list" class="challenges-list">
+                            <!-- Challenges will be populated by JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="community-tab-content" id="discussions">
+                    <div class="community-discussions">
+                        <h2>💭 Hot Discussions</h2>
+                        <p>Join trending conversations</p>
+                        <div id="community-discussions-list" class="discussions-list">
+                            <!-- Discussions will be populated by JS -->
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -969,43 +1130,120 @@
 
         <!-- NEW: Mock Test Page -->
         <div id="mock-test-page" class="page">
-            <div class="quiz-header">
+            <div class="quiz-header mock-test-header">
                 <div class="quiz-content-area">
-                    <h2>Mock Test</h2>
+                    <h2>🧪 Mock Test</h2>
+                    <div class="mock-test-progress">
+                        <div class="progress-bar">
+                            <div id="mock-progress-fill" class="progress-fill"></div>
+                        </div>
+                        <span id="mock-progress-text">0/100 Questions</span>
+                    </div>
                 </div>
-                <div class="quiz-info">
-                    <div id="mock-timer">60:00</div>
+                <div class="quiz-info mock-timer-info">
+                    <div class="timer-container">
+                        <div class="timer-icon">⏱️</div>
+                        <div id="mock-timer" class="timer-display">60:00</div>
+                    </div>
+                    <div class="timer-warning" id="timer-warning" style="display: none;">
+                        <span class="warning-icon">⚠️</span> Less than 5 minutes remaining!
+                    </div>
                 </div>
             </div>
 
             <div class="mock-test-layout">
                 <div class="mock-test-main">
                     <div id="mock-section-tabs" class="mock-section-tabs">
-                        <button class="mock-section-tab active" data-section="quantitative">Quantitative Aptitude</button>
-                        <button class="mock-section-tab" data-section="english">English</button>
-                        <button class="mock-section-tab" data-section="reasoning">Reasoning</button>
-                        <button class="mock-section-tab" data-section="general_science">General Science</button>
+                        <button class="mock-section-tab active" data-section="quantitative">
+                            <span class="section-icon">🔢</span>
+                            <span class="section-name">Quantitative</span>
+                            <span class="section-progress" id="quantitative-progress">0/25</span>
+                        </button>
+                        <button class="mock-section-tab" data-section="english">
+                            <span class="section-icon">📝</span>
+                            <span class="section-name">English</span>
+                            <span class="section-progress" id="english-progress">0/25</span>
+                        </button>
+                        <button class="mock-section-tab" data-section="reasoning">
+                            <span class="section-icon">🧠</span>
+                            <span class="section-name">Reasoning</span>
+                            <span class="section-progress" id="reasoning-progress">0/25</span>
+                        </button>
+                        <button class="mock-section-tab" data-section="general_science">
+                            <span class="section-icon">🔬</span>
+                            <span class="section-name">General Science</span>
+                            <span class="section-progress" id="general_science-progress">0/25</span>
+                        </button>
                     </div>
-                    <div class="question-container">
+                    <div class="question-container mock-question-container">
                         <div class="question-header-flex">
-                            <h3 id="mock-question-number">Question 1</h3>
+                            <div class="question-number-badge">
+                                <span id="mock-question-number">1</span>
+                            </div>
+                            <div class="question-meta">
+                                <span class="current-section" id="current-section-name">Quantitative Aptitude</span>
+                                <span class="question-type" id="question-type">Multiple Choice</span>
+                            </div>
+                            <button id="mock-bookmark-btn" class="bookmark-btn" title="Bookmark this question">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+                            </button>
                         </div>
-                        <p id="mock-question-text">Question will appear here.</p>
-                        <div id="mock-options-container" class="options-container"></div>
+                        <div class="question-content">
+                            <p id="mock-question-text">Question will appear here.</p>
+                        </div>
+                        <div id="mock-options-container" class="options-container mock-options"></div>
                     </div>
-                    <div class="navigation-buttons">
-                        <button id="mock-prev-btn">Previous</button>
-                        <button id="mock-next-btn">Next</button>
-                        <button id="mock-submit-btn" class="btn--danger">Submit Test</button>
+                    <div class="navigation-buttons mock-navigation">
+                        <button id="mock-prev-btn" class="nav-btn prev-btn">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                            Previous
+                        </button>
+                        <div class="nav-center">
+                            <button id="mock-clear-btn" class="nav-btn clear-btn" title="Clear selection">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                            </button>
+                            <button id="mock-review-btn" class="nav-btn review-btn" title="Mark for review">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.828 14.828a4 4 0 0 1-5.656 0"></path><path d="M9 10h1.586a1 1 0 0 1 .707.293l.707.707A1 1 0 0 0 13.414 11H15a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2v-2a2 2 0 0 1 2-2z"></path></svg>
+                            </button>
+                        </div>
+                        <button id="mock-next-btn" class="nav-btn next-btn">
+                            Next
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        </button>
+                        <button id="mock-submit-btn" class="nav-btn submit-btn">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            Submit Test
+                        </button>
                     </div>
                 </div>
                 <div class="mock-test-sidebar">
-                    <h4>Question Palette</h4>
-                    <div id="mock-question-numbers" class="question-numbers"></div>
+                    <div class="sidebar-header">
+                        <h4>📊 Question Palette</h4>
+                        <div class="palette-stats">
+                            <span id="answered-count">0</span> Answered
+                        </div>
+                    </div>
+                    <div id="mock-question-numbers" class="question-numbers mock-palette"></div>
                     <div class="palette-legend">
-                        <div><span class="q-legend current"></span> Current</div>
-                        <div><span class="q-legend answered"></span> Answered</div>
-                        <div><span class="q-legend not-answered"></span> Not Answered</div>
+                        <div class="legend-item">
+                            <span class="q-legend current"></span> 
+                            <span>Current</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="q-legend answered"></span> 
+                            <span>Answered</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="q-legend not-answered"></span> 
+                            <span>Not Answered</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="q-legend marked"></span> 
+                            <span>Marked for Review</span>
+                        </div>
+                    </div>
+                    <div class="sidebar-actions">
+                        <button id="mock-submit-sidebar-btn" class="btn btn--primary btn--full-width">Submit Test</button>
                     </div>
                 </div>
             </div>
@@ -1051,6 +1289,18 @@
                 <div class="profile-card">
                     <h2 id="profile-user-name"></h2>
                     <p>Focus: <strong id="profile-user-focus"></strong></p>
+                    <div class="level-info">
+                        <div class="level-badge">
+                            <span class="level-icon">⭐</span>
+                            <span id="profile-user-level">Level 1</span>
+                        </div>
+                        <div class="xp-progress">
+                            <div class="xp-bar">
+                                <div class="xp-fill" id="profile-level-progress-bar"></div>
+                            </div>
+                            <span class="xp-text" id="profile-level-progress">0/100 XP</span>
+                        </div>
+                    </div>
                 </div>
                 <div class="stats-grid">
                     <div class="stat-item">
@@ -1073,6 +1323,7 @@
                 <!-- NEW: Profile Page Tabs -->
                 <div class="profile-tabs" id="profile-tabs-container">
                     <button class="profile-tab-btn active" data-tab="profile-stats-tab">📊 Stats</button>
+                    <button class="profile-tab-btn" data-tab="profile-badges-tab">🏆 Badges</button>
                     <button class="profile-tab-btn" data-tab="profile-analysis-tab">🔬 Analysis</button>
                     <button class="profile-tab-btn" data-tab="profile-history-tab">📜 History</button>
                     <!-- NEW: Friends Tab Button -->
@@ -1085,6 +1336,16 @@
                         <div id="profile-chart-container">
                             <canvas id="performanceChart"></canvas>
                             <div id="mobile-performance-list" class="mobile-performance-list"></div>
+                        </div>
+                    </div>
+
+                    <div class="profile-tab-content" id="profile-badges-tab">
+                        <div class="badges-section">
+                            <h2>🏆 Achievement Badges</h2>
+                            <p class="section-description">Unlock badges by reaching milestones in your quiz journey!</p>
+                            <div class="badges-grid" id="badges-container">
+                                <!-- Badges will be populated by JavaScript -->
+                            </div>
                         </div>
                     </div>
         
@@ -1230,6 +1491,16 @@
                                     <button id="edit-account-btn" class="btn btn--icon" title="Edit Account Details">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                                     </button>
+                                </div>
+                                <div class="account-display-info">
+                                    <div class="account-info-item">
+                                        <span class="account-info-label">Current Name:</span>
+                                        <span id="account-display-name" class="account-info-value">Not Set</span>
+                                    </div>
+                                    <div class="account-info-item">
+                                        <span class="account-info-label">Current PIN:</span>
+                                        <span id="account-display-pin" class="account-info-value">Not Set</span>
+                                    </div>
                                 </div>
                                 <div class="setting-item">
                                     <label for="account-name-input" class="setting-label">Your Name</label>
