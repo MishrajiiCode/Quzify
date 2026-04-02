@@ -1,3 +1,4 @@
+
 // videos.js - Contains all logic for the Video Lectures feature.
 
 const QuizifyVideos = {
@@ -264,11 +265,31 @@ const QuizifyVideos = {
         if (!video) return;
 
         this.playerTitle.textContent = video.title;
-        this.playerDescription.textContent = video.description;
-        // Handle both regular video URLs and YouTube URLs
+        this.playerDescription.textContent = video.description || 'No description available.';
+        
+        // Handle different video URL types
         let videoSrc = video.videoUrl;
+        let embedHtml = '';
+        
         if (videoSrc.includes('youtube.com/watch?v=')) {
-            videoSrc = videoSrc.replace('watch?v=', 'embed/');
+            // YouTube video
+            const videoId = videoSrc.split('v=')[1].split('&')[0];
+            videoSrc = `https://www.youtube.com/embed/${videoId}`;
+            embedHtml = `<iframe id="video-player" src="${videoSrc}?autoplay=1&rel=0" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>`;
+        } else if (videoSrc.includes('youtu.be/')) {
+            // YouTube short link
+            const videoId = videoSrc.split('youtu.be/')[1].split('?')[0];
+            videoSrc = `https://www.youtube.com/embed/${videoId}`;
+            embedHtml = `<iframe id="video-player" src="${videoSrc}?autoplay=1&rel=0" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>`;
+        } else if (videoSrc.includes('youtube.com/embed/')) {
+            // Already an embed URL
+            embedHtml = `<iframe id="video-player" src="${videoSrc}?autoplay=1&rel=0" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>`;
+        } else if (videoSrc.match(/\.(mp4|webm|ogg)$/i)) {
+            // Direct video file
+            embedHtml = `<video id="video-player" controls autoplay style="width: 100%; height: 100%;"><source src="${videoSrc}" type="video/${videoSrc.split('.').pop()}">Your browser does not support the video tag.</video>`;
+        } else {
+            // Fallback: try to embed as iframe (might work for some platforms)
+            embedHtml = `<iframe id="video-player" src="${videoSrc}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>`;
         }
 
         // --- NEW: Lazy Loading Facade ---
@@ -276,19 +297,23 @@ const QuizifyVideos = {
         const facadeContainer = document.createElement('div');
         facadeContainer.className = 'video-player-facade';
         facadeContainer.style.backgroundImage = `url('${video.thumbnailUrl || 'https://via.placeholder.com/400x225.png?text=Loading...'}')`;
+        facadeContainer.style.backgroundSize = 'cover';
+        facadeContainer.style.backgroundPosition = 'center';
+        facadeContainer.style.cursor = 'pointer';
 
         // 2. Create the play button
         const playButton = document.createElement('div');
         playButton.className = 'video-play-button';
         playButton.innerHTML = '▶'; // Play icon
+        playButton.style.fontSize = '48px';
+        playButton.style.color = 'white';
+        playButton.style.textShadow = '0 0 10px rgba(0,0,0,0.5)';
 
         facadeContainer.appendChild(playButton);
 
-        // 3. When the user clicks the facade, replace it with the actual video iframe
+        // 3. When the user clicks the facade, replace it with the actual video embed
         facadeContainer.onclick = () => {
-            // Add 'autoplay=1' to start the video immediately after loading
-            const videoIframe = `<iframe id="video-player" src="${videoSrc}?autoplay=1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
-            this.playerContainer.innerHTML = videoIframe;
+            this.playerContainer.innerHTML = embedHtml;
         };
 
         // 4. Initially, show the facade instead of the iframe
