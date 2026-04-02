@@ -1,3 +1,4 @@
+
 // mock-test.js - Contains all logic for the Mock Test feature.
 
 const MockTest = {
@@ -8,6 +9,7 @@ const MockTest = {
     isActive: false,
     questions: [],
     userAnswers: [],
+    markedForReview: [], // NEW: Track questions marked for review
     currentQuestionIndex: 0,
     currentSection: 'quantitative',
     timer: null,
@@ -52,7 +54,11 @@ const MockTest = {
         // Mock Test Page Navigation
         this.page.querySelector('#mock-prev-btn').addEventListener('click', () => this.navigateQuestion(-1));
         this.page.querySelector('#mock-next-btn').addEventListener('click', () => this.navigateQuestion(1));
+        this.page.querySelector('#mock-clear-btn').addEventListener('click', () => this.clearSelection());
+        this.page.querySelector('#mock-review-btn').addEventListener('click', () => this.toggleReviewMark());
+        this.page.querySelector('#mock-bookmark-btn').addEventListener('click', () => this.bookmarkQuestion());
         this.page.querySelector('#mock-submit-btn').addEventListener('click', () => this.confirmSubmit());
+        this.page.querySelector('#mock-submit-sidebar-btn').addEventListener('click', () => this.confirmSubmit());
 
         // Section Tabs
         this.page.querySelector('#mock-section-tabs').addEventListener('click', (e) => {
@@ -151,6 +157,7 @@ const MockTest = {
 
         this.isActive = true;
         this.userAnswers = new Array(this.questions.length).fill(null);
+        this.markedForReview = []; // Initialize review marks
         this.currentQuestionIndex = 0;
         this.currentSection = 'quantitative';
 
@@ -492,5 +499,252 @@ const MockTest = {
             statusEl.textContent = 'A new mock test is available!';
             statusEl.style.color = '';
         }
+    },
+
+    // ===== NEW USER-FRIENDLY FEATURES =====
+
+    /**
+     * Clears the current question selection.
+     */
+    clearSelection() {
+        this.userAnswers[this.currentQuestionIndex] = null;
+        this.renderQuestion();
+        this.renderQuestionGrid();
+        this.updateProgress();
+    },
+
+    /**
+     * Toggles the review mark for the current question.
+     */
+    toggleReviewMark() {
+        if (!this.markedForReview) {
+            this.markedForReview = [];
+        }
+        const index = this.markedForReview.indexOf(this.currentQuestionIndex);
+        if (index > -1) {
+            this.markedForReview.splice(index, 1);
+        } else {
+            this.markedForReview.push(this.currentQuestionIndex);
+        }
+        this.renderQuestionGrid();
+        this.updateReviewButton();
+        this._app.showNotification(
+            this.markedForReview.includes(this.currentQuestionIndex) ? 
+            'Question marked for review' : 'Review mark removed', 
+            'info'
+        );
+    },
+
+    /**
+     * Updates the review button appearance.
+     */
+    updateReviewButton() {
+        const reviewBtn = this.page.querySelector('#mock-review-btn');
+        const isMarked = this.markedForReview.includes(this.currentQuestionIndex);
+        reviewBtn.classList.toggle('marked', isMarked);
+        reviewBtn.title = isMarked ? 'Unmark for review' : 'Mark for review';
+    },
+
+    /**
+     * Bookmarks the current question (for later reference).
+     */
+    bookmarkQuestion() {
+        const question = this.questions[this.currentQuestionIndex];
+        if (!question) return;
+
+        // Add to bookmarks if not already there
+        const bookmarks = this._app.userProgress.bookmarks || [];
+        const bookmarkKey = `mock_${question.id}`;
+        
+        const existingIndex = bookmarks.findIndex(b => b.id === bookmarkKey);
+        if (existingIndex > -1) {
+            bookmarks.splice(existingIndex, 1);
+            this._app.showNotification('Question removed from bookmarks.', 'info');
+        } else {
+            bookmarks.push({
+                id: bookmarkKey,
+                question: question.question,
+                options: question.options,
+                correctAnswer: question.correctAnswer,
+                subject: question.subject,
+                chapter: question.chapter,
+                dateAdded: new Date().toISOString()
+            });
+            this._app.showNotification('Question bookmarked!', 'success');
+        }
+
+        this._app.userProgress.bookmarks = bookmarks;
+        this._app.saveUserProgress();
+        this.updateBookmarkButton();
+    },
+
+    /**
+     * Updates the bookmark button appearance.
+     */
+    updateBookmarkButton() {
+        const bookmarkBtn = this.page.querySelector('#mock-bookmark-btn');
+        const question = this.questions[this.currentQuestionIndex];
+        const bookmarks = this._app.userProgress.bookmarks || [];
+        const bookmarkKey = `mock_${question.id}`;
+        const isBookmarked = bookmarks.some(b => b.id === bookmarkKey);
+        
+        bookmarkBtn.classList.toggle('bookmarked', isBookmarked);
+        bookmarkBtn.title = isBookmarked ? 'Remove bookmark' : 'Bookmark question';
+    },
+
+    /**
+     * Updates the overall progress display.
+     */
+    updateProgress() {
+        const answered = this.userAnswers.filter(answer => answer !== null).length;
+        const total = this.questions.length;
+        
+        // Update progress bar
+        const progressFill = document.getElementById('mock-progress-fill');
+        const progressText = document.getElementById('mock-progress-text');
+        const percentage = (answered / total) * 100;
+        
+        progressFill.style.width = `${percentage}%`;
+        progressText.textContent = `${answered}/${total} Questions`;
+        
+        // Update section progress
+        this.updateSectionProgress();
+        
+        // Update answered count in sidebar
+        document.getElementById('answered-count').textContent = answered;
+    },
+
+    /**
+     * Updates progress for each section.
+     */
+    updateSectionProgress() {
+        const sections = ['quantitative', 'english', 'reasoning', 'general_science'];
+        
+        sections.forEach(section => {
+            const sectionQuestions = this.questions.filter(q => q.subject === section);
+            const answered = sectionQuestions.filter((q, index) => {
+                const globalIndex = this.questions.indexOf(q);
+                return this.userAnswers[globalIndex] !== null;
+            }).length;
+            
+            const progressEl = document.getElementById(`${section}-progress`);
+            if (progressEl) {
+                progressEl.textContent = `${answered}/${sectionQuestions.length}`;
+            }
+        });
+    },
+
+    /**
+     * Enhanced question rendering with better UI.
+     */
+    renderQuestion() {
+        const question = this.questions[this.currentQuestionIndex];
+        if (!question) return;
+
+        // Update question display
+        document.getElementById('mock-question-number').textContent = this.currentQuestionIndex + 1;
+        document.getElementById('mock-question-text').innerHTML = question.question;
+        document.getElementById('current-section-name').textContent = this.SECTION_CONFIG[this.currentSection].name;
+        document.getElementById('question-type').textContent = question.type || 'Multiple Choice';
+
+        // Render options
+        const optionsContainer = document.getElementById('mock-options-container');
+        optionsContainer.innerHTML = '';
+
+        question.options.forEach((option, index) => {
+            const optionDiv = document.createElement('div');
+            optionDiv.className = `option ${this.userAnswers[this.currentQuestionIndex] === index ? 'selected' : ''}`;
+            optionDiv.dataset.optionIndex = index;
+            optionDiv.innerHTML = `
+                <span class="option-letter">${String.fromCharCode(65 + index)}</span>
+                <span class="option-text">${option}</span>
+            `;
+            optionsContainer.appendChild(optionDiv);
+        });
+
+        // Update buttons
+        this.updateNavigationButtons();
+        this.updateReviewButton();
+        this.updateBookmarkButton();
+        this.updateProgress();
+    },
+
+    /**
+     * Updates navigation button states.
+     */
+    updateNavigationButtons() {
+        const prevBtn = document.getElementById('mock-prev-btn');
+        const nextBtn = document.getElementById('mock-next-btn');
+        const clearBtn = document.getElementById('mock-clear-btn');
+        
+        prevBtn.disabled = this.currentQuestionIndex === 0;
+        nextBtn.disabled = this.currentQuestionIndex === this.questions.length - 1;
+        clearBtn.disabled = this.userAnswers[this.currentQuestionIndex] === null;
+        
+        prevBtn.classList.toggle('disabled', prevBtn.disabled);
+        nextBtn.classList.toggle('disabled', nextBtn.disabled);
+        clearBtn.classList.toggle('disabled', clearBtn.disabled);
+    },
+
+    /**
+     * Enhanced question grid with review marks.
+     */
+    renderQuestionGrid() {
+        const grid = document.getElementById('mock-question-numbers');
+        grid.innerHTML = '';
+
+        this.questions.forEach((question, index) => {
+            const numDiv = document.createElement('div');
+            numDiv.className = 'question-number';
+            numDiv.dataset.index = index;
+            numDiv.textContent = index + 1;
+
+            // Add classes based on status
+            if (index === this.currentQuestionIndex) {
+                numDiv.classList.add('current');
+            } else if (this.userAnswers[index] !== null) {
+                numDiv.classList.add('answered');
+            } else {
+                numDiv.classList.add('not-answered');
+            }
+
+            if (this.markedForReview.includes(index)) {
+                numDiv.classList.add('marked');
+            }
+
+            grid.appendChild(numDiv);
+        });
+    },
+
+    /**
+     * Enhanced timer with warning.
+     */
+    startTimer() {
+        if (this.timer) clearInterval(this.timer);
+        const timerEl = this.page.querySelector('#mock-timer');
+        const warningEl = document.getElementById('timer-warning');
+
+        // NEW: Initial display of dynamic time
+        const initialMinutes = Math.floor(this.timeRemaining / 60);
+        const initialSeconds = this.timeRemaining % 60;
+        timerEl.textContent = `${String(initialMinutes).padStart(2, '0')}:${String(initialSeconds).padStart(2, '0')}`;
+        
+        this.timer = setInterval(() => {
+            this.timeRemaining--;
+            const minutes = Math.floor(this.timeRemaining / 60);
+            const seconds = this.timeRemaining % 60;
+            timerEl.textContent = `${String(minutes).padStart(2, '0')}:${String(initialSeconds).padStart(2, '0')}`;
+
+            // Show warning when less than 5 minutes remain
+            if (this.timeRemaining <= 300) {
+                warningEl.style.display = 'block';
+                timerEl.classList.add('warning');
+            }
+
+            if (this.timeRemaining <= 0) {
+                clearInterval(this.timer);
+                this.submitTest();
+            }
+        }, 1000);
     }
 };
