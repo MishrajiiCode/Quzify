@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CINIVIX</title>
+<title>CINEVIX</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
@@ -40,18 +40,82 @@ header {
     padding: 20px;
 }
 
+.header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 5px;
+}
+
+.menu-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 28px;
+    cursor: pointer;
+    padding: 0 10px;
+}
+
 header h1 {
     font-size: 24px;
-    margin-bottom: 10px;
+    flex: 1;
+    margin: 0;
+}
+
+.controls-wrapper {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    max-width: 500px;
+    margin: 0 auto;
+    width: 90%;
+}
+
+/* Tabs Container */
+.tabs-container {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 15px auto;
+    width: 90%;
+    max-width: 500px;
+}
+.tab-btn {
+    flex: 1;
+    padding: 12px;
+    background: #1e293b;
+    color: #cbd5e1;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+.tab-btn.active {
+    background: #3b82f6;
+    color: white;
+    border-color: #60a5fa;
 }
 
 #searchBar {
-    width: 90%;
-    max-width: 400px;
+    flex: 1;
     padding: 12px;
     border-radius: 8px;
     border: none;
     outline: none;
+}
+
+#sortSelect {
+    padding: 12px;
+    border-radius: 8px;
+    border: none;
+    outline: none;
+    background: #1e293b;
+    color: white;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
 }
 
 /* Player Section */
@@ -66,6 +130,7 @@ header h1 {
     background: black;
     border-radius: 8px;
     overflow: hidden;
+    position: relative;
 }
 
 .video-container iframe,
@@ -75,24 +140,69 @@ header h1 {
     border: none;
 }
 
-/* Controls */
-.controls {
+/* Loading Placeholder */
+.video-loader {
+    position: absolute;
+    inset: 0;
     display: flex;
-    justify-content: space-between;
-    margin-top: 10px;
-    gap: 10px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: #111827;
+    z-index: 5;
+}
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid rgba(59, 130, 246, 0.2);
+    border-top-color: #3b82f6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 15px;
+}
+@keyframes spin {
+    to { transform: rotate(360deg); }
 }
 
-.controls button,
-.controls a {
-    flex: 1;
-    padding: 10px;
-    background: #2563eb;
-    border: none;
-    border-radius: 6px;
+/* Back Button */
+.back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #334155;
     color: white;
-    text-align: center;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
     cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 15px;
+    transition: background 0.2s;
+}
+.back-btn:hover {
+    background: #475569;
+}
+
+/* Load More */
+.load-more-container {
+    text-align: center;
+    margin: 20px 0 40px 0;
+    display: none;
+}
+.load-more-btn {
+    background: #334155;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    transition: background 0.2s;
+}
+.load-more-btn:hover {
+    background: #475569;
 }
 
 /* Gallery */
@@ -109,6 +219,8 @@ header h1 {
     overflow: hidden;
     cursor: pointer;
     transition: 0.3s;
+    position: relative;
+    animation: fadeIn 0.4s ease backwards;
 }
 
 .video-card:hover {
@@ -121,6 +233,23 @@ header h1 {
     object-fit: cover;
 }
 
+.play-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 150px;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+.video-card:hover .play-overlay {
+    opacity: 1;
+}
+
 .video-card .info {
     padding: 10px;
 }
@@ -128,36 +257,147 @@ header h1 {
 .video-card h4 {
     font-size: 15px;
 }
-/* --- Mobile Responsive Player Controls --- */
-@media (max-width: 600px) {
-    .video-controls {
-        padding: 10px;
-    }
 
-    /* Puts the progress bar on its own line at the very top */
-    .progress-container {
-        width: 100%;
-        margin: 0 0 10px 0; 
-        order: -1; 
-    }
+.timer {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(220, 38, 38, 0.9);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    z-index: 10;
+}
 
-    /* Reduces the gaps between buttons slightly */
-    .controls-left, .controls-right {
-        gap: 10px;
-    }
+/* Modal Styles */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 10000;
+    justify-content: center;
+    align-items: center;
+}
+.modal-content {
+    background: #1e293b;
+    padding: 24px;
+    border-radius: 10px;
+    text-align: center;
+    max-width: 320px;
+    width: 90%;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+.modal-content h3 {
+    margin-bottom: 12px;
+    color: #f59e0b;
+}
+.modal-content p {
+    margin-bottom: 20px;
+    font-size: 15px;
+    color: #cbd5e1;
+    white-space: pre-wrap;
+}
+.modal-content button {
+    background: #3b82f6;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    width: 100%;
+}
+.modal-content button:hover {
+    background: #2563eb;
+}
 
-    /* Makes the text and sliders slightly smaller to fit better */
-    .control-btn {
-        font-size: 16px; 
-    }
-    
-    #timeDisplay {
-        font-size: 12px;
-    }
+/* Side Menu */
+.side-menu {
+    position: fixed;
+    top: 0;
+    left: -260px;
+    width: 260px;
+    height: 100%;
+    background: #0f172a;
+    z-index: 10001;
+    transition: left 0.3s ease;
+    padding: 20px;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.5);
+}
+.side-menu.active {
+    left: 0;
+}
+.side-menu h2 {
+    color: #3b82f6;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #334155;
+}
+.side-menu ul {
+    list-style: none;
+}
+.side-menu ul li {
+    margin-bottom: 20px;
+}
+.side-menu ul li a {
+    color: #cbd5e1;
+    text-decoration: none;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: color 0.2s;
+}
+.side-menu ul li a:hover {
+    color: white;
+}
+.menu-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 10000;
+    display: none;
+    backdrop-filter: blur(2px);
+}
 
-    #volumeSlider {
-        width: 60px; 
-    }
+/* About Page */
+.about-page {
+    display: none;
+    padding: 40px 20px;
+    max-width: 800px;
+    margin: 0 auto;
+    line-height: 1.8;
+    animation: fadeIn 0.4s ease;
+}
+.about-page h2 {
+    font-size: 32px;
+    color: #3b82f6;
+    margin-bottom: 20px;
+}
+.about-page h3 {
+    font-size: 24px;
+    color: #3b82f6;
+    margin-top: 30px;
+    margin-bottom: 15px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid #334155;
+}
+.about-page p > strong {
+    color: #e2e8f0;
+    font-weight: 600;
+}
+.about-page p {
+    font-size: 16px;
+    color: #cbd5e1;
+    margin-bottom: 15px;
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 /* Mobile */
@@ -182,27 +422,88 @@ header h1 {
     </video>
 </div>
 
-<header>
-    <h1>🎬Wellcome to CineVix Powered by Quizify</h1>
-    <input type="text" id="searchBar" placeholder="Search videos...">
+<header id="mainHeader">
+    <div class="header-top">
+        <button class="menu-btn" onclick="openMenu()">☰</button>
+        <h1>🎬 CineVix</h1>
+        <div style="width: 48px;"></div>
+    </div>
+    <p style="color: #cbd5e1; font-size: 14px; margin-bottom: 15px;">Powered by Quizify</p>
+    <div class="controls-wrapper">
+        <input type="text" id="searchBar" placeholder="Search videos...">
+        <select id="sortSelect">
+            <option value="recent">Recently Added</option>
+            <option value="title">Title (A-Z)</option>
+        </select>
+    </div>
+    <div class="tabs-container">
+        <button id="tab-entertainment" class="tab-btn active" onclick="switchTab('entertainment')">🍿 Entertainment</button>
+        <button id="tab-study" class="tab-btn" onclick="switchTab('study')">📚 Study</button>
+    </div>
 </header>
+
+<!-- Side Menu -->
+<div class="menu-overlay" id="menuOverlay" onclick="closeMenu()"></div>
+<nav class="side-menu" id="sideMenu">
+    <h2>Menu</h2>
+    <ul>
+        <li><a onclick="showHome()">🏠 Home</a></li>
+        <li><a onclick="showAbout()">ℹ️ About Us</a></li>
+        <li><a onclick="closeMenu()">❌ Close</a></li>
+    </ul>
+</nav>
+
+<!-- About Page -->
+<div class="about-page" id="aboutPage">
+    <h2>About CineVix & Quizify</h2>
+    <p>Welcome to <strong>CineVix</strong>, where entertainment meets education. We're creating a unique space for you to learn, relax, and grow, all powered by the innovative spirit of <strong>Quizify</strong>.</p>
+    
+    <h3>Our Story</h3>
+    <p>Our journey began with Quizify, a platform created by our founder, Raj Mishra, to make studying for competitive exams more engaging and effective. As students embraced this new way of learning, we realized that true success isn't just about hard work—it's also about finding balance and inspiration.</p>
+    <p>That's where CineVix comes in. It's the other half of our vision: a curated world of entertainment designed to help you unwind, recharge, and find new perspectives. We believe a powerful film can be as enlightening as a textbook, and a moment of joy is essential for a sharp mind. CineVix is your space to relax after a study session and return to your goals refreshed and motivated.</p>
+
+    <h3>Meet the Creator</h3>
+    <p><strong>Raj Mishra</strong>, Founder & Lead Developer</p>
+    <p>A passionate software engineer with a vision to revolutionize the student experience. Raj is the architect behind both Quizify and CineVix, dedicated to building an ecosystem that supports both learning and leisure.</p>
+
+    <h3>Our Mission</h3>
+    <p>Our mission is to build a holistic platform that nurtures both the mind and the spirit. We provide top-tier educational tools through Quizify and high-quality entertainment through CineVix, creating a balanced ecosystem for personal growth. We're here to help you learn, enjoy, and succeed, all in one place.</p>
+
+    <br>
+    <button class="back-btn" onclick="showHome()">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path></svg>
+        Back to Movies
+    </button>
+</div>
 
 <!-- 🎥 Player -->
 <div class="player-wrapper" id="playerWrapper">
 
-    <button onclick="closePlayer()">⬅ Back</button>
+    <button class="back-btn" onclick="closePlayer()">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path></svg>
+        Back to Movies
+    </button>
 
     <div class="video-container" id="videoContainer"></div>
-
-    <div class="controls">
-        <button onclick="bookmarkVideo()">❤️ Bookmark</button>
-        <a id="downloadBtn" target="_blank">⬇ Download</a>
-    </div>
 
 </div>
 
 <!-- 🎞 Gallery -->
 <div class="video-gallery" id="videoGallery"></div>
+
+<!-- Load More -->
+<div class="load-more-container" id="loadMoreContainer">
+    <button class="load-more-btn" onclick="loadMoreVideos()">Load More</button>
+</div>
+
+<!-- Custom Modal -->
+<div id="customModal" class="modal-overlay">
+    <div class="modal-content">
+        <h3 id="modalTitle">Notice</h3>
+        <p id="modalMessage"></p>
+        <button onclick="closeModal()">OK</button>
+    </div>
+</div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
@@ -210,9 +511,13 @@ import { getFirestore, collection, query, orderBy, onSnapshot } from "https://ww
 
 /* Firebase Config */
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
+    apiKey: "AIzaSyAy-7QGZ05wNf0fLG1-AY2FxJy_fdILdoM",
     authDomain: "quizifyapp-4c5ca.firebaseapp.com",
-    projectId: "quizifyapp-4c5ca"
+    projectId: "quizifyapp-4c5ca",
+    storageBucket: "quizifyapp-4c5ca.firebasestorage.app",
+    messagingSenderId: "948606346917",
+    appId: "1:948606346917:web:ab385f7753da5c20710f4c",
+    measurementId: "G-C8BJ139KHE"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -222,36 +527,18 @@ const db = getFirestore(app);
 const gallery = document.getElementById("videoGallery");
 const player = document.getElementById("playerWrapper");
 const container = document.getElementById("videoContainer");
-const downloadBtn = document.getElementById("downloadBtn");
-
-let currentTitle = "";
 
 /* 🎬 Splash hide */
 setTimeout(()=>{
     document.getElementById("splash").style.display="none";
 },12000);
 
-/* 🔍 Search */
-document.getElementById("searchBar").addEventListener("input",(e)=>{
-    const value = e.target.value.toLowerCase();
-    document.querySelectorAll(".video-card").forEach(card=>{
-        card.style.display = card.innerText.toLowerCase().includes(value) ? "block" : "none";
-    });
-});
-
-/* ❤️ Bookmark */
-window.bookmarkVideo = function(){
-    let list = JSON.parse(localStorage.getItem("bookmarks")) || [];
-    list.push(currentTitle);
-    localStorage.setItem("bookmarks", JSON.stringify(list));
-    alert("Bookmarked!");
-}
-
 /* ⬅ Close Player */
 window.closePlayer = function(){
     player.style.display = "none";
     gallery.style.display = "grid";
     container.innerHTML = "";
+    if(typeof renderVideos === 'function') renderVideos(); // Restore gallery state and Load More button
 }
 
 /* 🎥 Get Video URL */
@@ -261,8 +548,15 @@ function getVideoURL(data){
         return `https://www.youtube.com/embed/${data.videoId}`;
     }
 
-    if(data.driveVideoId){
-        return `https://drive.google.com/file/d/${data.driveVideoId}/preview`;
+    if(data.platform === "drive" || data.driveVideoId){
+        const driveId = data.driveVideoId || data.videoId;
+        return `https://drive.google.com/file/d/${driveId}/preview`;
+    }
+
+    // Fallback for older legacy videos in your database
+    if(data.videoId) {
+        if(data.videoId.length === 11) return `https://www.youtube.com/embed/${data.videoId}`;
+        return `https://drive.google.com/file/d/${data.videoId}/preview`;
     }
 
     if(data.videoUrl){
@@ -272,48 +566,261 @@ function getVideoURL(data){
     return null;
 }
 
-/* 📡 Fetch Videos */
-const q = query(collection(db,"videos"), orderBy("createdAt","desc"));
+/* 📋 Side Menu & Navigation */
+window.openMenu = function() {
+    document.getElementById('sideMenu').classList.add('active');
+    document.getElementById('menuOverlay').style.display = 'block';
+}
 
-onSnapshot(q,(snapshot)=>{
+window.closeMenu = function() {
+    document.getElementById('sideMenu').classList.remove('active');
+    document.getElementById('menuOverlay').style.display = 'none';
+}
+
+window.showHome = function() {
+    closeMenu();
+    document.getElementById('aboutPage').style.display = 'none';
+    document.getElementById('mainHeader').style.display = 'block';
+    closePlayer(); 
+}
+
+window.showAbout = function() {
+    closeMenu();
+    document.getElementById('mainHeader').style.display = 'none';
+    document.getElementById('videoGallery').style.display = 'none';
+    document.getElementById('playerWrapper').style.display = 'none';
+    container.innerHTML = ""; 
+    document.getElementById('aboutPage').style.display = 'block';
+}
+
+/* Custom Modal */
+window.showModal = function(title, message) {
+    document.getElementById('modalTitle').innerText = title;
+    document.getElementById('modalMessage').innerText = message;
+    document.getElementById('customModal').style.display = 'flex';
+}
+
+window.closeModal = function() {
+    document.getElementById('customModal').style.display = 'none';
+}
+
+/* 📡 Fetch Videos & Pagination */
+let currentCategory = 'entertainment';
+let currentVideos = [];
+const ITEMS_PER_PAGE = 12;
+let visibleCount = ITEMS_PER_PAGE;
+
+window.switchTab = function(category) {
+    currentCategory = category;
+    
+    // Update active tab styles
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById(`tab-${category}`).classList.add('active');
+    
+    visibleCount = ITEMS_PER_PAGE;
+    renderVideos();
+}
+
+window.loadMoreVideos = function() {
+    visibleCount += ITEMS_PER_PAGE;
+    renderVideos();
+}
+
+window.renderVideos = function() {
     gallery.innerHTML = "";
 
-    snapshot.forEach(doc=>{
-        const data = doc.data();
+    // Clear existing intervals
+    if (window.timerIntervals) window.timerIntervals.forEach(clearInterval);
+    window.timerIntervals = [];
+
+    // 1. Filter by category
+    const filteredByCategory = currentVideos.filter(item => {
+        const videoCategory = item.data.category || 'entertainment';
+        return videoCategory === currentCategory;
+    });
+
+    // 2. Filter by search
+    const searchTerm = document.getElementById("searchBar").value.toLowerCase();
+    const filteredBySearch = filteredByCategory.filter(item => {
+        return item.data.title.toLowerCase().includes(searchTerm);
+    });
+
+    if (filteredBySearch.length === 0) {
+        gallery.innerHTML = "<p style='text-align: center; width: 100%; grid-column: 1 / -1; color: #64748b; margin-top: 20px;'>No videos found.</p>";
+    }
+
+    // 3. Paginate
+    const videosToRender = filteredBySearch.slice(0, visibleCount);
+    let cardIndex = 0;
+
+    videosToRender.forEach(item => {
+        const data = item.data;
+        const id = item.id;
 
         const card = document.createElement("div");
         card.className = "video-card";
+        card.style.animationDelay = `${cardIndex * 0.05}s`;
+        cardIndex++;
+        
+        const now = Date.now();
+        const createdAt = data.createdAt || 0;
+        const lockTime = 200 * 60 * 1000;
+        let isLocked = (now - createdAt) < lockTime;
+        let timerHTML = isLocked ? `<div class="timer" id="timer-${id}"></div>` : '';
+        let timerInterval;
 
         card.innerHTML = `
             <img src="${data.thumbnail}" />
+            <div class="play-overlay">
+                <svg width="48" height="48" fill="white" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            </div>
+            ${timerHTML}
             <div class="info">
                 <h4>${data.title}</h4>
             </div>
         `;
 
-        card.onclick = ()=>{
-            const url = getVideoURL(data);
-            currentTitle = data.title;
+        if (isLocked) {
+            const timerEl = card.querySelector(`#timer-${id}`);
+            const updateTimer = () => {
+                const currentNow = Date.now();
+                const remaining = lockTime - (currentNow - createdAt);
+                
+                if (remaining <= 0) {
+                    isLocked = false;
+                    if (timerEl) timerEl.style.display = 'none';
+                    if (timerInterval) clearInterval(timerInterval);
+                } else {
+                    const mins = Math.floor(remaining / 1000 / 60);
+                    const secs = Math.floor((remaining / 1000) % 60);
+                    if (timerEl) timerEl.innerText = `Available in ${mins}m ${secs}s`;
+                }
+            };
+            updateTimer();
+            timerInterval = setInterval(updateTimer, 1000);
+            window.timerIntervals.push(timerInterval);
+        }
 
-            gallery.style.display = "none";
-            player.style.display = "block";
-
-            if(url.includes("youtube") || url.includes("drive")){
-                container.innerHTML = `<iframe src="${url}" allowfullscreen></iframe>`;
-            } else {
-                container.innerHTML = `
-                    <video controls autoplay>
-                        <source src="${url}">
-                    </video>`;
+        card.onclick = () => {
+            if (isLocked) {
+                const currentNow = Date.now();
+                const remaining = lockTime - (currentNow - createdAt);
+                const mins = Math.ceil(remaining / 1000 / 60);
+                showModal("Almost Ready! 🍿", `This video is getting ready for its big premiere! 🎉\n\nIt will be fully playable right here in just ${mins} minute(s).\n\nOnce the countdown timer on the cover finishes, tap here again to start watching!`);
+                return;
             }
 
-            downloadBtn.href = url;
+            const url = getVideoURL(data);
+
+            if (!url) {
+                showModal("Error", "We're sorry, but the link for this video is missing or corrupted.");
+                return;
+            }
+
+            gallery.style.display = "none";
+            document.getElementById('loadMoreContainer').style.display = "none";
+            player.style.display = "block";
+
+            container.innerHTML = `
+                <div class="video-loader" id="videoLoader">
+                    <div class="spinner" id="loadingSpinner"></div>
+                    <p id="loadingText" style="color: #cbd5e1; font-size: 15px;">Loading video...</p>
+                </div>
+            `;
+
+            const loadTimeout = setTimeout(() => {
+                const loaderText = document.getElementById('loadingText');
+                const spinner = document.getElementById('loadingSpinner');
+                if (loaderText) {
+                    loaderText.innerText = 'Error: Video took too long to load. Please try again.';
+                    loaderText.style.color = '#ef4444';
+                }
+                if (spinner) {
+                    spinner.style.display = 'none';
+                }
+            }, 30000);
+
+            if(url.includes("youtube") || url.includes("drive")){
+                const iframe = document.createElement('iframe');
+                iframe.src = url;
+                iframe.setAttribute("allowfullscreen", "true");
+                iframe.setAttribute("allow", "autoplay; encrypted-media");
+                iframe.style.position = 'relative';
+                iframe.style.zIndex = '10';
+                iframe.onload = () => {
+                    clearTimeout(loadTimeout);
+                    const loader = document.getElementById('videoLoader');
+                    if (loader) loader.style.display = 'none';
+                };
+                container.appendChild(iframe);
+            } else {
+                const video = document.createElement('video');
+                video.controls = true;
+                video.autoplay = true;
+                video.style.position = 'relative';
+                video.style.zIndex = '10';
+                const source = document.createElement('source');
+                source.src = url;
+                video.appendChild(source);
+                video.onloadeddata = () => {
+                    clearTimeout(loadTimeout);
+                    const loader = document.getElementById('videoLoader');
+                    if (loader) loader.style.display = 'none';
+                };
+                container.appendChild(video);
+            }
 
             window.scrollTo({top:0,behavior:"smooth"});
         };
 
         gallery.appendChild(card);
     });
+
+    // Handle Load More button visibility
+    const loadMoreContainer = document.getElementById("loadMoreContainer");
+    if (visibleCount < filteredBySearch.length) {
+        loadMoreContainer.style.display = "block";
+    } else {
+        loadMoreContainer.style.display = "none";
+    }
+}
+
+let currentUnsubscribe = null;
+
+window.fetchVideos = function(sortType) {
+    if (currentUnsubscribe) {
+        currentUnsubscribe();
+    }
+
+    let q;
+    if (sortType === "title") {
+        q = query(collection(db, "videos"), orderBy("title", "asc"));
+    } else {
+        q = query(collection(db, "videos"), orderBy("createdAt", "desc"));
+    }
+
+    currentUnsubscribe = onSnapshot(q, (snapshot) => {
+        currentVideos = [];
+        snapshot.forEach(doc => {
+            currentVideos.push({ id: doc.id, data: doc.data() });
+        });
+        renderVideos();
+    });
+}
+
+// Initialize gallery with "Recently Added" sorting
+fetchVideos("recent");
+
+// Listen for search input
+document.getElementById("searchBar").addEventListener("input", () => {
+    visibleCount = ITEMS_PER_PAGE;
+    if (typeof renderVideos === 'function') renderVideos();
+});
+
+// Listen for dropdown changes
+document.getElementById("sortSelect").addEventListener("change", (e) => {
+    visibleCount = ITEMS_PER_PAGE;
+    fetchVideos(e.target.value);
 });
 </script>
 
