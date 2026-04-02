@@ -184,6 +184,29 @@ header h1 {
     background: #475569;
 }
 
+/* Player Actions */
+.player-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+.action-btn {
+    background: #1e293b;
+    color: #cbd5e1;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: background 0.2s, color 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.action-btn:hover { background: #334155; color: white; }
+.action-btn.active { background: #3b82f6; color: white; }
+
 /* Load More */
 .load-more-container {
     text-align: center;
@@ -448,6 +471,7 @@ header h1 {
     <h2>Menu</h2>
     <ul>
         <li><a onclick="showHome()">🏠 Home</a></li>
+        <li><a onclick="showBookmarks()">🔖 Watch Later</a></li>
         <li><a onclick="showAbout()">ℹ️ About Us</a></li>
         <li><a onclick="closeMenu()">❌ Close</a></li>
     </ul>
@@ -486,6 +510,18 @@ header h1 {
 
     <div class="video-container" id="videoContainer"></div>
 
+    <!-- Player Action Buttons -->
+    <div class="player-actions" id="playerActions">
+        <button class="action-btn" id="shareBtn">🔗 Share Link</button>
+        <button class="action-btn" id="bookmarkBtn">🔖 Watch Later</button>
+    </div>
+
+    <!-- Related Videos -->
+    <div id="relatedVideosSection" style="display: none; margin-top: 30px;">
+        <h3 style="margin-bottom: 15px; color: #3b82f6;">Related Videos</h3>
+        <div class="video-gallery" id="relatedVideosGallery" style="padding: 0;"></div>
+    </div>
+
 </div>
 
 <!-- 🎞 Gallery -->
@@ -507,7 +543,7 @@ header h1 {
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-import { getFirestore, collection, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { getFirestore, collection, query, orderBy, onSnapshot, doc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
 /* Firebase Config */
 const firebaseConfig = {
@@ -577,10 +613,15 @@ window.closeMenu = function() {
     document.getElementById('menuOverlay').style.display = 'none';
 }
 
+let showingBookmarks = false;
+
 window.showHome = function() {
     closeMenu();
+    showingBookmarks = false;
     document.getElementById('aboutPage').style.display = 'none';
     document.getElementById('mainHeader').style.display = 'block';
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById(`tab-${currentCategory}`).classList.add('active');
     closePlayer(); 
 }
 
@@ -591,6 +632,49 @@ window.showAbout = function() {
     document.getElementById('playerWrapper').style.display = 'none';
     container.innerHTML = ""; 
     document.getElementById('aboutPage').style.display = 'block';
+}
+
+window.showBookmarks = function() {
+    closeMenu();
+    showingBookmarks = true;
+    document.getElementById('aboutPage').style.display = 'none';
+    document.getElementById('mainHeader').style.display = 'block';
+    closePlayer();
+    
+    // Remove active styles from regular tabs
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    
+    visibleCount = ITEMS_PER_PAGE;
+    renderVideos();
+}
+
+/* Bookmarks & Sharing */
+window.getBookmarks = function() {
+    return JSON.parse(localStorage.getItem('cinevix_bookmarks') || '[]');
+}
+
+window.saveBookmarks = function(bookmarks) {
+    localStorage.setItem('cinevix_bookmarks', JSON.stringify(bookmarks));
+}
+
+window.toggleBookmark = function(id) {
+    let bookmarks = getBookmarks();
+    if (bookmarks.includes(id)) {
+        bookmarks = bookmarks.filter(b => b !== id);
+        showModal("Removed", "Video removed from Watch Later.");
+    } else {
+        bookmarks.push(id);
+        showModal("Added", "Video saved to Watch Later.");
+    }
+    saveBookmarks(bookmarks);
+}
+
+window.shareVideo = function(url) {
+    navigator.clipboard.writeText(url).then(() => {
+        showModal("Success!", "Video link copied to your clipboard.");
+    }).catch(() => {
+        showModal("Error", "Failed to copy the link.");
+    });
 }
 
 /* Custom Modal */
@@ -611,6 +695,7 @@ const ITEMS_PER_PAGE = 12;
 let visibleCount = ITEMS_PER_PAGE;
 
 window.switchTab = function(category) {
+    showingBookmarks = false;
     currentCategory = category;
     
     // Update active tab styles
@@ -633,20 +718,27 @@ window.renderVideos = function() {
     if (window.timerIntervals) window.timerIntervals.forEach(clearInterval);
     window.timerIntervals = [];
 
-    // 1. Filter by category
-    const filteredByCategory = currentVideos.filter(item => {
-        const videoCategory = item.data.category || 'entertainment';
-        return videoCategory === currentCategory;
-    });
+    // 1. Filter by category OR Bookmarks
+    let filteredVideos = currentVideos;
+    if (showingBookmarks) {
+        const bookmarks = getBookmarks();
+        filteredVideos = currentVideos.filter(item => bookmarks.includes(item.id));
+    } else {
+        filteredVideos = currentVideos.filter(item => {
+            const videoCategory = item.data.category || 'entertainment';
+            return videoCategory === currentCategory;
+        });
+    }
 
     // 2. Filter by search
     const searchTerm = document.getElementById("searchBar").value.toLowerCase();
-    const filteredBySearch = filteredByCategory.filter(item => {
+    const filteredBySearch = filteredVideos.filter(item => {
         return item.data.title.toLowerCase().includes(searchTerm);
     });
 
     if (filteredBySearch.length === 0) {
-        gallery.innerHTML = "<p style='text-align: center; width: 100%; grid-column: 1 / -1; color: #64748b; margin-top: 20px;'>No videos found.</p>";
+        const emptyMsg = showingBookmarks ? "You haven't saved any videos to Watch Later yet." : "No videos found.";
+        gallery.innerHTML = `<p style='text-align: center; width: 100%; grid-column: 1 / -1; color: #64748b; margin-top: 20px;'>${emptyMsg}</p>`;
     }
 
     // 3. Paginate
@@ -654,126 +746,7 @@ window.renderVideos = function() {
     let cardIndex = 0;
 
     videosToRender.forEach(item => {
-        const data = item.data;
-        const id = item.id;
-
-        const card = document.createElement("div");
-        card.className = "video-card";
-        card.style.animationDelay = `${cardIndex * 0.05}s`;
-        cardIndex++;
-        
-        const now = Date.now();
-        const createdAt = data.createdAt || 0;
-        const lockTime = 200 * 60 * 1000;
-        let isLocked = (now - createdAt) < lockTime;
-        let timerHTML = isLocked ? `<div class="timer" id="timer-${id}"></div>` : '';
-        let timerInterval;
-
-        card.innerHTML = `
-            <img src="${data.thumbnail}" />
-            <div class="play-overlay">
-                <svg width="48" height="48" fill="white" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-            </div>
-            ${timerHTML}
-            <div class="info">
-                <h4>${data.title}</h4>
-            </div>
-        `;
-
-        if (isLocked) {
-            const timerEl = card.querySelector(`#timer-${id}`);
-            const updateTimer = () => {
-                const currentNow = Date.now();
-                const remaining = lockTime - (currentNow - createdAt);
-                
-                if (remaining <= 0) {
-                    isLocked = false;
-                    if (timerEl) timerEl.style.display = 'none';
-                    if (timerInterval) clearInterval(timerInterval);
-                } else {
-                    const mins = Math.floor(remaining / 1000 / 60);
-                    const secs = Math.floor((remaining / 1000) % 60);
-                    if (timerEl) timerEl.innerText = `Available in ${mins}m ${secs}s`;
-                }
-            };
-            updateTimer();
-            timerInterval = setInterval(updateTimer, 1000);
-            window.timerIntervals.push(timerInterval);
-        }
-
-        card.onclick = () => {
-            if (isLocked) {
-                const currentNow = Date.now();
-                const remaining = lockTime - (currentNow - createdAt);
-                const mins = Math.ceil(remaining / 1000 / 60);
-                showModal("Almost Ready! 🍿", `This video is getting ready for its big premiere! 🎉\n\nIt will be fully playable right here in just ${mins} minute(s).\n\nOnce the countdown timer on the cover finishes, tap here again to start watching!`);
-                return;
-            }
-
-            const url = getVideoURL(data);
-
-            if (!url) {
-                showModal("Error", "We're sorry, but the link for this video is missing or corrupted.");
-                return;
-            }
-
-            gallery.style.display = "none";
-            document.getElementById('loadMoreContainer').style.display = "none";
-            player.style.display = "block";
-
-            container.innerHTML = `
-                <div class="video-loader" id="videoLoader">
-                    <div class="spinner" id="loadingSpinner"></div>
-                    <p id="loadingText" style="color: #cbd5e1; font-size: 15px;">Loading video...</p>
-                </div>
-            `;
-
-            const loadTimeout = setTimeout(() => {
-                const loaderText = document.getElementById('loadingText');
-                const spinner = document.getElementById('loadingSpinner');
-                if (loaderText) {
-                    loaderText.innerText = 'Error: Video took too long to load. Please try again.';
-                    loaderText.style.color = '#ef4444';
-                }
-                if (spinner) {
-                    spinner.style.display = 'none';
-                }
-            }, 30000);
-
-            if(url.includes("youtube") || url.includes("drive")){
-                const iframe = document.createElement('iframe');
-                iframe.src = url;
-                iframe.setAttribute("allowfullscreen", "true");
-                iframe.setAttribute("allow", "autoplay; encrypted-media");
-                iframe.style.position = 'relative';
-                iframe.style.zIndex = '10';
-                iframe.onload = () => {
-                    clearTimeout(loadTimeout);
-                    const loader = document.getElementById('videoLoader');
-                    if (loader) loader.style.display = 'none';
-                };
-                container.appendChild(iframe);
-            } else {
-                const video = document.createElement('video');
-                video.controls = true;
-                video.autoplay = true;
-                video.style.position = 'relative';
-                video.style.zIndex = '10';
-                const source = document.createElement('source');
-                source.src = url;
-                video.appendChild(source);
-                video.onloadeddata = () => {
-                    clearTimeout(loadTimeout);
-                    const loader = document.getElementById('videoLoader');
-                    if (loader) loader.style.display = 'none';
-                };
-                container.appendChild(video);
-            }
-
-            window.scrollTo({top:0,behavior:"smooth"});
-        };
-
-        gallery.appendChild(card);
+        gallery.appendChild(buildCard(item, cardIndex++));
     });
 
     // Handle Load More button visibility
@@ -784,6 +757,185 @@ window.renderVideos = function() {
         loadMoreContainer.style.display = "none";
     }
 }
+
+/* Helper: Build Video Card */
+window.buildCard = function(item, index) {
+    const data = item.data;
+    const id = item.id;
+
+    const card = document.createElement("div");
+    card.className = "video-card";
+    if (index !== undefined) card.style.animationDelay = `${index * 0.05}s`;
+    
+    const now = Date.now();
+    const createdAt = data.createdAt || 0;
+    const lockTime = 200 * 60 * 1000;
+    let isLocked = (now - createdAt) < lockTime;
+    let timerHTML = isLocked ? `<div class="timer" id="timer-${id}"></div>` : '';
+    let timerInterval;
+
+    card.innerHTML = `
+        <img src="${data.thumbnail}" />
+        <div class="play-overlay">
+            <svg width="48" height="48" fill="white" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        </div>
+        ${timerHTML}
+        <div class="info">
+            <h4>${data.title}</h4>
+            <p style="font-size: 12px; color: #94a3b8; margin-top: 4px;">👁 ${data.views || 0} views</p>
+        </div>
+    `;
+
+    if (isLocked) {
+        const timerEl = card.querySelector(`#timer-${id}`);
+        const updateTimer = () => {
+            const currentNow = Date.now();
+            const remaining = lockTime - (currentNow - createdAt);
+            
+            if (remaining <= 0) {
+                isLocked = false;
+                if (timerEl) timerEl.style.display = 'none';
+                if (timerInterval) clearInterval(timerInterval);
+            } else {
+                const mins = Math.floor(remaining / 1000 / 60);
+                const secs = Math.floor((remaining / 1000) % 60);
+                if (timerEl) timerEl.innerText = `Available in ${mins}m ${secs}s`;
+            }
+        };
+        updateTimer();
+        timerInterval = setInterval(updateTimer, 1000);
+        window.timerIntervals.push(timerInterval);
+    }
+
+    card.onclick = () => {
+        if (isLocked) {
+            const currentNow = Date.now();
+            const remaining = lockTime - (currentNow - createdAt);
+            const mins = Math.ceil(remaining / 1000 / 60);
+            showModal("Almost Ready! 🍿", `This video is getting ready for its big premiere! 🎉\n\nIt will be fully playable right here in just ${mins} minute(s).\n\nOnce the countdown timer on the cover finishes, tap here again to start watching!`);
+            return;
+        }
+        openPlayer(item);
+    };
+
+    return card;
+};
+
+/* Helper: Open Player & Render Related */
+window.openPlayer = function(item) {
+    const data = item.data;
+    const id = item.id;
+    const url = getVideoURL(data);
+
+    if (!url) {
+        showModal("Error", "We're sorry, but the link for this video is missing or corrupted.");
+        return;
+    }
+
+    // Increment view count in Firebase
+    const videoRef = doc(db, "videos", id);
+    updateDoc(videoRef, { views: increment(1) })
+        .catch(err => console.error("Error updating view count:", err));
+
+    gallery.style.display = "none";
+    document.getElementById('loadMoreContainer').style.display = "none";
+    player.style.display = "block";
+
+    container.innerHTML = `
+        <div class="video-loader" id="videoLoader">
+            <div class="spinner" id="loadingSpinner"></div>
+            <p id="loadingText" style="color: #cbd5e1; font-size: 15px;">Loading video...</p>
+        </div>
+    `;
+
+    const loadTimeout = setTimeout(() => {
+        const loaderText = document.getElementById('loadingText');
+        const spinner = document.getElementById('loadingSpinner');
+        if (loaderText) {
+            loaderText.innerText = 'Error: Video took too long to load. Please try again.';
+            loaderText.style.color = '#ef4444';
+        }
+        if (spinner) {
+            spinner.style.display = 'none';
+        }
+    }, 30000);
+
+    if(url.includes("youtube") || url.includes("drive")){
+        const iframe = document.createElement('iframe');
+        iframe.src = url;
+        iframe.setAttribute("allowfullscreen", "true");
+        iframe.setAttribute("allow", "autoplay; encrypted-media");
+        iframe.style.position = 'relative';
+        iframe.style.zIndex = '10';
+        iframe.onload = () => {
+            clearTimeout(loadTimeout);
+            const loader = document.getElementById('videoLoader');
+            if (loader) loader.style.display = 'none';
+        };
+        container.appendChild(iframe);
+    } else {
+        const video = document.createElement('video');
+        video.controls = true;
+        video.autoplay = true;
+        video.style.position = 'relative';
+        video.style.zIndex = '10';
+        const source = document.createElement('source');
+        source.src = url;
+        video.appendChild(source);
+        video.onloadeddata = () => {
+            clearTimeout(loadTimeout);
+            const loader = document.getElementById('videoLoader');
+            if (loader) loader.style.display = 'none';
+        };
+        container.appendChild(video);
+    }
+
+    // Initialize action buttons
+    const bookmarkBtn = document.getElementById('bookmarkBtn');
+    const shareBtn = document.getElementById('shareBtn');
+    const bookmarks = getBookmarks();
+    
+    if (bookmarks.includes(id)) {
+        bookmarkBtn.classList.add('active');
+        bookmarkBtn.innerHTML = '🔖 Saved';
+    } else {
+        bookmarkBtn.classList.remove('active');
+        bookmarkBtn.innerHTML = '🔖 Watch Later';
+    }
+
+    bookmarkBtn.onclick = () => {
+        toggleBookmark(id);
+        openPlayer(item); // Refresh player state easily
+    };
+    shareBtn.onclick = () => shareVideo(url);
+
+    renderRelatedVideos(id);
+    window.scrollTo({top: 0, behavior: "smooth"});
+};
+
+/* Helper: Render Related Videos */
+window.renderRelatedVideos = function(currentId) {
+    const relatedSection = document.getElementById("relatedVideosSection");
+    const relatedGallery = document.getElementById("relatedVideosGallery");
+    relatedGallery.innerHTML = "";
+
+    let related = currentVideos.filter(v => {
+        const cat = v.data.category || 'entertainment';
+        return cat === currentCategory && v.id !== currentId;
+    });
+
+    // Shuffle array and take top 4
+    related = related.sort(() => 0.5 - Math.random()).slice(0, 4);
+
+    if (related.length === 0) {
+        relatedSection.style.display = "none";
+    } else {
+        relatedSection.style.display = "block";
+        related.forEach((item, idx) => {
+            relatedGallery.appendChild(buildCard(item, idx));
+        });
+    }
+};
 
 let currentUnsubscribe = null;
 
