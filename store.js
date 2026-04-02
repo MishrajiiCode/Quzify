@@ -1,3 +1,4 @@
+
 // store.js - Contains all logic for the in-app currency store.
 
 
@@ -174,7 +175,16 @@ const QuizifyStore = {
         if (!modal || !closeBtn) return;
 
         const closeModal = () => modal.classList.remove('visible');
-        closeBtn.addEventListener('click', closeModal);
+        
+        const handleCloseClick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            closeModal();
+        };
+        
+        closeBtn.addEventListener('click', handleCloseClick);
+        closeBtn.addEventListener('touchend', handleCloseClick);
+        
         modal.addEventListener('click', (e) => {
             if (e.target === modal) closeModal();
         });
@@ -185,18 +195,35 @@ const QuizifyStore = {
      * Renders the store page and displays it.
      */
     displayStorePage() {
-        // NEW: Reset to the default tab each time the store is opened
-        document.querySelectorAll('.store-tab-btn').forEach(btn => btn.classList.remove('active'));
-        document.querySelector('.store-tab-btn[data-tab="daily-deals-tab"]').classList.add('active');
-        document.querySelectorAll('.store-tab-content').forEach(content => content.classList.remove('active'));
-        document.getElementById('daily-deals-tab').classList.add('active');
+        try {
+            // NEW: Track that user has opened the store
+            sessionStorage.setItem('storeOpened', 'true');
+            
+            // NEW: Reset to the default tab each time the store is opened
+            const storeTabButtons = document.querySelectorAll('.store-tab-btn');
+            storeTabButtons.forEach(btn => btn.classList.remove('active'));
 
-        this.generateFeaturedItem(); // NEW
-        this.generateDailyDeals();
-        this.startDealsCountdown(); // NEW: Start the timer
-        this.showStoreUpdatesModal(); // NEW: Show the updates modal if needed
-        this.renderStoreItems();
-        this._app.showPage('store-page');
+            const defaultTabBtn = document.querySelector('.store-tab-btn[data-tab="daily-deals-tab"]');
+            const defaultContent = document.getElementById('daily-deals-tab');
+
+            if (defaultTabBtn) defaultTabBtn.classList.add('active');
+            document.querySelectorAll('.store-tab-content').forEach(content => content.classList.remove('active'));
+            if (defaultContent) defaultContent.classList.add('active');
+
+            this.generateFeaturedItem();
+            this.generateDailyDeals();
+            this.startDealsCountdown();
+            this.renderStoreItems();
+
+            if (this._app && typeof this._app.showPage === 'function') {
+                this._app.showPage('store-page');
+            }
+        } catch (error) {
+            console.error('Store display error:', error);
+            if (this._app && typeof this._app.showNotification === 'function') {
+                this._app.showNotification('Could not open store. Please refresh and try again.', 'error');
+            }
+        }
     },
 
 
@@ -212,18 +239,21 @@ const QuizifyStore = {
         // Clear other tabs to ensure they re-render with fresh data on next click
         this.clearTabContent(['avatars-tab', 'themes-tab', 'lifelines-tab', 'utilities-tab']);
         
-        // Update the coin balance display on the store page
         const balanceDisplay = document.getElementById('store-coin-balance-display');
-        if (balanceDisplay) {
-            balanceDisplay.textContent = this._app.quizCoins;
+        if (balanceDisplay && this._app) {
+            balanceDisplay.textContent = this._app.quizCoins || 0;
         }
 
         // NEW: Render Featured Item
-        featuredSection.innerHTML = '';
-        if (this._featuredItem) {
-            const itemCard = this.createFeaturedItemCard(this._featuredItem.type, this._featuredItem);
-            featuredSection.appendChild(itemCard);
-            featuredSection.style.display = 'block';
+        if (featuredSection) {
+            featuredSection.innerHTML = '';
+            if (this._featuredItem) {
+                const itemCard = this.createFeaturedItemCard(this._featuredItem.type, this._featuredItem);
+                featuredSection.appendChild(itemCard);
+                featuredSection.style.display = 'block';
+            } else {
+                featuredSection.style.display = 'none';
+            }
         }
 
         // Render Daily Deals
@@ -779,8 +809,9 @@ const QuizifyStore = {
      * NEW: Shows the store updates modal if it hasn't been seen this session.
      */
     showStoreUpdatesModal() {
-        if (sessionStorage.getItem('storeUpdatesSeen')) {
-            return; // Don't show again in the same session
+        // Don't show if already seen this session OR if user has opened the store
+        if (sessionStorage.getItem('storeUpdatesSeen') || sessionStorage.getItem('storeOpened')) {
+            return;
         }
 
         const modal = document.getElementById('store-updates-modal');
