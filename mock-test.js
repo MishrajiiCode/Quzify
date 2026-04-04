@@ -83,6 +83,11 @@ const MockTest = {
 
         // Results Page
         this.resultsPage.querySelector('#mock-results-home-btn').addEventListener('click', () => this._app.goToHome());
+
+        const reviewBtn = this.resultsPage.querySelector('#mock-results-review-btn');
+        if (reviewBtn) {
+            reviewBtn.addEventListener('click', () => this.reviewAnswers());
+        }
     },
 
     showRules() {
@@ -166,8 +171,8 @@ const MockTest = {
         this.totalTime = this.timeRemaining; // Store the initial total time
 
         this._app.showPage('mock-test-page');
-        this.renderQuestion();
         this.renderQuestionGrid();
+        this.renderQuestion();
         this.updateSectionTabs();
         this.startTimer();
         // Hide chat and bot while the mock test is active
@@ -179,74 +184,20 @@ const MockTest = {
         } catch (e) { /* Ignore if elements not present */ }
     },
 
-    startTimer() {
-        if (this.timer) clearInterval(this.timer);
-        const timerEl = this.page.querySelector('#mock-timer');
-
-        // NEW: Initial display of dynamic time
-        const initialMinutes = Math.floor(this.timeRemaining / 60);
-        const initialSeconds = this.timeRemaining % 60;
-        timerEl.textContent = `${String(initialMinutes).padStart(2, '0')}:${String(initialSeconds).padStart(2, '0')}`;
-        
-        this.timer = setInterval(() => {
-            this.timeRemaining--;
-            const minutes = Math.floor(this.timeRemaining / 60);
-            const seconds = this.timeRemaining % 60;
-            timerEl.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-
-            if (this.timeRemaining <= 0) {
-                clearInterval(this.timer);
-                this.submitTest();
-            }
-        }, 1000);
-    },
-
-    renderQuestion() {
-        if (this.currentQuestionIndex < 0 || this.currentQuestionIndex >= this.questions.length) return;
-
-        const question = this.questions[this.currentQuestionIndex];
-        this.page.querySelector('#mock-question-number').textContent = `Question ${this.currentQuestionIndex + 1}`;
-        this.page.querySelector('#mock-question-text').textContent = question.question;
-
-        const optionsContainer = this.page.querySelector('#mock-options-container');
-        optionsContainer.innerHTML = '';
-        question.options.forEach((option, index) => {
-            const optionDiv = document.createElement('div');
-            optionDiv.className = 'option';
-            optionDiv.dataset.optionIndex = index;
-            optionDiv.textContent = `${String.fromCharCode(65 + index)}. ${option}`;
-            if (this.userAnswers[this.currentQuestionIndex] === index) {
-                optionDiv.classList.add('selected');
-            }
-            optionsContainer.appendChild(optionDiv);
-        });
-
-        this.updateQuestionGrid();
-    },
-
-    renderQuestionGrid() {
-        const grid = this.page.querySelector('#mock-question-numbers');
-        grid.innerHTML = '';
-        this.questions.forEach((q, index) => {
-            const numberDiv = document.createElement('div');
-            numberDiv.className = 'question-number';
-            numberDiv.dataset.index = index;
-            numberDiv.dataset.section = q.section;
-            numberDiv.textContent = index + 1;
-            grid.appendChild(numberDiv);
-        });
-    },
-
     updateQuestionGrid() {
         const gridItems = this.page.querySelectorAll('.question-number');
         gridItems.forEach((item, index) => {
-            item.classList.remove('current', 'answered', 'not-answered');
+            item.classList.remove('current', 'answered', 'not-answered', 'marked');
             if (index === this.currentQuestionIndex) {
                 item.classList.add('current');
             } else if (this.userAnswers[index] !== null) {
                 item.classList.add('answered');
             } else {
                 item.classList.add('not-answered');
+            }
+
+            if (this.markedForReview && this.markedForReview.includes(index)) {
+                item.classList.add('marked');
             }
 
             // Show/hide based on current section
@@ -501,6 +452,83 @@ const MockTest = {
         }
     },
 
+    reviewAnswers() {
+        const reviewContainer = document.getElementById('review-container');
+        reviewContainer.innerHTML = '';
+        document.getElementById('review-page-title').textContent = 'Mock Test - Answer Review';
+
+        // Wire up the back button to return to the results page
+        const backBtn = document.getElementById('review-page-back-btn');
+        backBtn.onclick = () => this._app.showPage('mock-test-results-page');
+
+        const sections = ['quantitative', 'english', 'reasoning', 'general_science'];
+
+        // Render an accordion-style review container grouped by section
+        sections.forEach(sectionKey => {
+            const sectionQuestions = this.questions.filter(q => q.section === sectionKey);
+            if (sectionQuestions.length === 0) return;
+
+            const sectionConfig = this.SECTION_CONFIG[sectionKey];
+
+            const sectionHeader = document.createElement('h2');
+            sectionHeader.className = 'review-section-header';
+            sectionHeader.textContent = sectionConfig.name;
+            reviewContainer.appendChild(sectionHeader);
+
+            const sectionContainer = document.createElement('div');
+            sectionContainer.className = 'mock-review-section';
+
+            sectionQuestions.forEach((question) => {
+                const globalIndex = this.questions.indexOf(question);
+                const userAnswer = this.userAnswers[globalIndex];
+                const correctAnswer = question.answer;
+                const isCorrect = userAnswer === correctAnswer;
+                const isUnanswered = userAnswer === null;
+
+                const reviewDiv = document.createElement('div');
+                let statusClass = isUnanswered ? 'unanswered' : (isCorrect ? 'correct' : 'incorrect');
+                reviewDiv.className = `review-question compact ${statusClass}`;
+
+                // Create a plain text preview to show when collapsed
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = question.question;
+                let plainQuestion = tempDiv.textContent || tempDiv.innerText || "";
+                if (plainQuestion.length > 60) plainQuestion = plainQuestion.substring(0, 60) + '...';
+
+                let badgeText = isUnanswered ? 'Skipped' : (isCorrect ? '✓ Correct' : '✗ Incorrect');
+
+                let reviewHTML = `
+                    <div class="review-question-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <h3>Q${globalIndex + 1}. ${plainQuestion}</h3>
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <span class="status-badge ${statusClass}">${badgeText}</span>
+                            <svg class="expand-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </div>
+                    </div>
+                    <div class="review-question-body">
+                        <p><strong>Question:</strong> ${question.question}</p>
+                `;
+
+                if (question.imageUrl && question.imageUrl.trim()) {
+                    reviewHTML += `<img class="question-thumbnail" src="${question.imageUrl}" alt="Question Image" onerror="this.style.display='none'">`;
+                }
+
+                reviewHTML += `<div class="review-options">`;
+                question.options.forEach((option, optIndex) => {
+                    let optionClass = 'review-option';
+                    if (optIndex === correctAnswer) optionClass += ' correct-answer';
+                    if (optIndex === userAnswer && !isCorrect) optionClass += ' user-wrong';
+                    reviewHTML += `<div class="${optionClass}">${String.fromCharCode(65 + optIndex)}. ${option}</div>`;
+                });
+                reviewHTML += `</div><p style="margin-top: 12px;"><strong>Correct Answer:</strong> ${String.fromCharCode(65 + correctAnswer)}</p><p><strong>Your Answer:</strong> ${isUnanswered ? 'Not answered' : String.fromCharCode(65 + userAnswer)}</p></div>`;
+                reviewDiv.innerHTML = reviewHTML;
+                sectionContainer.appendChild(reviewDiv);
+            });
+            reviewContainer.appendChild(sectionContainer);
+        });
+        this._app.showPage('review-page');
+    },
+
     // ===== NEW USER-FRIENDLY FEATURES =====
 
     /**
@@ -509,7 +537,7 @@ const MockTest = {
     clearSelection() {
         this.userAnswers[this.currentQuestionIndex] = null;
         this.renderQuestion();
-        this.renderQuestionGrid();
+        this.updateQuestionGrid();
         this.updateProgress();
     },
 
@@ -526,7 +554,7 @@ const MockTest = {
         } else {
             this.markedForReview.push(this.currentQuestionIndex);
         }
-        this.renderQuestionGrid();
+        this.updateQuestionGrid();
         this.updateReviewButton();
         this._app.showNotification(
             this.markedForReview.includes(this.currentQuestionIndex) ? 
@@ -667,6 +695,7 @@ const MockTest = {
         this.updateReviewButton();
         this.updateBookmarkButton();
         this.updateProgress();
+        this.updateQuestionGrid();
     },
 
     /**
@@ -697,23 +726,13 @@ const MockTest = {
             const numDiv = document.createElement('div');
             numDiv.className = 'question-number';
             numDiv.dataset.index = index;
+            numDiv.dataset.section = question.section;
             numDiv.textContent = index + 1;
-
-            // Add classes based on status
-            if (index === this.currentQuestionIndex) {
-                numDiv.classList.add('current');
-            } else if (this.userAnswers[index] !== null) {
-                numDiv.classList.add('answered');
-            } else {
-                numDiv.classList.add('not-answered');
-            }
-
-            if (this.markedForReview.includes(index)) {
-                numDiv.classList.add('marked');
-            }
 
             grid.appendChild(numDiv);
         });
+
+            this.updateQuestionGrid();
     },
 
     /**
@@ -733,7 +752,7 @@ const MockTest = {
             this.timeRemaining--;
             const minutes = Math.floor(this.timeRemaining / 60);
             const seconds = this.timeRemaining % 60;
-            timerEl.textContent = `${String(minutes).padStart(2, '0')}:${String(initialSeconds).padStart(2, '0')}`;
+            timerEl.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 
             // Show warning when less than 5 minutes remain
             if (this.timeRemaining <= 300) {
