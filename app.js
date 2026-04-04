@@ -236,52 +236,60 @@ document.addEventListener('DOMContentLoaded', async function() { // Make async
     // NEW: Use an object-oriented approach for better organization
     const QuizifyApp = {
         async init() {
-            await this.checkUserProfile(); // This now waits for user data to load
-            this.checkForUpdates();
-        initializeSideMenu();
-        initializeUpdateDetailsModal();
-        initializeHomepageSearch();
-        initializeFeatureComingSoonModal();
-        initializeLockedContentModal();
-        initializeSettingsPage();
-        initializeQuizModeModal();
-        initializeImageViewer();
-        initializeLeaderboard();
-        initializeProfilePage();
-        initializeAchievements(); // NEW
-        initializeSettingsTabs(); // NEW
-        initializeProfileTabs(); // NEW
-        initializeSparkles();
-        initializePurchaseSuccessModal(); // NEW
-        initializeEventListeners();
-            this.initializeDailyCoinModal(); // NEW
-            // this.initializeStoreUpdatesModal(); // REMOVED: This is now handled by QuizifyStore.init()
+            try {
+                await this.checkUserProfile(); // This now waits for user data to load
+                this.checkForUpdates();
+                initializeSideMenu();
+                initializeSideMenuScrollbar();
+                initializeUpdateDetailsModal();
+                initializeHomepageSearch();
+                initializeFeatureComingSoonModal();
+                initializeLockedContentModal();
+                initializeSettingsPage();
+                initializeQuizModeModal();
+                initializeImageViewer();
+                initializeLeaderboard();
+                initializeProfilePage();
+                initializeAchievements(); // NEW
+                initializeSettingsTabs(); // NEW
+                initializeProfileTabs(); // NEW
+                initializeSparkles();
+                initializePurchaseSuccessModal(); // NEW
+                initializeEventListeners();
+                this.initializeDailyCoinModal(); // NEW
+                // this.initializeStoreUpdatesModal(); // REMOVED: This is now handled by QuizifyStore.init()
 
-            // NEW: Initialize the store module with the app context
-            QuizifyStore.init(this);
+                // NEW: Initialize optional modules safely
+                if (typeof QuizifyStore !== 'undefined' && typeof QuizifyStore.init === 'function') {
+                    QuizifyStore.init(this);
+                }
+                if (typeof QuizifyChat !== 'undefined' && typeof QuizifyChat.init === 'function') {
+                    QuizifyChat.init(this, db, userProgressCollection);
+                }
+                if (typeof QuizifyFriends !== 'undefined' && typeof QuizifyFriends.init === 'function') {
+                    QuizifyFriends.init(this, db);
+                }
+                if (typeof QuizifyBot !== 'undefined' && typeof QuizifyBot.init === 'function') {
+                    QuizifyBot.init(this);
+                }
+                if (typeof MockTest !== 'undefined' && typeof MockTest.init === 'function') {
+                    MockTest.init(this, allQuizData);
+                }
+                if (typeof QuizifyVideos !== 'undefined' && typeof QuizifyVideos.init === 'function') {
+                    QuizifyVideos.init(this, db);
+                }
 
-            // NEW: Initialize the chat module with the app context
-            QuizifyChat.init(this, db, userProgressCollection);
-
-            // NEW: Initialize the friends module
-            QuizifyFriends.init(this, db);
-
-            // NEW: Initialize the bot module
-            QuizifyBot.init(this);
-
-            // NEW: Initialize the Mock Test module
-            MockTest.init(this, allQuizData);
-
-            // NEW: Initialize the videos module
-            QuizifyVideos.init(this, db);
-
-            // NEW: Add event listener for the videos menu button
-            document.getElementById('menu-videos-btn').addEventListener('click', () => this.displayVideosPage());
-            
-        initializeLogoutConfirmation();
-            this.initializeInfoPopup();
-            this.checkAndShowPinReminder();
-            this.updateSubjectProgress(); // Update progress rings on initialization
+                // NEW: Add event listener for the videos menu button
+                addEventListenerSafe('#menu-videos-btn', 'click', () => this.displayVideosPage());
+                initializeLogoutConfirmation();
+                this.initializeInfoPopup();
+                this.checkAndShowPinReminder();
+                this.updateSubjectProgress(); // Update progress rings on initialization
+            } catch (error) {
+                console.error('QuizifyApp initialization failed:', error);
+            } finally {
+                goToHome(); // Ensure the home page shows the correct academic or competitive view even if other modules fail
+            }
         },
 
         // Update subject progress rings based on user progress
@@ -492,15 +500,16 @@ function initializeEventListeners() {
     addEventListenerSafe('#results-page .action-buttons button:nth-child(3)', 'click', goToChapter);
 
     // --- Search ---
-    document.getElementById('search-chapters').addEventListener('keyup', filterChapters);
+    addEventListenerSafe('#search-chapters', 'keyup', filterChapters);
 
     // --- Quiz Navigation ---
-    document.getElementById('prev-btn').addEventListener('click', previousQuestion);
-    document.getElementById('next-btn').addEventListener('click', nextQuestion);
+    addEventListenerSafe('#prev-btn', 'click', previousQuestion);
+    addEventListenerSafe('#next-btn', 'click', nextQuestion);
 
     // --- Results Page Actions ---
-    document.querySelector('#results-page .action-buttons button:nth-child(1)').addEventListener('click', retakeQuiz);
-    document.getElementById('review-answers-btn').addEventListener('click', reviewAnswers);
+    const retakeQuizBtn = document.querySelector('#results-page .action-buttons button:nth-child(1)');
+    if (retakeQuizBtn) retakeQuizBtn.addEventListener('click', retakeQuiz);
+    addEventListenerSafe('#review-answers-btn', 'click', reviewAnswers);
 
     // --- Retake Confirmation Modal ---
     addEventListenerSafe('#confirm-retake-btn', 'click', handleRetakeConfirmation);
@@ -585,13 +594,61 @@ function showPage(pageId) {
         page.classList.remove('active');
     });
     document.getElementById(pageId).classList.add('active');
+
+    // Ensure home page always uses the correct focus mode
+    if (pageId === 'home-page') {
+        const userFocus = normalizeUserFocus(localStorage.getItem('userFocus'));
+        setHomeMode(userFocus);
+    }
+
+    // Hide FAB buttons on non-home pages
+    const chatFab = document.getElementById('open-chat-fab');
+    const botFab = document.getElementById('open-help-bot-fab');
+
+    if (pageId === 'home-page') {
+        if (chatFab) chatFab.style.display = 'block';
+        if (botFab) botFab.style.display = 'block';
+    } else {
+        if (chatFab) chatFab.style.display = 'none';
+        if (botFab) botFab.style.display = 'none';
+    }
+}
+
+function normalizeUserFocus(userFocus) {
+    if (!userFocus || typeof userFocus !== 'string') return 'competitive';
+    const cleaned = userFocus.toLowerCase().trim();
+    if (cleaned.startsWith('acad')) return 'academic';
+    if (cleaned.startsWith('comp')) return 'competitive';
+    return 'competitive';
+}
+
+function setHomeMode(userFocus) {
+    const competitiveSection = document.getElementById('competitive-section');
+    const academicSection = document.getElementById('academic-section');
+    const dailyChallengeSection = document.getElementById('daily-challenge-section');
+
+    if (competitiveSection) competitiveSection.style.display = 'none';
+    if (academicSection) academicSection.style.display = 'none';
+    if (dailyChallengeSection) dailyChallengeSection.style.display = 'none';
+
+    const focus = normalizeUserFocus(userFocus);
+    if (focus === 'competitive') {
+        if (competitiveSection) competitiveSection.style.display = 'block';
+        if (dailyChallengeSection) dailyChallengeSection.style.display = 'block';
+        setDailyChallengeDate();
+        checkAndResetStreak();
+        updateStreakDisplay();
+        checkDailyChallengeStatus();
+    } else {
+        if (academicSection) academicSection.style.display = 'block';
+    }
 }
 
 function goToHome() {
     if (timer) {
         clearInterval(timer);
     }
-    const userFocus = localStorage.getItem('userFocus');
+    let userFocus = localStorage.getItem('userFocus');
 
     dailyChallengeMode = false;
     classMode = false;
@@ -600,25 +657,16 @@ function goToHome() {
     currentSubject = '';
     isGeneralScienceMode = false; // NEW: Reset General Science mode
     academicDailyChallenge = false;
-    document.getElementById('open-chat-fab')?.style.setProperty('display', 'block');
-    document.getElementById('open-help-bot-fab')?.style.setProperty('display', 'block');
     QuizifyStore?.stopDealsCountdown?.();
-    currentChapter = '';    
+    currentChapter = '';
     updateCoinDisplay(); // NEW: Update coin display on home
 
-
-    // Correctly show/hide sections based on user preference
-    document.getElementById('competitive-section').style.display = userFocus === 'competitive' ? 'block' : 'none';
-    document.getElementById('daily-challenge-section').style.display = userFocus === 'competitive' ? 'block' : 'none';
-    document.getElementById('academic-section').style.display = userFocus === 'academic' ? 'block' : 'none';
-
-    showPage('home-page');
-    // Re-check status only if the user is in competitive mode
-    if (userFocus === 'competitive') {
-        checkDailyChallengeStatus();
-        MockTest.checkAndDisplayDailyMock(); // NEW: Check mock test status
-        checkStreakCelebration(); // NEW: Check for streak celebrations
+    if (!userFocus || (userFocus !== 'academic' && userFocus !== 'competitive')) {
+        userFocus = 'competitive';
     }
+
+    setHomeMode(userFocus);
+    showPage('home-page');
     updateDailyGoal(); // NEW: Update daily goal progress for all users
 }
 
@@ -1916,6 +1964,10 @@ function submitQuiz() {
             score: results.percentage,
             timeTaken: timeTaken,
             date: new Date().toISOString(),
+            type: 'quiz',
+            subject: currentSubject,
+            chapter: currentChapter,
+            set: currentSet,
             answers: userAnswers.slice() // Keep answers for review
         };
 
@@ -1935,6 +1987,18 @@ function submitQuiz() {
                 showNotification('New high score saved!', 'success');
             }
         }
+
+        // Keep a global quiz history array for daily goal tracking.
+        userProgress.quizHistory = userProgress.quizHistory || [];
+        userProgress.quizHistory.push({
+            type: 'quiz',
+            date: newAttempt.date,
+            score: newAttempt.score,
+            timeTaken: newAttempt.timeTaken,
+            subject: newAttempt.subject,
+            chapter: newAttempt.chapter,
+            set: newAttempt.set
+        });
 
         // --- NEW: Refined Coin Award Logic ---
         let coinsEarned = 0;
@@ -2979,8 +3043,9 @@ function saveUserPreferences(focus) {
         return;
     }
 
+    const normalizedFocus = normalizeUserFocus(focus);
     localStorage.setItem('userName', userName);
-    localStorage.setItem('userFocus', focus);
+    localStorage.setItem('userFocus', normalizedFocus);
 
     // Generate pre-seeded userId if not present (for stable storage key)
     let userId = localStorage.getItem('userId');
@@ -2994,6 +3059,7 @@ function saveUserPreferences(focus) {
     document.getElementById('onboarding-modal').classList.remove('visible');
     document.getElementById('logout-btn').style.display = 'inline-flex';
     personalizeHomepage(userName, focus);
+    goToHome();
     // Do not reload; this avoids accidental interruption
 }
 
@@ -3012,25 +3078,7 @@ function personalizeHomepage(userName, userFocus) {
         if (welcomeHeading) welcomeHeading.textContent = `Welcome, ${userName}!`;
     }
 
-    // Get section elements
-    const competitiveSection = document.getElementById('competitive-section');
-    const academicSection = document.getElementById('academic-section');
-    const dailyChallengeSection = document.getElementById('daily-challenge-section');
-
-    // Show/hide sections based on focus
-    if (userFocus === 'competitive') {
-        competitiveSection.style.display = 'block';
-        dailyChallengeSection.style.display = 'block';
-        academicSection.style.display = 'none';
-        setDailyChallengeDate(); // Set the date on the card
-        checkAndResetStreak(); // NEW: Check if streak is broken
-        updateStreakDisplay(); // NEW: Display the current streak
-        checkDailyChallengeStatus(); // Check status only for competitive users
-    } else if (userFocus === 'academic') {
-        competitiveSection.style.display = 'none';
-        dailyChallengeSection.style.display = 'none';
-        academicSection.style.display = 'block';
-    }
+    setHomeMode(userFocus);
 
     // Initialize the app view
     initializeApp();
@@ -3525,6 +3573,81 @@ function initializeSideMenu() {
     });
 
     menuOverlay.addEventListener('click', closeSideMenu);
+}
+
+// ===================== ENHANCED SCROLLBAR FUNCTIONALITY =====================
+function initializeSideMenuScrollbar() {
+    const sideMenuContent = document.querySelector('.side-menu-content');
+    if (!sideMenuContent) return;
+
+    // Enhanced scrolling for better touch support
+    sideMenuContent.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        sideMenuContent.scrollTop += e.deltaY;
+    }, { passive: false });
+
+    // Add touch scrolling enhancement
+    let startY = 0;
+    let scrollTop = 0;
+    let isScrolling = false;
+
+    sideMenuContent.addEventListener('touchstart', (e) => {
+        startY = e.touches[0].pageY;
+        scrollTop = sideMenuContent.scrollTop;
+        isScrolling = true;
+    }, { passive: true });
+
+    sideMenuContent.addEventListener('touchmove', (e) => {
+        if (!isScrolling) return;
+
+        const y = e.touches[0].pageY;
+        const walk = (startY - y) * 2; // Scroll speed multiplier
+        sideMenuContent.scrollTop = scrollTop + walk;
+    }, { passive: true });
+
+    sideMenuContent.addEventListener('touchend', () => {
+        isScrolling = false;
+    });
+
+    // Add scroll animation feedback
+    let scrollTimeout;
+    sideMenuContent.addEventListener('scroll', () => {
+        sideMenuContent.classList.add('scrolling');
+        clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(() => {
+            sideMenuContent.classList.remove('scrolling');
+        }, 150);
+    });
+
+    // Add keyboard navigation for scrollbar
+    document.addEventListener('keydown', (e) => {
+        const sideMenu = document.getElementById('side-menu');
+        if (!sideMenu || !sideMenu.classList.contains('open')) return;
+
+        if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            sideMenuContent.scrollBy({ top: -50, behavior: 'smooth' });
+        } else if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            sideMenuContent.scrollBy({ top: 50, behavior: 'smooth' });
+        } else if (e.key === 'PageUp') {
+            e.preventDefault();
+            sideMenuContent.scrollBy({ top: -sideMenuContent.clientHeight, behavior: 'smooth' });
+        } else if (e.key === 'PageDown') {
+            e.preventDefault();
+            sideMenuContent.scrollBy({ top: sideMenuContent.clientHeight, behavior: 'smooth' });
+        } else if (e.key === 'Home') {
+            e.preventDefault();
+            sideMenuContent.scrollTo({ top: 0, behavior: 'smooth' });
+        } else if (e.key === 'End') {
+            e.preventDefault();
+            sideMenuContent.scrollTo({ top: sideMenuContent.scrollHeight, behavior: 'smooth' });
+        }
+    });
+
+    // Add click-to-scroll functionality for the scrollbar track
+    // Note: Direct click handling on scrollbar pseudo-elements is not supported
+    // The scrollbar thumb interaction is handled via CSS hover/active states
 }
 
 /**
@@ -5385,5 +5508,4 @@ function shareAchievement(type, data) {
         showNotification('Achievement link copied to clipboard!', 'success');
     }
 }
-
 
