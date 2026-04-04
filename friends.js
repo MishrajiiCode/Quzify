@@ -342,7 +342,7 @@ const QuizifyFriends = {
 
         // Add post creation UI
         this.createPostCreationUI(postsContainer);
-        
+
         // Load existing posts and community stats
         this.loadCommunityPosts();
         this.loadCommunityStats();
@@ -405,16 +405,13 @@ const QuizifyFriends = {
         try {
             if (!this._db) throw new Error('Firestore not initialized');
 
-            // Prefer explicit users collection if available; fallback to userProgress if not
-                // Fetch directly from userProgress to get the accurate user count as requested
+            // Fetch directly from userProgress to get the accurate user count as requested
             let usersSnapshot;
             try {
-                usersSnapshot = await this._db.collection('users').get();
-                    usersSnapshot = await this._db.collection('userProgress').get();
-            } catch (e) {
-                console.warn('users collection not available, falling back to userProgress:', e);
                 usersSnapshot = await this._db.collection('userProgress').get();
-                    console.warn('Error fetching userProgress collection:', e);
+            } catch (e) {
+                console.warn('Error fetching userProgress collection:', e);
+                usersSnapshot = null;
             }
 
             usersCount = usersSnapshot ? usersSnapshot.size : 0;
@@ -571,27 +568,30 @@ const QuizifyFriends = {
         try {
             const postsSnapshot = await this._db.collection('communityPosts')
                 .orderBy('timestamp', 'desc')
-                .limit(5)
+                .limit(10)
                 .get();
             
             discussionsList.innerHTML = '';
             
-            postsSnapshot.forEach(doc => {
-                const postData = { id: doc.id, ...doc.data() };
-                const discussionItem = document.createElement('div');
-                discussionItem.className = 'discussion-item';
-                discussionItem.innerHTML = `
-                    <div class="discussion-avatar">${postData.authorAvatar || '👤'}</div>
-                    <div class="discussion-content">
-                        <h3>${postData.authorName}</h3>
-                        <p>${this.truncateText(postData.content, 100)}</p>
-                        <div class="discussion-stats">
-                            ❤️ ${postData.likes?.length || 0} • 💬 ${postData.comments?.length || 0}
-                        </div>
+            if (postsSnapshot.empty) {
+                discussionsList.innerHTML = `
+                    <div class="discussions-empty-state">
+                        <p>No discussions yet. Start one in the Feed tab!</p>
+                        <button id="start-discussion-btn" class="btn btn--primary btn--sm">Start a Discussion</button>
                     </div>
                 `;
-                discussionItem.addEventListener('click', () => this.openDiscussion(postData.id));
-                discussionsList.appendChild(discussionItem);
+
+                const startBtn = document.getElementById('start-discussion-btn');
+                if (startBtn) {
+                    startBtn.addEventListener('click', () => this.switchToFeedTabAndFocus());
+                }
+                return;
+            }
+
+            postsSnapshot.forEach(doc => {
+                const postData = { id: doc.id, ...doc.data() };
+                const postElement = this.createPostElement(postData);
+                discussionsList.appendChild(postElement);
             });
         } catch (error) {
             console.error('Error loading discussions:', error);
@@ -618,15 +618,30 @@ const QuizifyFriends = {
         // Switch to feed tab
         document.querySelector('[data-tab="feed"]').click();
         
-        // Scroll to the post after a short delay
-        setTimeout(() => {
+        // Scroll to the post after a short delay and open comments
+        setTimeout(async () => {
             const postElement = document.querySelector(`[data-post-id="${postId}"]`);
             if (postElement) {
                 postElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 postElement.style.animation = 'highlight 2s ease';
             }
+            await this.showComments(postId, true);
         }, 300);
     },
+
+    switchToFeedTabAndFocus() {
+        const feedTab = document.querySelector('[data-tab="feed"]');
+        if (feedTab) {
+            feedTab.click();
+        }
+        setTimeout(() => {
+            const newPostText = document.getElementById('new-post-text');
+            if (newPostText) {
+                newPostText.focus();
+            }
+        }, 300);
+    },
+
 
     /**
      * Creates the UI for creating new posts.
@@ -742,6 +757,7 @@ const QuizifyFriends = {
     createPostElement(postData) {
         const postDiv = document.createElement('div');
         postDiv.className = 'community-post-card';
+        postDiv.dataset.postId = postData.id;
         
         const currentUserId = this._app.getOrCreateUserId();
         const isLiked = postData.likes?.includes(currentUserId);
@@ -767,8 +783,11 @@ const QuizifyFriends = {
                 <button class="post-action-btn ${isLiked ? 'liked' : ''}" onclick="QuizifyFriends.toggleLike('${postData.id}')">
                     ❤️ ${postData.likes?.length || 0}
                 </button>
+                <button class="post-action-btn" onclick="QuizifyFriends.openDiscussion('${postData.id}')">
+                    💬 Discuss
+                </button>
                 <button class="post-action-btn" onclick="QuizifyFriends.showComments('${postData.id}')">
-                    💬 ${postData.comments?.length || 0}
+                    🗨️ ${postData.comments?.length || 0}
                 </button>
                 <button class="post-action-btn" onclick="QuizifyFriends.sharePost('${postData.id}')">
                     📤 Share
@@ -856,25 +875,34 @@ const QuizifyFriends = {
      * Shows/hides comments for a post.
      * @param {string} postId - The post ID.
      */
-    async showComments(postId) {
+    async showComments(postId, forceOpen = false) {
         const commentsDiv = document.getElementById(`comments-${postId}`);
         const commentsList = document.getElementById(`comments-list-${postId}`);
-        
-        if (commentsDiv.style.display === 'block') {
+        if (!commentsDiv || !commentsList) return;
+
+        if (commentsDiv.style.display === 'block' && !forceOpen) {
             commentsDiv.style.display = 'none';
             return;
         }
 
         commentsDiv.style.display = 'block';
-        
-        // Load comments
+        await this.loadComments(postId);
+    },
+
+    async loadComments(postId) {
+        const commentsList = document.getElementById(`comments-list-${postId}`);
+        if (!commentsList) return;
+
         try {
             const postDoc = await this._db.collection('communityPosts').doc(postId).get();
-            if (!postDoc.exists) return;
+            if (!postDoc.exists) {
+                commentsList.innerHTML = '<p class="error-message">Post not found.</p>';
+                return;
+            }
 
             const comments = postDoc.data().comments || [];
             commentsList.innerHTML = '';
-            
+
             if (comments.length === 0) {
                 commentsList.innerHTML = '<p class="no-comments">No comments yet. Be the first!</p>';
                 return;
@@ -927,8 +955,9 @@ const QuizifyFriends = {
             });
             
             commentInput.value = '';
-            this.showComments(postId); // Refresh comments
+            await this.loadComments(postId); // Refresh comments without toggling visibility
             this._app.showNotification('Comment added!', 'success');
+            this.loadCommunityPosts(); // Refresh post counts and state
         } catch (error) {
             console.error('Error adding comment:', error);
             this._app.showNotification('Failed to add comment.', 'error');
