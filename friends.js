@@ -477,7 +477,11 @@ const QuizifyFriends = {
                 const userData = doc.data();
                 const rank = index + 1;
                 const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : '🏅';
-                
+                const avgScore = (userData.averageScore && !isNaN(userData.averageScore)) ? userData.averageScore.toFixed(1) : 0;
+                const totalScore = (userData.totalScore && !isNaN(userData.totalScore)) ? userData.totalScore : 0;
+                const streak = (userData.streak && !isNaN(userData.streak)) ? userData.streak : 0;
+                const totalQuizzes = (userData.totalQuizzesTaken && !isNaN(userData.totalQuizzesTaken)) ? userData.totalQuizzesTaken : 0;
+
                 const leaderboardItem = document.createElement('div');
                 leaderboardItem.className = 'leaderboard-item';
                 leaderboardItem.innerHTML = `
@@ -485,11 +489,11 @@ const QuizifyFriends = {
                     <div class="leaderboard-avatar">${userData.activeAvatar || '👤'}</div>
                     <div class="leaderboard-info">
                         <div class="leaderboard-name">${userData.userName || 'Anonymous'}</div>
-                        <div class="leaderboard-score">${userData.averageScore ? userData.averageScore.toFixed(1) : 0}% Avg</div>
+                        <div class="leaderboard-score">${avgScore}% Avg</div>
                     </div>
                     <div class="leaderboard-stats">
-                        <div>${userData.totalQuizzesTaken || 0} Quizzes</div>
-                        <div>🔥 ${userData.streak || 0} Streak</div>
+                        <div>${totalQuizzes} Quizzes</div>
+                        <div>🔥 ${streak} Streak</div>
                     </div>
                 `;
                 leaderboardList.appendChild(leaderboardItem);
