@@ -229,6 +229,8 @@ const resultsCollection = db.collection("quizResults");
 const leaderboardCollection = db.collection("leaderboard"); // NEW: Collection for best scores
 const quizzesCollection = db.collection("quizzes"); // NEW: Collection for all quiz questions
 const userProgressCollection = db.collection("userProgress"); // NEW: Collection for user progress
+const auth = firebase.auth(); // Firebase Auth instance
+const googleProvider = new firebase.auth.GoogleAuthProvider(); // Google Sign-In provider
 
 
 // ===================== INITIALIZATION =====================
@@ -283,7 +285,6 @@ document.addEventListener('DOMContentLoaded', async function() { // Make async
                 addEventListenerSafe('#menu-videos-btn', 'click', () => this.displayVideosPage());
                 initializeLogoutConfirmation();
                 this.initializeInfoPopup();
-                this.checkAndShowPinReminder();
                 this.updateSubjectProgress(); // Update progress rings on initialization
             } catch (error) {
                 console.error('QuizifyApp initialization failed:', error);
@@ -371,7 +372,7 @@ document.addEventListener('DOMContentLoaded', async function() { // Make async
             this.closeSideMenu();
         },
         seededShuffle, // NEW: Expose shuffle function for the mock test module
-        checkUserProfile, checkForUpdates, initializeDailyCoinModal, initializeStoreUpdatesModal, initializeInfoPopup, checkAndShowPinReminder, getOrCreateUserId, showFeatureComingSoonModal
+        checkUserProfile, checkForUpdates, initializeDailyCoinModal, initializeStoreUpdatesModal, initializeInfoPopup, getOrCreateUserId, showFeatureComingSoonModal
     };
 
     QuizifyApp.init();
@@ -422,9 +423,12 @@ function addEventListenerSafe(selector, event, handler) {
 }
 
 function initializeEventListeners() {
-    // --- Modals ---
-    addEventListenerSafe('#onboarding-modal .onboarding-choices button:nth-child(1)', 'click', () => saveUserPreferences('competitive'));
-    addEventListenerSafe('#onboarding-modal .onboarding-choices button:nth-child(2)', 'click', () => saveUserPreferences('academic'));
+    // --- Auth Page ---
+    initializeAuthPage();
+
+    // --- Focus Selection Modal ---
+    addEventListenerSafe('#focus-competitive-btn', 'click', () => saveFocusPreference('competitive'));
+    addEventListenerSafe('#focus-academic-btn', 'click', () => saveFocusPreference('academic'));
 
     // --- Side Menu ---
     addEventListenerSafe('#logout-btn', 'click', logout);
@@ -1932,7 +1936,8 @@ function submitQuiz() {
     const results = calculateResults();
 
     // Get user info for saving results
-    const userName = localStorage.getItem('userName') || 'Anonymous';
+    const _currentUser = auth.currentUser;
+    const userName = _currentUser?.displayName || _currentUser?.email?.split('@')[0] || 'Anonymous';
     const userId = getOrCreateUserId(); // NEW: Get a unique ID for the user
 
     saveResultToFirestore(
@@ -2347,26 +2352,31 @@ function displayReview(questions, userAnswersForQuiz) {
  */
 async function saveUserProgress() {
     const userId = getOrCreateUserId();
+    console.log('💾 saveUserProgress: userId =', userId);
+    
     if (!userId || userId.startsWith('user_anonymous')) {
         // Fallback to localStorage if user is not properly identified
         localStorage.setItem('quizProgress', JSON.stringify(userProgress));
-        console.log("User not identified, saving progress to localStorage.");
+        console.log("⚠️ User not identified, saving progress to localStorage.");
         return;
     }
 
     userProgress.bookmarks = bookmarkedQuestions; // Ensure latest bookmarks are on the object before saving
 
     try {
+        console.log('📤 Saving to userProgressCollection with userId:', userId);
+        console.log('📊 Saving data:', userProgress);
         await userProgressCollection.doc(userId).set(userProgress);
-        console.log("User progress saved to Firestore.");
+        console.log("✅ User progress saved to Firestore.");
         // Update subject progress rings after saving
         if (window.QuizifyApp) {
             window.QuizifyApp.updateSubjectProgress();
         }
     } catch (error) {
-        console.error("Error saving progress to Firestore: ", error);
+        console.error("❌ Error saving progress to Firestore: ", error);
         // Fallback to localStorage on error
         localStorage.setItem('quizProgress', JSON.stringify(userProgress));
+        console.log("📍 Saved to localStorage as fallback");
     }
 }
 
@@ -2377,36 +2387,53 @@ async function saveUserProgress() {
 async function loadUserProgress() {
     showSpinnerModal(true, 'Syncing Your Progress', 'Please wait while we fetch your latest data...');
     const userId = getOrCreateUserId();
+    console.log('📦 loadUserProgress: userId =', userId);
+    
     if (!userId || userId.startsWith('user_anonymous')) {
         const savedLocal = localStorage.getItem('quizProgress');
         userProgress = savedLocal ? JSON.parse(savedLocal) : {};
-        console.log("User not identified, loading progress from localStorage.");
+        console.log("❌ User not identified, loading progress from localStorage.");
         showSpinnerModal(false); // Hide spinner
         return;
     }
 
     try {
+        console.log('🔍 Querying userProgressCollection for userId:', userId);
         const doc = await userProgressCollection.doc(userId).get();
+        
         if (doc.exists) {
             userProgress = doc.data();
+            console.log('✅ User progress loaded from Firestore:', userProgress);
         } else {
+            console.log('⚠️ No user progress found in Firestore. Creating new progress...');
+            const currentUser = firebase.auth().currentUser;
             // NEW: Initialize for a brand new user on Firestore
             userProgress = {
+                userName: currentUser ? (currentUser.displayName || currentUser.email.split('@')[0]) : 'Anonymous',
+                email: currentUser ? currentUser.email : '',
                 quizCoins: 50, // Starting coins
                 lifelines: { fiftyFifty: 3, hint: 3, skip: 3, timeFreeze: 1 }, // Starting lifelines (include Time Freeze)
                 achievements: [],
                 bookmarks: [],
                 purchasedItems: { themes: ['system', 'light', 'dark'], avatars: ['👤'] },
                 activeAvatar: '👤',
-                theme: 'system'
+                theme: 'system',
+                quantitative: {},
+                english: {},
+                reasoning: {},
+                general_science: {},
+                mockTestHistory: []
             };
-            saveUserProgress(); // Save the defaults for the new user immediately
+            await saveUserProgress(); // Save the defaults for the new user immediately
         }
-        console.log("User progress loaded from Firestore.");
+        console.log("✅ User progress loaded from Firestore.");
         showSpinnerModal(false); // Hide spinner on success
     } catch (error) {
-        console.error("Error loading progress from Firestore: ", error);
+        console.error("❌ Error loading progress from Firestore: ", error);
         showSpinnerModal(false); // Hide spinner on error
+        const savedLocal = localStorage.getItem('quizProgress');
+        userProgress = savedLocal ? JSON.parse(savedLocal) : {};
+        console.log("📍 Fallback: Loading from localStorage");
     }
 
     // --- NEW: Initialize local state from the loaded userProgress object ---
@@ -2417,6 +2444,13 @@ async function loadUserProgress() {
     userProgress.purchasedItems = userProgress.purchasedItems || { themes: ['system', 'light', 'dark'], avatars: ['👤'] };
     userProgress.activeAvatar = userProgress.activeAvatar || '👤';
     userProgress.theme = userProgress.theme || 'system';
+    
+    // NEW: Ensure all quiz subject data structures exist
+    userProgress.quantitative = userProgress.quantitative || {};
+    userProgress.english = userProgress.english || {};
+    userProgress.reasoning = userProgress.reasoning || {};
+    userProgress.general_science = userProgress.general_science || {};
+    userProgress.mockTestHistory = userProgress.mockTestHistory || [];
     // userProgress.utilityTokens = userProgress.utilityTokens || {}; // REVERTED: Removed for now
 
     // NEW: Apply active avatar
@@ -2519,59 +2553,136 @@ function initializeSettingsPage() {
     const editBtn = document.getElementById('edit-account-btn');    
     const applyAvatarBtn = document.getElementById('apply-avatar-btn');
 
-    // Hide account management section and disable user/pin editing to avoid errors and remove the old migration path.
-    const accountTab = document.getElementById('settings-account-tab');
-    if (accountTab) {
-        accountTab.style.display = 'none';
-    }
-
-    const accountDisplayName = document.getElementById('account-display-name');
-    const accountDisplayPin = document.getElementById('account-display-pin');
-    if (accountDisplayName) accountDisplayName.textContent = 'Disabled';
-    if (accountDisplayPin) accountDisplayPin.textContent = 'Disabled';
-
     // We only require minimal settings elements now
     if (!saveQuizBtn || !durationInput || !applyAvatarBtn) return;
     
+    // Account setting elements
+    const providerDisplay = document.getElementById('account-display-provider');
+    const emailDisplay = document.getElementById('account-display-email');
+    const nameUpdateInput = document.getElementById('account-name-update');
+    const saveNameBtn = document.getElementById('save-name-btn');
+    const passwordSection = document.getElementById('password-update-section');
+    const passwordUpdateInput = document.getElementById('account-password-update');
+    const savePasswordBtn = document.getElementById('save-password-btn');
+
     // Populate fields when settings page is opened
     const menuSettingsBtn = document.getElementById('menu-settings-btn');
     if (menuSettingsBtn) {
         menuSettingsBtn.addEventListener('click', () => {
-            // NEW: Reset fields to disabled state when opening settings
-            nameInput.disabled = true;
-            pinInput.disabled = true;
-            saveAccountBtn.style.display = 'none'; // Hide save button initially
             document.getElementById('avatar-actions').style.display = 'none'; // Hide apply avatar button
 
             loadQuizSettings(); // Load latest settings
             durationInput.value = quizTimerSetting;
-            nameInput.value = localStorage.getItem('userName') || '';
-            pinInput.value = '';
             
-            // Populate account display info
-            const displayName = document.getElementById('account-display-name');
-            const displayPin = document.getElementById('account-display-pin');
-            if (displayName) displayName.textContent = localStorage.getItem('userName') || 'Not Set';
-            if (displayPin) displayPin.textContent = 'Disabled';
+            // Populate account display info using Firebase Auth
+            const user = firebase.auth().currentUser;
+            if (user) {
+                // Determine provider
+                const providerData = user.providerData[0];
+                const providerId = providerData ? providerData.providerId : 'firebase';
+                let providerName = 'Email/Password';
+                if (providerId === 'google.com') providerName = 'Google';
+                
+                if (providerDisplay) providerDisplay.textContent = providerName;
+                if (emailDisplay) emailDisplay.textContent = user.email || 'No email associated';
+                
+                // Set name input
+                if (nameUpdateInput) nameUpdateInput.value = user.displayName || user.email?.split('@')[0] || '';
+                
+                // Show password update only for email/password users
+                if (passwordSection) {
+                    passwordSection.style.display = (providerId === 'password' || providerId === 'firebase') ? 'block' : 'none';
+                }
+            }
             
             goToSettings();
             closeSideMenu();
-            // NEW: Populate customization options when settings are opened
             populateCustomizationGrids();
         });
     }
 
     // Set initial values on first load
-    nameInput.disabled = true;
-    pinInput.disabled = true;
     loadQuizSettings();
     document.getElementById('avatar-actions').style.display = 'none'; // Hide apply avatar button
-    if (saveAccountBtn) saveAccountBtn.style.display = 'none'; // Hide save button initially
     durationInput.value = quizTimerSetting;
-    nameInput.value = localStorage.getItem('userName') || '';
-    pinInput.value = '';
 
-    // NEW: Event listener for saving ONLY quiz settings
+    // Save Name Update
+    if (saveNameBtn && nameUpdateInput) {
+        saveNameBtn.addEventListener('click', async () => {
+            const user = firebase.auth().currentUser;
+            const newName = nameUpdateInput.value.trim();
+            if (!user) return;
+            if (!newName) {
+                showNotification('Name cannot be empty', 'error');
+                return;
+            }
+            
+            try {
+                saveNameBtn.disabled = true;
+                saveNameBtn.textContent = 'Updating...';
+                await user.updateProfile({ displayName: newName });
+                
+                // ALSO map to Firestore so features using Firestore data know the name
+                const firestoreDb = firebase.firestore();
+                try {
+                    await firestoreDb.collection('userProgress').doc(user.uid).set({
+                        userName: newName
+                    }, { merge: true });
+                    
+                    await firestoreDb.collection('users').doc(user.uid).set({
+                        userName: newName
+                    }, { merge: true });
+                } catch(fsErr) {
+                    console.warn("Could not sync name to all Firestore collections", fsErr);
+                }
+
+                showNotification('Name updated successfully!', 'success');
+                // Real-time update on home page UI
+                const userFocus = localStorage.getItem('userFocus') || 'none';
+                personalizeHomepage(newName, userFocus);
+            } catch (error) {
+                console.error("Error updating name:", error);
+                showNotification('Failed to update name: ' + error.message, 'error');
+            } finally {
+                saveNameBtn.disabled = false;
+                saveNameBtn.textContent = 'Update Name';
+                nameUpdateInput.value = ''; // clear input
+            }
+        });
+    }
+
+    // Save Password Update
+    if (savePasswordBtn && passwordUpdateInput) {
+        savePasswordBtn.addEventListener('click', async () => {
+            const user = firebase.auth().currentUser;
+            const newPassword = passwordUpdateInput.value;
+            if (!user) return;
+            if (newPassword.length < 6) {
+                showNotification('Password must be at least 6 characters', 'error');
+                return;
+            }
+            
+            try {
+                savePasswordBtn.disabled = true;
+                savePasswordBtn.textContent = 'Updating...';
+                await user.updatePassword(newPassword);
+                passwordUpdateInput.value = ''; // clear input
+                showNotification('Password updated successfully!', 'success');
+            } catch (error) {
+                console.error("Error updating password:", error);
+                if (error.code === 'auth/requires-recent-login') {
+                    showNotification('Please sign out and sign back in to change your password', 'error');
+                } else {
+                    showNotification('Failed to update password: ' + error.message, 'error');
+                }
+            } finally {
+                savePasswordBtn.disabled = false;
+                savePasswordBtn.textContent = 'Update Password';
+            }
+        });
+    }
+
+    // Event listener for saving ONLY quiz settings
     saveQuizBtn.addEventListener('click', () => {
         const newDuration = parseInt(durationInput.value, 10);
         if (isNaN(newDuration) || newDuration < 10 || newDuration > 180) {
@@ -2582,17 +2693,6 @@ function initializeSettingsPage() {
         saveQuizSettings();
         showNotification('Quiz settings saved!', 'success');
     });
-
-    // NEW: Event listener for saving ONLY account settings (disabled as account management is removed)
-    if (saveAccountBtn) {
-        saveAccountBtn.addEventListener('click', () => {
-            showNotification('Account editing is disabled for now.', 'info');
-        });
-    }
-
-    // Add event listeners for delete and edit buttons (no-op, account management disabled)
-    if (deleteBtn) deleteBtn.addEventListener('click', () => showNotification('Account deletion is disabled.', 'info'));
-    if (editBtn) editBtn.addEventListener('click', () => showNotification('Account editing is disabled.', 'info'));
 
     // NEW: Event listener for the Apply Avatar button
     applyAvatarBtn.addEventListener('click', () => {
@@ -2674,34 +2774,40 @@ function confirmAccountDeletion() {
 }
 
 async function deleteAccount() {
-    const userId = getOrCreateUserId();
+    const user = auth.currentUser;
+    if (!user) {
+        showNotification('No user signed in.', 'error');
+        return;
+    }
+
+    const userId = user.uid;
     
     // Use the account update modal to show deletion progress
-    const updateModal = document.getElementById('spinner-modal');
-    const titleEl = document.getElementById('spinner-modal-title');
-    const messageEl = document.getElementById('spinner-modal-message');
-    if (updateModal && titleEl && messageEl) {
-        titleEl.textContent = 'Deleting Account...';
-        messageEl.textContent = 'Your data is being permanently removed. Please wait.';
-        showSpinnerModal(true, 'Deleting Account...', 'Your data is being permanently removed. Please wait.');
-    }
+    showSpinnerModal(true, 'Deleting Account...', 'Your data is being permanently removed. Please wait.');
 
     try {
         // Delete data from Firestore
         await userProgressCollection.doc(userId).delete();
         await leaderboardCollection.doc(userId).delete();
 
-        // Clear local storage
-        localStorage.clear(); // Clears everything for a full reset
-    userProgress = {}; // Reset in-memory progress
+        // Delete the Firebase Auth account
+        await user.delete();
 
-        if (updateModal) showSpinnerModal(false);
+        // Clear local storage
+        localStorage.clear();
+        userProgress = {};
+
+        showSpinnerModal(false);
         showNotification('Account deleted successfully. Reloading...', 'success');
         setTimeout(() => window.location.reload(), 2000);
     } catch (error) {
         console.error("Error deleting account:", error);
-        if (updateModal) showSpinnerModal(false);
-        showNotification('Failed to delete account. Please try again.', 'error');
+        showSpinnerModal(false);
+        if (error.code === 'auth/requires-recent-login') {
+            showNotification('Please log out and log back in, then try deleting again.', 'error');
+        } else {
+            showNotification('Failed to delete account. Please try again.', 'error');
+        }
     }
 }
 
@@ -2981,86 +3087,267 @@ function generateAcademicDailyChallengeQuestions() {
 }
 
 // ===================== NEW: ONBOARDING & PERSONALIZATION =====================
-async function checkUserProfile() { // NEW: Make this function async
-    const userName = localStorage.getItem('userName');
-    const userFocus = localStorage.getItem('userFocus');
+async function checkUserProfile() { // NEW: Firebase Auth based profile check
+    // Set up Firebase Auth state listener
+    auth.onAuthStateChanged(async (user) => {
+        if (user) {
+            // User is signed in
+            console.log('✅ User signed in:', user.email, 'UID:', user.uid);
+            document.getElementById('auth-page').classList.add('hidden');
+            document.getElementById('logout-btn').style.display = 'inline-flex';
 
-    if (!userName || !userFocus) {
-        document.getElementById('onboarding-modal').classList.add('visible');
-        document.getElementById('logout-btn').style.display = 'none';
-        initializeTheme(); // Initialize with default theme for new users
-    } else {
-        document.getElementById('onboarding-modal').classList.remove('visible');
-        document.getElementById('logout-btn').style.display = 'inline-flex';
-        await loadUserProgress();
-        personalizeHomepage(userName, userFocus);
-        initializeLogoutConfirmation(); // FIX: Initialize after user profile is confirmed
-    }
-    // NEW: These are now called after user data is loaded, ensuring they have the correct data.
-    initializeTheme();
-    initializeInfoPopup();
-    // REMOVED: QuizifyStore.showStoreUpdatesModal(); // Now shown after 5 minutes if store not opened
-    // REMOVED: checkDailyCoinReward(); // Now shown after 5 minutes if coins not collected
-    setupDelayedPopups(); // NEW: Set up timers for popups
-    updateStreakDisplay();
-    document.getElementById('app-version').textContent = `v${APP_VERSION}`;
-    document.getElementById('menu-app-version').textContent = `v${APP_VERSION}`;
+            // Sync user profile explicitly into Firestore users collection
+            try {
+                await db.collection("users").doc(user.uid).set({
+                    email: user.email,
+                    displayName: user.displayName || user.email.split('@')[0],
+                    uid: user.uid,
+                    lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+                console.log('✅ User profile synced to Firestore.');
+            } catch (error) {
+                console.warn('⚠️ Could not sync user profile to Firestore:', error);
+            }
+
+            // Check if user has a focus preference saved
+            const userFocus = localStorage.getItem('userFocus');
+
+            await loadUserProgress();
+
+            if (!userFocus) {
+                // First time login - show focus selection modal
+                document.getElementById('focus-selection-modal').classList.add('visible');
+            } else {
+                const displayName = user.displayName || user.email.split('@')[0];
+                personalizeHomepage(displayName, userFocus);
+            }
+
+            initializeTheme();
+            initializeInfoPopup();
+            setupDelayedPopups();
+            updateStreakDisplay();
+            document.getElementById('app-version').textContent = `v${APP_VERSION}`;
+            document.getElementById('menu-app-version').textContent = `v${APP_VERSION}`;
+        } else {
+            // User is signed out - show auth page
+            console.log('ℹ️ No user signed in. Showing auth page.');
+            document.getElementById('auth-page').classList.remove('hidden');
+            document.getElementById('logout-btn').style.display = 'none';
+            initializeTheme();
+        }
+    });
 }
 
 /**
- * NEW: Sets up delayed popups that appear after 5 minutes if conditions aren't met
+ * Sets up delayed popups that appear after 5 minutes if conditions aren't met
  */
 function setupDelayedPopups() {
-    const FIVE_MINUTES = 5 * 60 * 1000; // 5 minutes in milliseconds
+    const FIVE_MINUTES = 5 * 60 * 1000;
     
-    // Set up store updates popup timer
     setTimeout(() => {
-        // Only show if user hasn't opened the store yet
         if (!sessionStorage.getItem('storeOpened')) {
             QuizifyStore.showStoreUpdatesModal();
         }
     }, FIVE_MINUTES);
     
-    // Set up daily coin popup timer
     setTimeout(() => {
-        // Only show if user hasn't collected daily coins today
         const today = new Date().toISOString().split('T')[0];
         const lastCollectionDate = userProgress.lastDailyCoinCollectionDate;
-        
         if (lastCollectionDate !== today) {
             showDailyCoinModal();
         }
     }, FIVE_MINUTES);
 }
 
-function saveUserPreferences(focus) {
-    const nameInput = document.getElementById('user-name-input');
-    const userName = nameInput.value.trim();
+/**
+ * Initializes the auth page UI: form submissions, Google login, mode toggling, forgot password.
+ */
+function initializeAuthPage() {
+    let isSignUpMode = false;
 
-    if (!userName) {
-        showNotification('Please enter your name.', 'error');
-        nameInput.focus();
-        return;
+    const authForm = document.getElementById('auth-form');
+    const authTitle = document.getElementById('auth-title');
+    const authSubtitle = document.getElementById('auth-subtitle');
+    const authSubmitText = document.getElementById('auth-submit-text');
+    const authToggleText = document.getElementById('auth-toggle-text');
+    const authToggleLink = document.getElementById('auth-toggle-link');
+    const authNameGroup = document.getElementById('auth-name-group');
+    const authForgotPassword = document.getElementById('auth-forgot-password');
+    const authError = document.getElementById('auth-error');
+    const authSubmitBtn = document.getElementById('auth-submit-btn');
+    const authSubmitSpinner = document.getElementById('auth-submit-spinner');
+    const authGoogleBtn = document.getElementById('auth-google-btn');
+    const forgotPasswordLink = document.getElementById('forgot-password-link');
+
+    function setLoading(loading) {
+        authSubmitBtn.disabled = loading;
+        authSubmitText.style.display = loading ? 'none' : 'inline';
+        authSubmitSpinner.style.display = loading ? 'inline-block' : 'none';
     }
 
+    function showAuthError(message) {
+        authError.textContent = message;
+        authError.style.display = 'block';
+    }
+
+    function hideAuthError() {
+        authError.style.display = 'none';
+    }
+
+    function getFirebaseAuthErrorMessage(error) {
+        if (!error) return 'An error occurred. Please try again.';
+        const errorCode = error.code || '';
+        const messages = {
+            'auth/user-not-found': 'No account found with this email.',
+            'auth/wrong-password': 'Incorrect password. Try again.',
+            'auth/invalid-email': 'Please enter a valid email address.',
+            'auth/email-already-in-use': 'An account with this email already exists.',
+            'auth/weak-password': 'Password must be at least 6 characters.',
+            'auth/too-many-requests': 'Too many attempts. Please try again later.',
+            'auth/network-request-failed': 'Network error. Check your connection.',
+            'auth/popup-closed-by-user': 'Sign-in popup was closed.',
+            'auth/invalid-credential': 'Invalid email or password.',
+            'auth/unauthorized-domain': 'This domain is not authorized for OAuth operations.',
+            'auth/operation-not-allowed': 'Google Sign-In is not enabled in Firebase Console.'
+        };
+        return messages[errorCode] || error.message || 'An error occurred. Please try again.';
+    }
+
+    // Toggle between Login and Sign Up
+    authToggleLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        isSignUpMode = !isSignUpMode;
+        hideAuthError();
+
+        if (isSignUpMode) {
+            authTitle.textContent = 'Create Account';
+            authSubtitle.textContent = 'Start your learning journey today!';
+            authSubmitText.textContent = 'Sign Up';
+            authToggleText.textContent = 'Already have an account? ';
+            authToggleLink.textContent = 'Log in';
+            authNameGroup.style.display = 'flex';
+            authForgotPassword.style.display = 'none';
+        } else {
+            authTitle.textContent = 'Welcome Back';
+            authSubtitle.textContent = 'Log in to continue your learning streak!';
+            authSubmitText.textContent = 'Log In';
+            authToggleText.textContent = "Don't have an account? ";
+            authToggleLink.textContent = 'Sign up';
+            authNameGroup.style.display = 'none';
+            authForgotPassword.style.display = 'block';
+        }
+    });
+
+    // Form submission
+    authForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        hideAuthError();
+        setLoading(true);
+
+        const email = document.getElementById('auth-email-input').value.trim();
+        const password = document.getElementById('auth-password-input').value;
+        const displayName = document.getElementById('auth-name-input').value.trim();
+
+        try {
+            if (isSignUpMode) {
+                // Sign Up
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                // Set display name if provided
+                if (displayName) {
+                    await userCredential.user.updateProfile({ displayName: displayName });
+                }
+                console.log('✅ Account created:', userCredential.user.email);
+            } else {
+                // Log In
+                await auth.signInWithEmailAndPassword(email, password);
+                console.log('✅ Logged in successfully');
+            }
+            // onAuthStateChanged will handle the rest
+        } catch (error) {
+            console.error('❌ Auth error:', error);
+            showAuthError(getFirebaseAuthErrorMessage(error));
+        } finally {
+            setLoading(false);
+        }
+    });
+
+    // Google Sign-In
+    authGoogleBtn.addEventListener('click', async () => {
+        hideAuthError();
+        try {
+            await auth.signInWithPopup(googleProvider);
+            console.log('✅ Google sign-in successful');
+        } catch (error) {
+            console.error('❌ Google sign-in error:', error);
+            if (error.code !== 'auth/popup-closed-by-user') {
+                showAuthError(getFirebaseAuthErrorMessage(error));
+            }
+        }
+    });
+
+    // Forgot Password
+    forgotPasswordLink.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('auth-email-input').value.trim();
+
+        if (!email) {
+            showAuthError('Please enter your email address first.');
+            return;
+        }
+
+        try {
+            await auth.sendPasswordResetEmail(email);
+            hideAuthError();
+            showNotification('Password reset email sent! Check your inbox.', 'success');
+        } catch (error) {
+            console.error('❌ Password reset error:', error);
+            showAuthError(getFirebaseAuthErrorMessage(error));
+        }
+    });
+}
+
+/**
+ * Saves the user's focus preference after first sign-up.
+ * This replaces the old saveUserPreferences that handled name/PIN.
+ */
+async function saveFocusPreference(focus) {
     const normalizedFocus = normalizeUserFocus(focus);
-    localStorage.setItem('userName', userName);
     localStorage.setItem('userFocus', normalizedFocus);
 
-    // Generate pre-seeded userId if not present (for stable storage key)
-    let userId = localStorage.getItem('userId');
-    if (!userId) {
-        userId = `user_${userName.toLowerCase().replace(/[^a-z0-9]/g, '')}_${Date.now()}`;
-        localStorage.setItem('userId', userId);
+    const user = auth.currentUser;
+    if (!user) return;
+
+    // Check if user is brand new (no progress doc yet)
+    const userId = user.uid;
+    const doc = await userProgressCollection.doc(userId).get();
+
+    if (!doc.exists) {
+        // Initialize userProgress with ALL default values for new users
+        console.log('📦 Initializing userProgress with default values...');
+        userProgress = {
+            userName: user.displayName || user.email.split('@')[0],
+            email: user.email,
+            quizCoins: 50,
+            lifelines: { fiftyFifty: 3, hint: 3, skip: 3, timeFreeze: 1 },
+            achievements: [],
+            bookmarks: [],
+            purchasedItems: { themes: ['system', 'light', 'dark'], avatars: ['👤'] },
+            activeAvatar: '👤',
+            theme: 'system',
+            quantitative: {},
+            english: {},
+            reasoning: {},
+            general_science: {},
+            mockTestHistory: []
+        };
+        await saveUserProgress();
     }
 
-    userProgress.userName = userName;
+    document.getElementById('focus-selection-modal').classList.remove('visible');
 
-    document.getElementById('onboarding-modal').classList.remove('visible');
-    document.getElementById('logout-btn').style.display = 'inline-flex';
-    personalizeHomepage(userName, focus);
+    const displayName = user.displayName || user.email.split('@')[0];
+    personalizeHomepage(displayName, normalizedFocus);
     goToHome();
-    // Do not reload; this avoids accidental interruption
 }
 
 
@@ -3076,6 +3363,13 @@ function personalizeHomepage(userName, userFocus) {
         // Fallback for older structure
         const welcomeHeading = document.getElementById('welcome-heading');
         if (welcomeHeading) welcomeHeading.textContent = `Welcome, ${userName}!`;
+    }
+
+    // Update user progress object with current display name
+    userProgress.userName = userName;
+    const user = auth.currentUser;
+    if (user) {
+        userProgress.email = user.email;
     }
 
     setHomeMode(userFocus);
@@ -3204,12 +3498,17 @@ function initializeLogoutConfirmation() {
         modal.classList.remove('visible');
     };
 
-    confirmBtn.addEventListener('click', () => {
-        localStorage.removeItem('userName');
-        localStorage.removeItem('userFocus');
-        localStorage.removeItem('userId');
-        userProgress.activeAvatar = '👤'; // Reset avatar
-        window.location.reload();
+    confirmBtn.addEventListener('click', async () => {
+        try {
+            await auth.signOut();
+            localStorage.removeItem('userFocus');
+            userProgress = {};
+            userProgress.activeAvatar = '👤'; // Reset avatar
+            window.location.reload();
+        } catch (error) {
+            console.error('❌ Logout error:', error);
+            window.location.reload(); // Reload anyway
+        }
     });
 
     cancelBtn.addEventListener('click', closeModal);
@@ -4078,7 +4377,8 @@ function initializeSettingsTabs() {
 }
 
 function displayProfilePage() {
-    const userName = localStorage.getItem('userName') || 'Guest';
+    const _u = auth.currentUser;
+    const userName = _u?.displayName || _u?.email?.split('@')[0] || 'Guest';
     const userFocus = localStorage.getItem('userFocus') || 'Not Set';
 
     document.getElementById('profile-user-name').textContent = userName;
@@ -4839,22 +5139,131 @@ function initializeLeaderboard() {
 }
 
 /**
- * Gets a unique ID for the current user from localStorage, or creates one if it doesn't exist.
- * This version creates a consistent ID based on the user's name.
- * This ensures each user's high score is tracked uniquely.
- * @returns {string} The user's unique ID.
+ * Gets a unique ID for the current user from localStorage, or returns anonymous if not set.
+ * This ensures each user's data is tracked uniquely.
+ * @returns {string} The user's unique ID or 'user_anonymous' if not logged in.
  */
 function getOrCreateUserId() {
-    let userId = localStorage.getItem('userId');
-    if (userId) {
-        return userId;
+    const user = auth.currentUser;
+    if (user) {
+        return user.uid;
     }
+    // Return anonymous ID if user hasn't logged in yet
+    return 'user_anonymous';
+}
 
-    const userName = localStorage.getItem('userName') || 'anonymous';
-    const sanitizedName = userName.toLowerCase().replace(/[^a-z0-9]/g, '');
-    userId = `user_${sanitizedName}_${Date.now()}`;
-    localStorage.setItem('userId', userId);
-    return userId;
+/**
+ * NEW: Diagnostic function to test Firestore connectivity and permissions
+ */
+async function testFirestoreConnection() {
+    console.log('🧪 Testing Firestore connection...');
+    try {
+        // Test 1: Read from userCredentials
+        console.log('Test 1: Reading from userCredentials collection...');
+        const credentialSnapshot = await firebase.firestore().collection('userCredentials').limit(1).get();
+        console.log('✅ Can read from userCredentials:', credentialSnapshot.size);
+
+        // Test 2: Read from userProgress
+        console.log('Test 2: Reading from userProgress collection...');
+        const progressSnapshot = await firebase.firestore().collection('userProgress').limit(1).get();
+        console.log('✅ Can read from userProgress:', progressSnapshot.size);
+
+        // Test 3: Try writing a test document to userCredentials
+        console.log('Test 3: Attempting to write to userCredentials...');
+        const testDocRef = await firebase.firestore().collection('userCredentials').add({
+            test: true,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        console.log('✅ Can write to userCredentials:', testDocRef.id);
+        
+        // Clean up test document
+        await testDocRef.delete();
+        console.log('✅ Cleaned up test document');
+
+        console.log('✅ All Firestore tests passed!');
+        return true;
+    } catch (error) {
+        console.error('❌ Firestore test failed:', error);
+        return false;
+    }
+}
+
+/**
+ * NEW: Verifies if a user with the given name and PIN already exists in Firestore.
+ * If they do, returns their existing userId.
+ * If they don't, creates a new user and returns the new userId.
+ * Also handles migration from OLD userId format to new format.
+ * @param {string} userName - The user's name
+ * @param {string} userPin - The user's 4-digit PIN
+ * @returns {Promise<string>} The userId (existing or newly created)
+ */
+async function verifyOrCreateUser(userName, userPin) {
+    try {
+        // Create a unique identifier for this user based on name and PIN
+        const userCredentialId = `${userName.toLowerCase().replace(/[^a-z0-9]/g, '')}_${userPin}`;
+        console.log('Verifying user with credential ID:', userCredentialId);
+        
+        // STEP 1: Try to find in userCredentials collection (new system)
+        const q = firebase.firestore().collection('userCredentials').where('credential', '==', userCredentialId);
+        const snapshot = await q.get();
+        
+        console.log('Query snapshot size:', snapshot.size);
+        
+        if (!snapshot.empty) {
+            // User exists in new system - return their existing userId
+            const existingUserId = snapshot.docs[0].data().userId;
+            console.log('✅ Existing user found in userCredentials. Using userId:', existingUserId);
+            console.log('Existing user data:', snapshot.docs[0].data());
+            return { userId: existingUserId, isNewUser: false };
+        }
+        
+        // STEP 2: Check for OLD-format userId (migration needed)
+        console.log('⚠️  No entry in userCredentials. Checking for OLD-format account...');
+        const oldFormatUserId = `user_${userCredentialId}`;
+        console.log('Looking for OLD userId:', oldFormatUserId);
+        
+        const oldUserDoc = await userProgressCollection.doc(oldFormatUserId).get();
+        
+        if (oldUserDoc.exists) {
+            console.log('✅ Found OLD-format user data! Migrating to new system...');
+            console.log('Old user data:', oldUserDoc.data());
+            
+            // Migrate: Create a userCredentials entry pointing to the old userId
+            await firebase.firestore().collection('userCredentials').add({
+                credential: userCredentialId,
+                userId: oldFormatUserId,
+                userName: userName,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                userPin: userPin,
+                migrated: true,
+                migratedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            
+            console.log('✅ Migration complete! Old userId registered in userCredentials:', oldFormatUserId);
+            return { userId: oldFormatUserId, isNewUser: false };
+        }
+        
+        // STEP 3: No existing user found - create new user
+        console.log('❌ No existing user found. Creating new user...');
+        const newUserId = `user_${userCredentialId}_${Date.now()}`;
+        
+        console.log('Creating new userId:', newUserId);
+        
+        // Store the credential mapping in Firestore for future lookups
+        await firebase.firestore().collection('userCredentials').add({
+            credential: userCredentialId,
+            userId: newUserId,
+            userName: userName,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            userPin: userPin
+        });
+        
+        console.log('✅ New user created with userId:', newUserId);
+        return { userId: newUserId, isNewUser: true };
+    } catch (error) {
+        console.error('❌ Error in verifyOrCreateUser:', error);
+        throw error;
+    }
 }
 
 /**
