@@ -167,7 +167,8 @@ const QuizifyChat = {
         messageInput.value = '';
         this.clearReplyState();
 
-        const userName = localStorage.getItem('userName') || 'Anonymous';
+        const user = firebase.auth().currentUser;
+        const userName = user?.displayName || user?.email?.split('@')[0] || 'Anonymous';
         const userId = this._app.getOrCreateUserId();
         const userAvatar = this._app.userProgress.activeAvatar || '👤';
 
@@ -310,7 +311,7 @@ const QuizifyChat = {
             <div class="chat-message-content">
                 <div class="chat-bubble-tail"></div>
                 <div class="chat-message-header">
-                    <span class="chat-message-sender" data-userid="${message.userId}" title="View Profile">${message.userName}</span>
+                    <span class="chat-message-sender" data-userid="${message.userId}" title="View Profile">${message.userName || 'Anonymous'}</span>
                     <div class="message-meta">
                         <span class="chat-message-timestamp">${timeString}</span>
                         <button class="add-reaction-btn" title="Add reaction" data-message-id="${message.id}">
@@ -392,7 +393,8 @@ const QuizifyChat = {
      */
     async setUserAsOnline() {
         const userId = this._app.getOrCreateUserId();
-        const userName = localStorage.getItem('userName') || 'Anonymous';
+        const user = firebase.auth().currentUser;
+        const userName = user?.displayName || user?.email?.split('@')[0] || 'Anonymous';
         if (!userId || userId.startsWith('user_anonymous')) return;
         await this._onlineUsersCollection.doc(userId).set({ userId, userName, isTyping: false });
     },
@@ -567,7 +569,7 @@ const QuizifyChat = {
                 await reactionRef.set({
                     emoji: emoji,
                     userId: userId,
-                    userName: localStorage.getItem('userName') || 'Anonymous'
+                    userName: (firebase.auth().currentUser?.displayName || firebase.auth().currentUser?.email?.split('@')[0] || 'Anonymous')
                 });
             }
         } catch (error) {
