@@ -1,0 +1,6621 @@
+
+// app.js - Complete Quiz Platform with Class and Competitive Exam functionality
+// Only business logic - questions stored in separate data files
+// ===================== APP CHANGELOG =====================
+const APP_VERSION = '3.1.0'; // AI Everywhere update
+
+const COMMUNITY_POSTS = {
+    '3.1.0': {
+        date: 'Jun 14, 2026',
+        type: 'major_update',
+        changes: [
+            '<strong>Quizify AI Launch:</strong> Your intelligent study assistant is now available across the entire app.',
+            '<strong>AI Everywhere:</strong> Ask questions from the bottom nav, header, chat, quiz pages, and profile pages.',
+            '<strong>Smart Study Support:</strong> Get instant explanations, topic summaries, quiz help, progress insights, and step-by-step guidance.',
+            '<strong>Interactive AI Tour:</strong> A new onboarding slideshow introduces the AI experience and collects your feedback.',
+            '<strong>Improved Navigation:</strong> AI suggestions adapt to your learning path and help you reach goals faster.',
+            '<strong>Fresh Branding:</strong> Quizify AI now shines as your go-to smart learning companion.'
+        ],
+        note: 'Meet the smartest Quizify update yet — AI that helps you learn, quiz, and improve across every screen. Share your feedback to make it even better!'
+    },
+    '2.2.0': {
+        date: 'Apr 12, 2026',
+        type: 'major_update',
+        changes: [
+            '<strong>Google Auth Mobile Fix:</strong> Enhanced redirection logic to ensure Google Sign-in works flawlessly within mobile app wrappers (WebViews).',
+            '<strong>Mock Test Submission Fix:</strong> Resolved a critical issue where mock tests would not submit on mobile devices by implementing a robust confirmation system.',
+            '<strong>Premium Results Dashboard:</strong> Redesigned the Mock Test Results page with a modern, glassmorphism-style UI for a professional performance overview.',
+            '<strong>App Origin Utility:</strong> Added a "Check App Origin" tool in Settings to help you identify your mobile app\'s unique URL for Firebase configuration.',
+            '<strong>Phone Auth Guidance:</strong> Improved error messages and provides clear instructions for setting up Phone Authentication with the Firebase Blaze plan.',
+            '<strong>Stability & Cleanup:</strong> Removed obsolete legacy code and fixed background bugs to improve overall app stability and loading speed.'
+        ],
+        note: 'This update significantly improves the mobile experience, especially for those using converted app wrappers. Make sure to use the new App Origin tool to finalize your login setup!'
+    },
+    '2.1.0': {
+        date: 'Jan 01, 2026',
+        type: 'feature_update', // New features & improvements
+        changes: [
+            '<strong>New Achievement System:</strong> Unlock badges as you learn! Earn achievements for streaks, high scores, speed, consistency, and dedication.',
+            '<strong>Streak & Consistency Tracking:</strong> Daily learning streaks are now tracked with special rewards for maintaining consistency.',
+            '<strong>Improved User Motivation:</strong> Added milestone-based achievements like Quiz Grinder, Quiz Legend, Early Bird, and Night Owl to keep learning engaging.',
+            '<strong>Performance-Based Rewards:</strong> New achievements for accuracy, speed, perfect scores, and comeback attempts.',
+            '<strong>UI Enhancements:</strong> Achievement icons, popups, and progress indicators have been visually refined for a smoother experience.',
+            '<strong>Stability Improvements:</strong> Minor bug fixes and performance optimizations for faster load times and smoother gameplay.'
+        ],
+        note: 'This update focuses on motivation, engagement, and consistency. Keep learning daily, unlock achievements, and level up your Quizify journey in 2026 🎉'
+    },
+    
+    '2.0.0': {
+        date: 'Oct 22, 2025',
+        type: 'major_update', // A new type for major releases
+        changes: [
+            '<strong>Official Stable Release!</strong> Quizify is now out of Beta, bringing a more polished, secure, and feature-rich experience.',
+            '<strong>Complete English Overhaul:</strong> All English chapters and question sets have been fully reviewed, corrected, and expanded for accuracy.',
+            '<strong>Quizify Help Bot:</strong> Get instant answers to your questions about the app with our new intelligent assistant.',
+            '<strong>Online Leaderboard & Profiles:</strong> Compete with others! Your best scores are saved online. View your rank and detailed stats on the new Profile page.',
+            '<strong>Friends System:</strong> Connect with friends, send requests, and get ready for future social features.',
+            '<strong>Redesigned Store:</strong> Discover the new look of the store with purchasable themes and avatars.',
+            '<strong>Quiz Instructions:</strong> A new instruction screen appears before every quiz to ensure you are ready.'
+        ],
+        note: "Thank you for being part of our journey from Beta to the official release! We're excited to bring you even more features and content. Happy quizzing!"
+    },
+    '1.7.2-Beta.': {
+        date: 'Oct 21, 2025',
+        type: 'update',
+        changes: [
+            'General bug fixes and performance improvements.',
+            'Enhanced UI responsiveness on smaller devices.',
+            'Optimized data loading for a faster startup experience.'
+        ],
+        note: "We're continuously working to improve Quizify for you. Stay tuned for more updates!"
+    },
+    '1.7.1-Beta.': {
+        date: 'Oct 20, 2025',
+        type: 'content', // NEW
+        changes: [
+            '<strong>Major Content Overhaul!</strong> The English question bank has been fully reviewed and expanded.',
+            'Performed a deep-dive review of all existing English questions for 100% accuracy.',
+            'Completed all empty question sets in the English section, including Adverb, Preposition, Conjunction, and more.',
+            'Fixed various grammatical errors and incorrect answers across all English chapters.'
+        ],
+        note: "Your learning experience is our top priority. The English section is now more robust and reliable than ever!"
+    },
+    '1.7.0-Beta.': {
+        date: 'Oct 19, 2025',
+        type: 'security', // NEW
+        changes: [
+            '<strong>Critical Security Update!</strong> Your data is now more secure.',
+            'Implemented robust server-side security rules for Firestore to protect user scores and quiz history.',
+            'Integrated Firebase Anonymous Authentication for secure and unique user tracking on the leaderboard.',
+            'These changes prevent unauthorized access and ensure the integrity of your quiz progress.'
+        ],
+        note: "This backend security update is crucial for protecting your data. More features coming soon!"
+    },
+    '1.6.2-Beta.': {
+        date: 'Sep 28, 2025',
+        type: 'feature', // NEW
+        changes: [
+            '<strong>Major Feature: Online Leaderboard!</strong> Your quiz scores are now saved online.',
+            'Added a dynamic Leaderboard to show the top 10 high scores across all quizzes.',
+            'The leaderboard now shows each user\'s single best score, making it fair and competitive.',
+            'Added a "Your Rank" feature to show your personal rank even if you are not in the top 10.',
+            'Fixed several navigation and display bugs for a smoother experience.'
+        ],
+        note: "This is a major update introducing online scoring. Your feedback is valuable!"
+    },
+    '1.6.0-Beta.': {
+        date: 'Sep 27, 2025',
+        type: 'update', // NEW
+        changes: [
+            'Added class-specific Daily Challenges for academic students (Classes 9-12).',
+            'Fixed a bug where the back button would not work after clicking on an empty Daily Challenge.',
+            'Added a Community page to view detailed updates.'
+        ],
+        note: "This is a beta version. Features and functionality may change in the final release."
+    },
+    '1.5.13-Beta.': {
+        date: 'Sep 26, 2025',
+        type: 'ui', // NEW
+        changes: [
+            'Added an info button to update notifications to show what\'s new.',
+            'Replaced all disruptive browser alerts with a new, professional toast notification system.',
+            'Moved the bookmark button next to the question for easier access.'
+        ]
+    }
+};
+// ===================== APP CONFIGURATION =====================
+
+// NEW: Configuration for the informational AI launch popup
+const INFO_POPUP_CONFIG = {
+    id: 'ai_launch_2026', // New ID so it shows again for users
+
+    // Date range for the Quizify AI launch announcement
+    // Format: YYYY-MM-DD
+    startDate: '2026-06-01',
+    endDate: '2026-06-30',
+
+    icon: '🤖',
+    title: 'Quizify AI is Live!',
+
+    messageHTML: `
+      <p>Quizify AI is now available across the app, bringing smarter study support, instant answers, and a powerful learning companion to every screen.</p>
+      <ul>
+        <li>Ask AI for explanations, summaries, hints, and progress insights.</li>
+        <li>Use AI from the bottom nav, header, chat, and quiz screens.</li>
+        <li>Get personalized guidance that helps you learn faster and more confidently.</li>
+      </ul>
+      <p>Explore the new AI experience and let Quizify make studying easier, more interactive, and more joyful.</p>
+    `,
+
+    subtext: 'This announcement appears once during the AI launch window. Enjoy the new AI experience and tell us what you think!'
+};
+
+
+// NEW: Achievements Configuration
+const ACHIEVEMENTS = {
+    first_quiz: { name: 'First Step', description: 'Complete your first quiz.', icon: '🎓' },
+    passed_quiz: { name: 'Achiever', description: 'Pass your first quiz with 40% or more.', icon: '✅' },
+    perfect_score: { name: 'Perfectionist', description: 'Get a 100% score on any quiz.', icon: '🎯' },
+    chapter_master: { name: 'Chapter Master', description: 'Pass all 5 sets in any chapter.', icon: '📚' },
+    subject_expert: { name: 'Subject Expert', description: 'Pass all sets in a whole subject.', icon: '🧠' },
+    streak_5: { name: 'On a Roll!', description: 'Maintain a 5-day streak.', icon: '🔥' },
+    streak_10: { name: 'Unstoppable', description: 'Maintain a 10-day streak.', icon: '🚀' },
+    speed_demon: { name: 'Speed Demon', description: 'Pass a quiz with an average of <30s per question.', icon: '⚡' },
+    comeback_kid: { name: 'Comeback Kid', description: 'Pass a quiz set you previously failed.', icon: '💪' },
+    dedicated_learner: { name: 'Dedicated Learner', description: 'Complete 10 quizzes.', icon: '📖' },
+    quiz_master: { name: 'Quiz Master', description: 'Complete 50 quizzes.', icon: '👑' },
+      // 🟢 Beginner
+    first_quiz: { name: 'First Step', description: 'Complete your first quiz.', icon: '🎓' },
+    first_pass: { name: 'Getting Started', description: 'Pass your first quiz.', icon: '🥳' },
+
+    // 🟡 Performance
+    passed_quiz: { name: 'Achiever', description: 'Pass your first quiz with 40% or more.', icon: '✅' },
+    high_scorer: { name: 'High Scorer', description: 'Score 80% or more in any quiz.', icon: '🏆' },
+    perfect_score: { name: 'Perfectionist', description: 'Get a 100% score on any quiz.', icon: '🎯' },
+    accuracy_master: { name: 'Accuracy Master', description: 'Answer 20 questions correctly in a row.', icon: '🎯' },
+
+    // 🔵 Speed & Skill
+    speed_demon: { name: 'Speed Demon', description: 'Pass a quiz with an average of <30s per question.', icon: '⚡' },
+    lightning_fast: { name: 'Lightning Fast', description: 'Answer 5 questions correctly in under 10 seconds each.', icon: '⚡' },
+
+    // 📚 Progress & Mastery
+    chapter_master: { name: 'Chapter Master', description: 'Pass all 5 sets in any chapter.', icon: '📚' },
+    subject_expert: { name: 'Subject Expert', description: 'Pass all sets in a whole subject.', icon: '🧠' },
+    syllabus_champion: { name: 'Syllabus Champion', description: 'Complete all chapters in a subject.', icon: '🏅' },
+
+    // 🔥 Consistency & Streaks
+    streak_3: { name: 'Consistent', description: 'Maintain a 3-day learning streak.', icon: '🔥' },
+    streak_5: { name: 'On a Roll!', description: 'Maintain a 5-day streak.', icon: '🔥' },
+    streak_10: { name: 'Unstoppable', description: 'Maintain a 10-day streak.', icon: '🚀' },
+    streak_30: { name: 'Legendary Streak', description: 'Maintain a 30-day learning streak.', icon: '🌟' },
+
+    // 💪 Comeback & Effort
+    comeback_kid: { name: 'Comeback Kid', description: 'Pass a quiz set you previously failed.', icon: '💪' },
+    never_give_up: { name: 'Never Give Up', description: 'Attempt the same quiz 3 times.', icon: '🛡️' },
+
+    // 📖 Volume & Dedication
+    dedicated_learner: { name: 'Dedicated Learner', description: 'Complete 10 quizzes.', icon: '📖' },
+    quiz_grinder: { name: 'Quiz Grinder', description: 'Complete 25 quizzes.', icon: '⚙️' },
+    quiz_master: { name: 'Quiz Master', description: 'Complete 50 quizzes.', icon: '👑' },
+    quiz_legend: { name: 'Quiz Legend', description: 'Complete 100 quizzes.', icon: '🏆' },
+
+    // 🕒 Engagement
+    early_bird: { name: 'Early Bird', description: 'Complete a quiz before 7 AM.', icon: '🌅' },
+    night_owl: { name: 'Night Owl', description: 'Complete a quiz after 11 PM.', icon: '🌙' },
+
+    // 🎉 Special
+    daily_challenger: { name: 'Daily Challenger', description: 'Complete quizzes on 7 different days.', icon: '📆' },
+    knowledge_seeker: { name: 'Knowledge Seeker', description: 'Attempt quizzes from 3 different subjects.', icon: '🔍' }
+};
+
+
+// ===================== GLOBAL STATE VARIABLES =====================
+let currentSubject = '';
+let currentChapter = '';
+let currentSet = 0;
+let currentQuestionIndex = 0;
+let userAnswers = [];
+let timer = null;
+let totalTime = 0;
+let timeRemaining = 1200; // 20 minutes for 20 questions
+let quizData = null;
+let bookmarkedQuestions = []; // Will be loaded from userProgress or Firestore
+let userProgress = {}; // This will be the single source of truth for all user data.
+let unlockedAchievements = new Set(); // To track newly unlocked achievements in a session
+
+// NEW: Class-related state variables
+let currentClass = '';
+let currentStream = '';
+let academicDailyChallenge = false; // To distinguish academic vs competitive daily challenge
+let practiceMode = false; // To handle practice mode logic
+let pendingSetIndex = -1; // To hold the set index while the mode modal is open
+let classMode = false; // true if user is in class (academic) mode
+
+let dailyCoinReminderInterval = null; // NEW: For the daily coin reminder
+
+// NEW: Daily Challenge state
+let dailyChallengeMode = false;
+let quizTimerSetting = 60; // NEW: Default time per question in seconds
+// NEW: Time Freeze lifeline state
+let isTimerFrozen = false;
+let freezeInterval = null;
+let freezeRemaining = 0; // seconds remaining while frozen
+const FREEZE_DURATION = 30; // seconds
+
+
+// ===================== DATA & FIREBASE SETUP =====================
+let allQuizData = []; // NEW: This will be populated from Firestore
+let isGeneralScienceMode = false; // NEW: Flag for General Science sub-subject navigation
+ // Your web app's Firebase configuration
+  const firebaseConfig = {
+    apiKey: "AIzaSyAy-7QGZ05wNf0fLG1-AY2FxJy_fdILdoM",
+    authDomain: "quizifyapp-4c5ca.firebaseapp.com",
+    projectId: "quizifyapp-4c5ca",
+    storageBucket: "quizifyapp-4c5ca.firebasestorage.app",
+    messagingSenderId: "948606346917",
+    appId: "1:948606346917:web:6fdfa4e16adefb5f710f4c"
+  };
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const resultsCollection = db.collection("quizResults");
+const leaderboardCollection = db.collection("leaderboard"); // NEW: Collection for best scores
+const quizzesCollection = db.collection("quizzes"); // NEW: Collection for all quiz questions
+const userProgressCollection = db.collection("userProgress"); // NEW: Collection for user progress
+const auth = firebase.auth(); // Firebase Auth instance
+const googleProvider = new firebase.auth.GoogleAuthProvider(); // Google Sign-In provider
+
+
+// ===================== INITIALIZATION =====================
+document.addEventListener('DOMContentLoaded', async function() { // Make async
+    // NEW: Use an object-oriented approach for better organization
+    const QuizifyApp = {
+        async init() {
+            try {
+                await this.checkUserProfile(); // This now waits for user data to load
+                this.checkForUpdates();
+                initializeSideMenu();
+                initializeSideMenuScrollbar();
+                initializeUpdateDetailsModal();
+                initializeHomepageSearch();
+                initializeFeatureComingSoonModal();
+                initializeLockedContentModal();
+                initializeSettingsPage();
+                initializeQuizModeModal();
+                initializeImageViewer();
+                initializeLeaderboard();
+                initializeProfilePage();
+                initializeAchievements(); // NEW
+                initializeSettingsTabs(); // NEW
+                initializeProfileTabs(); // NEW
+                initializeSparkles();
+                initializePurchaseSuccessModal(); // NEW
+                initializeEventListeners();
+                this.initializeDailyCoinModal(); // NEW
+                // this.initializeStoreUpdatesModal(); // REMOVED: This is now handled by QuizifyStore.init()
+
+                // NEW: Initialize optional modules safely
+                if (typeof window.QuizifyOnboarding !== 'undefined' && typeof window.QuizifyOnboarding.init === 'function') {
+                    window.QuizifyOnboarding.init(this);
+                }
+                if (typeof window.QuizifySubscription !== 'undefined' && typeof window.QuizifySubscription.init === 'function') {
+                    window.QuizifySubscription.init(this);
+                }
+                if (typeof QuizifyStore !== 'undefined' && typeof QuizifyStore.init === 'function') {
+                    QuizifyStore.init(this);
+                }
+                if (typeof QuizifyChat !== 'undefined' && typeof QuizifyChat.init === 'function') {
+                    QuizifyChat.init(this, db, userProgressCollection);
+                }
+                if (typeof QuizifyFriends !== 'undefined' && typeof QuizifyFriends.init === 'function') {
+                    QuizifyFriends.init(this, db);
+                }
+                if (typeof QuizifyBot !== 'undefined' && typeof QuizifyBot.init === 'function') {
+                    QuizifyBot.init(this);
+                }
+                if (typeof MockTest !== 'undefined' && typeof MockTest.init === 'function') {
+                    MockTest.init(this, allQuizData);
+                }
+                if (typeof QuizifyVideos !== 'undefined' && typeof QuizifyVideos.init === 'function') {
+                    QuizifyVideos.init(this, db);
+                }
+
+                // Show AI Intro slideshow on first load
+                initializeAiIntroModal();
+
+                // Keep: Analytics and Leaderboards
+                if (typeof QuizifyAnalytics !== 'undefined' && typeof QuizifyAnalytics.init === 'function') {
+                    QuizifyAnalytics.init(this);
+                    console.log('✅ QuizifyAnalytics initialized');
+                }
+                if (typeof QuizifyLeaderboards !== 'undefined' && typeof QuizifyLeaderboards.init === 'function') {
+                    QuizifyLeaderboards.init(this, db);
+                    console.log('✅ QuizifyLeaderboards initialized');
+                }
+                // Note: LevelSystem, BattlePass, SocialChallenges, Quests removed in v4.0
+
+
+                // NEW: Leaderboard period tab switching
+                document.querySelectorAll('.lb-tab-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        document.querySelectorAll('.lb-tab-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        const period = btn.dataset.period;
+                        if (typeof QuizifyLeaderboards !== 'undefined') {
+                            QuizifyLeaderboards.displayLeaderboard(period);
+                        } else {
+                            displayLeaderboard(); // fallback
+                        }
+                    });
+                });
+
+                // NEW: Analytics tab trigger
+                addEventListenerSafe('[data-tab="profile-analytics-tab"]', 'click', () => {
+                    if (typeof QuizifyAnalytics !== 'undefined') {
+                        QuizifyAnalytics.renderDashboard();
+                    }
+                });
+
+
+                // NEW: Add event listener for the videos menu button
+                addEventListenerSafe('#menu-videos-btn', 'click', () => this.displayVideosPage());
+                initializeLogoutConfirmation();
+                this.initializeInfoPopup();
+                this.updateSubjectProgress(); // Update progress rings on initialization
+            } catch (error) {
+                console.error('QuizifyApp initialization failed:', error);
+            } finally {
+                goToHome(); // Ensure the home page shows the correct academic or competitive view even if other modules fail
+            }
+        },
+
+        // Update subject progress rings based on user progress
+        updateSubjectProgress() {
+            const subjects = ['quantitative', 'english', 'reasoning', 'general_science'];
+            subjects.forEach(subject => {
+                const progress = this.calculateSubjectProgress(subject);
+                this.updateProgressRing(subject, progress);
+            });
+            
+            // Update mock test progress separately
+            this.updateMockTestProgress();
+        },
+
+        // Calculate progress percentage for a subject
+        calculateSubjectProgress(subject) {
+            if (!userProgress || !userProgress[subject]) return 0;
+            
+            const subjectData = userProgress[subject];
+            let totalQuestions = 0;
+            let answeredQuestions = 0;
+            
+            // Count total and answered questions across all chapters
+            Object.values(subjectData).forEach(chapter => {
+                if (chapter && typeof chapter === 'object') {
+                    Object.values(chapter).forEach(questionSet => {
+                        if (Array.isArray(questionSet)) {
+                            totalQuestions += questionSet.length;
+                            answeredQuestions += questionSet.filter(q => q.answered).length;
+                        }
+                    });
+                }
+            });
+            
+            return totalQuestions > 0 ? Math.round((answeredQuestions / totalQuestions) * 100) : 0;
+        },
+
+        // Update progress ring for a subject
+        updateProgressRing(subject, percentage) {
+            const ring = document.getElementById(`${subject}-progress`);
+            const text = ring?.parentElement?.querySelector('.progress-text');
+            
+            if (ring && text) {
+                // Read actual radius so we support both old (r=26) and new v4 (r=22) rings
+                const r = parseFloat(ring.getAttribute('r') || '26');
+                const circumference = 2 * Math.PI * r;
+                ring.style.strokeDasharray = circumference;
+                const offset = circumference - (percentage / 100) * circumference;
+                ring.style.strokeDashoffset = offset;
+                text.textContent = `${Math.round(percentage)}%`;
+            }
+        },
+
+        // Update mock test progress ring
+        updateMockTestProgress() {
+            // For mock test, show completion status of today's test
+            const today = new Date().toDateString();
+            const mockTestHistory = userProgress.mockTestHistory || [];
+            const todayTest = mockTestHistory.find(test => 
+                new Date(test.date).toDateString() === today
+            );
+            
+            let progress = 0;
+            if (todayTest && todayTest.completed) {
+                progress = 100;
+            }
+            
+            this.updateProgressRing('mock-test', progress);
+        },
+
+        // Expose necessary properties and methods for other modules
+        get quizCoins() { return userProgress.quizCoins || 0; },
+        get userProgress() { return userProgress; },
+        get purchasedItems() { return userProgress.purchasedItems || { themes: ['system', 'light', 'dark'], avatars: ['👤'] }; },
+        set purchasedItems(value) { userProgress.purchasedItems = value; },
+        get currentQuestionIndex() { return currentQuestionIndex; },
+        get quizData() { return quizData; },
+        get currentQuestion() { return quizData?.[currentQuestionIndex] || null; },
+        get currentSubject() { return currentSubject; },
+        get currentChapter() { return currentChapter; },
+        get currentSet() { return currentSet; },
+        get allQuizData() { return allQuizData; },
+        get practiceMode() { return practiceMode; },
+        get dailyChallengeMode() { return dailyChallengeMode; },
+        get isGeneralScienceMode() { return isGeneralScienceMode; },
+        get classMode() { return classMode; },
+        get currentClass() { return currentClass; },
+        get currentStream() { return currentStream; },
+        getActiveQuizContext() {
+            return {
+                currentQuestionIndex,
+                currentQuestion: quizData?.[currentQuestionIndex] || null,
+                quizData,
+                currentSubject,
+                currentChapter,
+                currentSet,
+                practiceMode,
+                dailyChallengeMode,
+                isGeneralScienceMode,
+                classMode,
+                currentClass,
+                currentStream,
+                allQuizData
+            };
+        },
+        performGlobalSearch, // NEW: Expose search function for the bot
+        APP_VERSION, // NEW: Expose app version for the bot
+        getSubjectTitle, // NEW: Expose title function for the bot
+        saveUserProgress, updateCoinDisplay, updateLifelineDisplay, showNotification, showPage, showPurchaseSuccessModal, goToHome, closeSideMenu,
+        displayVideosPage() { // NEW: Method to display the videos page
+            QuizifyVideos.displayVideosPage();
+            this.closeSideMenu();
+        },
+        seededShuffle, // NEW: Expose shuffle function for the mock test module
+        checkUserProfile, checkForUpdates, initializeDailyCoinModal, initializeStoreUpdatesModal, initializeInfoPopup, getOrCreateUserId, showFeatureComingSoonModal
+    };
+
+    window.QuizifyApp = QuizifyApp;
+    QuizifyApp.init();
+    await loadAllQuizData(); // Load all quiz data from Firestore on startup
+});
+
+/**
+ * NEW: Function to load all quiz data from Firestore.
+ * This is now a standalone function called at startup.
+ */
+async function loadAllQuizData() {
+    // NEW: Show the spinner before fetching data.
+    showSpinnerModal(true, 'Loading Quizzes...', 'Fetching the latest content for you.');
+    try {
+        const snapshot = await quizzesCollection.get();
+        allQuizData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        window.allQuizData = allQuizData;
+        // Ensure modules that captured an earlier reference get the fresh data
+        if (typeof MockTest !== 'undefined') {
+            MockTest._allQuizData = allQuizData;
+            // Refresh mock-test related UI/status now that data is available
+            if (typeof MockTest.checkAndDisplayDailyMock === 'function') {
+                try { MockTest.checkAndDisplayDailyMock(); } catch (e) { console.warn('MockTest refresh failed', e); }
+            }
+        }
+        console.log("All quiz data loaded from Firestore.");
+        showSpinnerModal(false); // Hide spinner on success
+    } catch (error) {
+        console.error("Failed to load quiz data from Firestore:", error);
+        showSpinnerModal(false); // Hide spinner on error
+        showNotification("Could not load quiz content. Please refresh.", "error");
+    }
+}
+
+function initializeApp() {
+    showPage('home-page');
+    classMode = false;
+    currentClass = '';
+    currentStream = '';
+    dailyChallengeMode = false;
+}
+
+/**
+ * Centralizes all event listeners for the application, separating behavior from HTML.
+ */
+function addEventListenerSafe(selector, event, handler) {
+    const element = document.querySelector(selector);
+    if (element) element.addEventListener(event, handler);
+}
+
+function initializeEventListeners() {
+    // --- Auth Page ---
+    initializeAuthPage();
+
+    // --- Focus Selection Modal ---
+    addEventListenerSafe('#focus-competitive-btn', 'click', () => saveFocusPreference('competitive'));
+    addEventListenerSafe('#focus-academic-btn', 'click', () => saveFocusPreference('academic'));
+
+    // --- Side Menu ---
+    addEventListenerSafe('#logout-btn', 'click', logout);
+
+    // --- Home Page ---
+    addEventListenerSafe('.daily-challenge-card', 'click', startDailyChallenge);
+
+    // Competitive Section: Use delegation on the whole section container
+    const competitiveSection = document.getElementById('competitive-section');
+    if (competitiveSection) {
+        competitiveSection.addEventListener('click', (e) => {
+            // Match both old '.subject-card' and new '.hpv5-subject-card'
+            const subjectCard = e.target.closest('[data-subject]');
+            if (!subjectCard) return;
+            const selectedSubject = subjectCard.dataset.subject;
+
+            if (selectedSubject === 'mock_test' && typeof MockTest !== 'undefined' && MockTest.showRules) {
+                MockTest.showRules();
+            } else if (selectedSubject) {
+                selectSubject(selectedSubject);
+            }
+        });
+    }
+
+    // Fallback direct binding (handles dynamically-added cards too)
+    document.querySelectorAll('[data-subject]').forEach((card) => {
+        if (card.dataset.bound) return; // avoid double-binding
+        card.dataset.bound = '1';
+        card.addEventListener('click', (e) => {
+            const subject = card.dataset.subject;
+            if (!subject) return;
+            if (subject === 'mock_test' && typeof MockTest !== 'undefined' && MockTest.showRules) {
+                MockTest.showRules();
+            } else {
+                selectSubject(subject);
+            }
+        });
+    });
+
+    // Academic Section: delegation for class cards
+    const academicSection = document.getElementById('academic-section');
+    if (academicSection) {
+        academicSection.addEventListener('click', (e) => {
+            const classCard = e.target.closest('[data-class]');
+            if (!classCard) return;
+            const selectedClass = classCard.dataset.class;
+            if (selectedClass) selectClass(selectedClass);
+        });
+    }
+
+    // --- Page-Level Back Buttons ---
+    const backButtonActions = {
+        'stream-page': goToHome,
+        'class-page': goBack,
+        'subject-page': goBack,
+        'chapter-page': goToSubject,
+        'store-page': goToHome,
+        'review-page': goToResults,
+        'bookmarks-page': goToHome,
+        'community-page': goToHome,
+        'about-us-page': goToHome,
+        'profile-page': goToHome,
+        'leaderboard-page': goToHome,
+        'achievements-page': goToHome,
+        'settings-page': goToHome,
+    };
+
+    // Back buttons: support both old .back-btn and new .pgv5-back-btn
+    document.querySelectorAll('.page .back-btn, .page .pgv5-back-btn').forEach((backBtn) => {
+        backBtn.addEventListener('click', () => {
+            const page = backBtn.closest('.page');
+            const action = page ? backButtonActions[page.id] : goToHome;
+            if (typeof action === 'function') action();
+        });
+    });
+
+    addEventListenerSafe('#results-page .action-buttons button:nth-child(3)', 'click', goToChapter);
+
+    // --- Search ---
+    addEventListenerSafe('#search-chapters', 'keyup', filterChapters);
+
+    // --- Quiz Navigation ---
+    addEventListenerSafe('#prev-btn', 'click', previousQuestion);
+    addEventListenerSafe('#next-btn', 'click', nextQuestion);
+
+    // --- Results Page Actions ---
+    const retakeQuizBtn = document.querySelector('#results-page .action-buttons button:nth-child(1)');
+    if (retakeQuizBtn) retakeQuizBtn.addEventListener('click', retakeQuiz);
+    addEventListenerSafe('#review-answers-btn', 'click', reviewAnswers);
+
+    // --- Retake Confirmation Modal ---
+    addEventListenerSafe('#confirm-retake-btn', 'click', handleRetakeConfirmation);
+    addEventListenerSafe('#cancel-retake-btn', 'click', () => document.getElementById('retake-confirm-modal')?.classList.remove('visible'));
+
+    // --- Dynamic Content Event Delegation ---
+    const streamsGrid = document.getElementById('streams-grid');
+    if (streamsGrid) {
+        streamsGrid.addEventListener('click', (e) => {
+            const streamCard = e.target.closest('.stream-card');
+            if (streamCard && streamCard.dataset.stream) {
+                selectStream(streamCard.dataset.stream);
+            }
+        });
+    }
+
+    // --- Lifeline Buttons ---
+    addEventListenerSafe('#lifeline-5050', 'click', useFiftyFifty);
+    addEventListenerSafe('#lifeline-hint', 'click', useHint);
+    addEventListenerSafe('#lifeline-skip', 'click', useSkip);
+
+    // NEW: Time Freeze lifeline
+    const freezeBtn = document.getElementById('lifeline-freeze');
+    if (freezeBtn) freezeBtn.addEventListener('click', useTimeFreeze);
+
+    // NEW: Re-add chat button event listeners
+    addEventListenerSafe('#send-chat-message-btn', 'click', () => QuizifyChat?.sendChatMessage && QuizifyChat.sendChatMessage());
+    addEventListenerSafe('#open-chat-fab', 'click', () => QuizifyChat?.openGlobalChat && QuizifyChat.openGlobalChat());
+    addEventListenerSafe('#close-chat-modal-btn', 'click', () => QuizifyChat?.closeGlobalChat && QuizifyChat.closeGlobalChat());
+
+    // NEW: Bottom nav action buttons
+    addEventListenerSafe('#bn-profile', 'click', displayProfilePage);
+    addEventListenerSafe('#bn-ai', 'click', () => QuizifyBot?.openHelpBot && QuizifyBot.openHelpBot());
+    addEventListenerSafe('#bn-chat', 'click', () => document.getElementById('open-chat-fab')?.click());
+
+    // Bot listeners are registered inside QuizifyBot.init() to avoid duplicates
+
+
+
+    document.getElementById('class-content').addEventListener('click', (e) => {
+        const subjectCard = e.target.closest('.subject-card:not(.daily-challenge-card)');
+        if (subjectCard && subjectCard.dataset.subject) {
+            selectClassSubject(subjectCard.dataset.subject);
+        }
+    });
+
+    // --- Sample Paper Modal: robust close handlers ---
+    try {
+        const sampleModal = document.getElementById('sample-paper-modal');
+        const closeSampleBtn = document.getElementById('close-sample-paper-modal-btn');
+        const openNewTabBtn = document.getElementById('open-sample-paper-new-tab-btn');
+        const previewContainer = document.getElementById('sample-paper-preview');
+        if (closeSampleBtn && sampleModal) {
+            // Close when clicking the × button
+            closeSampleBtn.addEventListener('click', () => {
+                sampleModal.classList.remove('visible');
+                if (previewContainer) previewContainer.innerHTML = '';
+                if (openNewTabBtn) openNewTabBtn.style.display = 'none';
+            });
+
+            // Also allow clicking on the overlay (outside modal-content) to close
+            sampleModal.addEventListener('click', (ev) => {
+                if (ev.target === sampleModal) {
+                    sampleModal.classList.remove('visible');
+                    if (previewContainer) previewContainer.innerHTML = '';
+                    if (openNewTabBtn) openNewTabBtn.style.display = 'none';
+                }
+            });
+        }
+    } catch (e) {
+        console.warn('Sample paper modal handlers initialization failed', e);
+    }
+}
+
+/**
+ * NEW: Initializes event listeners for the store updates modal.
+ * This was missing, causing the buttons to be unresponsive.
+ */
+function initializeStoreUpdatesModal() {
+    // REMOVED: This function is now handled by store.js to avoid conflicts
+    // The store.js initializeUpdatesModal() function handles this properly
+}
+
+function initializeAiIntroModal() {
+    const modal = document.getElementById('ai-intro-modal');
+    if (!modal) return;
+
+    const slides = Array.from(modal.querySelectorAll('.ai-intro-slide'));
+    const progress = document.getElementById('ai-intro-progress');
+    const prevBtn = document.getElementById('ai-intro-prev-btn');
+    const nextBtn = document.getElementById('ai-intro-next-btn');
+    const closeBtn = document.getElementById('ai-intro-close-btn');
+    const feedbackChips = Array.from(modal.querySelectorAll('.feedback-chip'));
+    const feedbackText = document.getElementById('ai-intro-feedback-text');
+
+    let currentStep = 1;
+    const totalSteps = slides.length;
+
+    function updateSlideState() {
+        slides.forEach((slide, index) => {
+            slide.classList.toggle('active', index === currentStep - 1);
+        });
+        if (progress) {
+            progress.textContent = `Step ${currentStep} of ${totalSteps}`;
+        }
+        if (prevBtn) {
+            prevBtn.disabled = currentStep === 1;
+        }
+        if (nextBtn) {
+            nextBtn.textContent = currentStep === totalSteps ? 'Finish' : 'Next';
+        }
+    }
+
+    function closeModal() {
+        modal.classList.remove('visible');
+        document.body.style.overflow = '';
+    }
+
+    function saveFeedback() {
+        const selectedChips = feedbackChips.filter(chip => chip.classList.contains('active'))
+            .map(chip => chip.textContent.trim());
+        const text = feedbackText ? feedbackText.value.trim() : '';
+        const feedbackPayload = {
+            selected: selectedChips,
+            notes: text,
+            step: currentStep,
+            timestamp: new Date().toISOString()
+        };
+        console.log('Quizify AI Intro feedback:', feedbackPayload);
+        localStorage.setItem('quizifyAiIntroSeen', 'true');
+    }
+
+    function showIntro() {
+        currentStep = 1;
+        updateSlideState();
+        modal.classList.add('visible');
+        document.body.style.overflow = 'hidden';
+    }
+
+    nextBtn?.addEventListener('click', () => {
+        if (currentStep < totalSteps) {
+            currentStep += 1;
+            updateSlideState();
+            return;
+        }
+        saveFeedback();
+        closeModal();
+    });
+
+    prevBtn?.addEventListener('click', () => {
+        if (currentStep > 1) {
+            currentStep -= 1;
+            updateSlideState();
+        }
+    });
+
+    closeBtn?.addEventListener('click', () => {
+        saveFeedback();
+        closeModal();
+    });
+
+    modal.addEventListener('click', (event) => {
+        if (event.target === modal) {
+            saveFeedback();
+            closeModal();
+        }
+    });
+
+    feedbackChips.forEach((chip) => {
+        chip.addEventListener('click', () => {
+            feedbackChips.forEach(c => c.classList.remove('active'));
+            chip.classList.add('active');
+        });
+    });
+
+    if (localStorage.getItem('quizifyAiIntroSeen') !== 'true') {
+        setTimeout(showIntro, 800);
+    }
+}
+
+// ===================== NAVIGATION FUNCTIONS =====================
+function showPage(pageId) {
+    document.querySelectorAll('.page').forEach(page => {
+        page.classList.remove('active');
+    });
+    const targetPage = document.getElementById(pageId);
+    if (!targetPage) { console.warn(`showPage: page "${pageId}" not found`); return; }
+    targetPage.classList.add('active');
+
+    // Ensure home page always uses the correct focus mode
+    if (pageId === 'home-page') {
+        const userFocus = normalizeUserFocus(localStorage.getItem('userFocus'));
+        setHomeMode(userFocus);
+    }
+
+    // Bot FAB is always visible (help should be accessible everywhere!)
+    // Chat FAB is hidden during quiz/results to avoid distraction
+    const chatFab = document.getElementById('open-chat-fab');
+    const botFab = document.getElementById('open-help-bot-fab');
+    const bottomNav = document.getElementById('bottom-nav');
+
+    const hideChatPages = ['quiz-page', 'results-page', 'review-page'];
+    const hideAllFabPages = []; // Keep empty — bot available everywhere
+
+    if (hideChatPages.includes(pageId)) {
+        if (chatFab) chatFab.style.display = 'none';
+    } else {
+        if (chatFab) chatFab.style.display = 'block';
+    }
+
+    // Bot help FAB is ALWAYS visible — users need help everywhere!
+    if (botFab) botFab.style.display = 'block';
+
+    // Hide the mobile bottom nav while the quiz page is active so quiz controls stay visible.
+    if (bottomNav) {
+        bottomNav.style.display = pageId === 'quiz-page' ? 'none' : '';
+    }
+}
+
+function normalizeUserFocus(userFocus) {
+    if (!userFocus || typeof userFocus !== 'string') return 'competitive';
+    const cleaned = userFocus.toLowerCase().trim();
+    if (cleaned.startsWith('acad')) return 'academic';
+    if (cleaned.startsWith('comp')) return 'competitive';
+    return 'competitive';
+}
+
+function setHomeMode(userFocus) {
+    const competitiveSection = document.getElementById('competitive-section');
+    const academicSection = document.getElementById('academic-section');
+    const dailyChallengeSection = document.getElementById('daily-challenge-section');
+
+    if (competitiveSection) competitiveSection.style.display = 'none';
+    if (academicSection) academicSection.style.display = 'none';
+    if (dailyChallengeSection) dailyChallengeSection.style.display = 'none';
+
+    const focus = normalizeUserFocus(userFocus);
+    if (focus === 'competitive') {
+        if (competitiveSection) competitiveSection.style.display = 'block';
+        if (dailyChallengeSection) dailyChallengeSection.style.display = 'block';
+        setDailyChallengeDate();
+        checkAndResetStreak();
+        updateStreakDisplay();
+        checkDailyChallengeStatus();
+    } else {
+        if (academicSection) academicSection.style.display = 'block';
+    }
+}
+
+function goToHome() {
+    if (timer) {
+        clearInterval(timer);
+    }
+    let userFocus = localStorage.getItem('userFocus');
+
+    dailyChallengeMode = false;
+    classMode = false;
+    currentClass = '';
+    currentStream = '';
+    currentSubject = '';
+    isGeneralScienceMode = false; // NEW: Reset General Science mode
+    academicDailyChallenge = false;
+    QuizifyStore?.stopDealsCountdown?.();
+    currentChapter = '';
+    updateCoinDisplay(); // NEW: Update coin display on home
+
+    if (!userFocus || (userFocus !== 'academic' && userFocus !== 'competitive')) {
+        userFocus = 'competitive';
+    }
+
+    setHomeMode(userFocus);
+    showPage('home-page');
+    updateDailyGoal(); // NEW: Update daily goal progress for all users
+
+    // ── Quizify AI: show proactive greeting bubble ──
+    setTimeout(() => {
+        if (window.QuizifyBot && typeof QuizifyBot.showProactiveGreeting === 'function') {
+            QuizifyBot.showProactiveGreeting();
+        }
+    }, 2000);
+}
+
+function goBack() {
+    if (dailyChallengeMode) {
+        // From a daily challenge quiz, always go back to the appropriate home screen
+        if (academicDailyChallenge) {
+            goToClass();
+        } else {
+            goToHome();
+        }
+    } else if (classMode) {
+        if (currentClass === '11' || currentClass === '12') {
+            if (currentStream && currentSubject) {
+                currentSubject = '';
+                currentChapter = '';
+                displaySubjectsForClass();
+            } else if (currentStream) {
+                // We are on the subject list page, go back to the stream selection.
+                currentStream = '';
+                showPage('stream-page');
+            } else {
+                // We are on the stream selection page, go back to the main home page.
+                goToHome(); // This correctly resets all state
+            }
+        } else {
+            if (currentSubject) {
+                // FIX: Reset subject and chapter when going back to the subject list
+                currentSubject = '';
+                currentChapter = '';
+                goToClass(); // Call this AFTER resetting the state
+            } else {
+                goToHome();
+            }
+        }
+    } else if (isGeneralScienceMode) {
+        if (currentSubject) {
+            selectSubject('general_science'); // Go back to sub-subject list
+        } else {
+            goToHome();
+        }
+    } else if (currentSubject) {
+        // From competitive chapter list back to competitive subject list
+        // Using goToHome() resets the state and shows the subject selection.
+        goToHome();
+    } else {
+        // Default fallback to home
+        showPage('home-page');
+    }
+}
+
+function goToClass() {
+    if (classMode && currentClass) {
+        displaySubjectsForClass();
+        showPage('class-page');
+        document.getElementById('open-chat-fab').style.display = 'block'; // NEW: Show chat button
+        // Re-check status when returning to class page
+        checkAcademicDailyChallengeStatus();
+    } else {
+        showPage('home-page');
+    }
+}
+
+function goToSubject() {
+    // This function should always navigate back to the chapter list for the current subject
+    if (classMode) {
+        currentChapter = '';
+        displayChaptersForClass();
+    } else {
+        currentChapter = '';
+        displayChapters(currentSubject);
+    }
+    document.getElementById('open-chat-fab').style.display = 'block'; // NEW: Show chat button
+    showPage('subject-page');
+}
+
+function goToChapter() {
+    if (dailyChallengeMode) {
+        // After a daily challenge, go back to the appropriate home/class screen
+        if (academicDailyChallenge) {
+            dailyChallengeMode = false;
+            academicDailyChallenge = false;
+            currentSubject = ''; // Reset subject after academic daily challenge
+            goToClass();
+        } else {
+            dailyChallengeMode = false;
+            goToHome();
+        }
+        return; // Stop further execution
+    }
+    displayChapterInfo(); // This will handle both class and competitive modes
+    document.getElementById('open-chat-fab').style.display = 'block'; // NEW: Show chat button
+    showPage('chapter-page');
+}
+
+function goToResults() {
+    showPage('results-page');
+    document.getElementById('open-chat-fab').style.display = 'block'; // NEW: Show chat button
+}
+
+function goToPracticeResults() {
+    // In practice mode, "Finish" goes back to the chapter page.
+    goToChapter();
+}
+
+function goToSettings() {
+    document.getElementById('timer-duration-input').value = quizTimerSetting;
+    showPage('settings-page');
+}
+
+function initializeQuizModeModal() {
+    const modal = document.getElementById('quiz-mode-modal');
+    const timedBtn = document.getElementById('start-timed-quiz-btn');
+    const practiceBtn = document.getElementById('start-practice-quiz-btn');
+    const closeBtn = document.getElementById('close-quiz-mode-btn'); // NEW
+
+    const closeModal = () => {
+        modal.classList.remove('visible');
+    };
+
+    // When a mode is chosen, we first show the instructions modal before starting the quiz.
+    timedBtn.onclick = () => {
+        closeModal();
+        showQuizInstructions('timed');
+    };
+    practiceBtn.onclick = () => {
+        closeModal();
+        showQuizInstructions('practice');
+    };
+    closeBtn.onclick = closeModal; // NEW
+
+    // NEW: Close modal when clicking on the overlay
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            closeModal();
+        }
+    });
+}
+
+/**
+ * Shows the quiz instructions modal populated with details for the pending set.
+ * @param {'timed'|'practice'} mode
+ */
+function showQuizInstructions(mode) {
+    const modal = document.getElementById('quiz-instructions-modal');
+    const summaryEl = document.getElementById('quiz-instructions-summary');
+    const titleEl = document.getElementById('quiz-instructions-title');
+    if (!modal || !summaryEl) return;
+
+    // Determine context from global state
+    const subjectTitle = getSubjectTitle(currentSubject || (isGeneralScienceMode ? 'General Science' : '')) || 'Quiz';
+    const chapter = currentChapter || '';
+    const setIndex = pendingSetIndex >= 0 ? pendingSetIndex : currentSet;
+
+    // Attempt to find number of questions for this set
+    let questionsCount = 0;
+    try {
+        let chapterData = null;
+        if (classMode && !academicDailyChallenge) {
+            chapterData = allQuizData.find(d => d.id === `class${currentClass}_${currentSubject}` && d.category === 'academic')?.chapters.find(ch => ch.name === currentChapter);
+        } else if (isGeneralScienceMode && !dailyChallengeMode) {
+            chapterData = allQuizData.find(d => d.id === currentSubject && d.category === 'general_science')?.chapters.find(ch => ch.name === currentChapter);
+        } else if (!classMode && !dailyChallengeMode) {
+            chapterData = allQuizData.find(d => d.id === currentSubject && d.category === 'competitive')?.chapters.find(ch => ch.name === currentChapter);
+        }
+        questionsCount = chapterData?.sets?.[setIndex]?.questions?.length || 0;
+    } catch (e) {
+        questionsCount = 0;
+    }
+
+    const estimatedTimeSec = questionsCount * quizTimerSetting; // seconds
+    const minutes = Math.floor(estimatedTimeSec / 60);
+
+    titleEl.textContent = mode === 'timed' ? 'Timed Quiz - Instructions' : 'Practice Mode - Instructions';
+    summaryEl.innerHTML = `
+        <strong>Subject:</strong> ${subjectTitle}<br>
+        <strong>Chapter:</strong> ${chapter || '—'}<br>
+        <strong>Set:</strong> ${setIndex + 1}<br>
+        <strong>Questions:</strong> ${questionsCount}<br>
+        <strong>Estimated time:</strong> ${minutes} minute(s)${mode === 'practice' ? ' (No timer in Practice Mode)' : ''}
+    `;
+
+    // Wire start/cancel buttons
+    const startBtn = document.getElementById('start-quiz-from-instructions-btn');
+    const cancelBtn = document.getElementById('cancel-quiz-instructions-btn');
+    const closeBtn = document.getElementById('close-quiz-instructions-btn');
+
+    const onStart = () => {
+        modal.classList.remove('visible');
+        // Start the selected mode
+        if (mode === 'timed') {
+            startQuiz(pendingSetIndex);
+        } else {
+            startPracticeMode(pendingSetIndex);
+        }
+        // Clean listeners (defensive)
+        startBtn.removeEventListener('click', onStart);
+        cancelBtn.removeEventListener('click', onCancel);
+        closeBtn.removeEventListener('click', onCancel);
+    };
+
+    const onCancel = () => {
+        modal.classList.remove('visible');
+        // reset pendingSetIndex only if we don't want to carry it over
+        // leave pendingSetIndex untouched so user can re-open mode modal
+        startBtn.removeEventListener('click', onStart);
+        cancelBtn.removeEventListener('click', onCancel);
+        closeBtn.removeEventListener('click', onCancel);
+    };
+
+    // Attach listeners
+    startBtn.removeEventListener('click', onStart); // defensive
+    startBtn.addEventListener('click', onStart);
+    cancelBtn.removeEventListener('click', onCancel);
+    cancelBtn.addEventListener('click', onCancel);
+    closeBtn.removeEventListener('click', onCancel);
+    closeBtn.addEventListener('click', onCancel);
+
+    modal.classList.add('visible');
+}
+/**
+ * Checks if a chapter object contains any questions.
+ * @param {object} chapter The chapter object from the data file.
+ * @returns {boolean} True if the chapter has at least one question, false otherwise.
+ */
+function chapterHasQuestions(chapter) {
+    if (!chapter || !chapter.sets || !Array.isArray(chapter.sets)) return false;    
+    return chapter.sets.some(set => set.questions && Array.isArray(set.questions) && set.questions.length > 0);
+}
+
+// ===================== COMPETITIVE EXAM FUNCTIONS (ORIGINAL) =====================
+function selectSubject(subject) {
+    dailyChallengeMode = false;
+    classMode = false;
+    isGeneralScienceMode = false; // Reset this flag
+    currentSubject = subject;
+    currentClass = '';
+    currentStream = '';
+    const subjectTitle = getSubjectTitle(subject);
+    document.getElementById('search-chapters').value = ''; // Clear search bar
+
+    // NEW: Handle General Science sub-subject display
+    if (subject === 'general_science') {
+        isGeneralScienceMode = true;
+        currentSubject = ''; // Clear subject to show sub-subjects
+        document.getElementById('subject-title').textContent = 'General Science';
+        displayGeneralScienceSubSubjects();
+        showPage('subject-page');
+        return;
+    }
+
+    // Original logic for other subjects
+    document.getElementById('subject-title').textContent = subjectTitle;
+    displayChapters(subject);
+    showPage('subject-page');
+}
+
+function getSubjectTitle(subject) {
+    const titles = {
+        quantitative: 'Quantitative Aptitude',
+        english: 'English',
+        reasoning: 'Reasoning',
+        math: 'Mathematics',
+        physics: 'Physics',
+        chemistry: 'Chemistry',
+        biology: 'Biology',
+        accounts: 'Accounts',
+        business: 'Business Studies',
+        economics: 'Economics',
+        history: 'History',
+        geography: 'Geography',
+        polity: 'Polity',
+        static_gk: 'Static GK',
+        // NEW: Handle General Science sub-subject keys
+        'gs_history': 'History',
+        'gs_geography': 'Geography',
+        'gs_polity': 'Polity',
+        'gs_economics': 'Economics'
+    };
+    return titles[subject] || subject;
+}
+
+function displayChapters(subject) {
+    const chaptersGrid = document.getElementById('chapters-grid');
+    chaptersGrid.innerHTML = '';
+    
+    // NEW: Determine the category based on the mode
+    let category = 'competitive';
+    if (isGeneralScienceMode) {
+        category = 'general_science';
+    }
+
+    const data = allQuizData.find(d => d.id === subject && d.category === category);
+    if (!data || !data.chapters) {
+        chaptersGrid.innerHTML = '<p>No chapters available. Please check back later.</p>';
+        return;
+    }
+
+    data.chapters.forEach((chapter, index) => {
+        const hasQuestions = chapterHasQuestions(chapter);
+        const chapterCard = document.createElement('div'); // This was step 1, but I've renumbered for clarity
+        chapterCard.className = `chapter-card ${!hasQuestions ? 'locked' : ''}`;
+        chapterCard.innerHTML = `
+            <h3>${chapter.name}</h3>
+            <p>${chapter.description || 'Practice questions on ' + chapter.name}</p>
+            ${!hasQuestions ? '<div class="set-status">Coming Soon</div>' : ''}
+        `;
+
+        if (hasQuestions) {
+            chapterCard.onclick = function() {
+                currentChapter = chapter.name;
+                displayChapterInfo();
+                showPage('chapter-page');
+            };
+        } else {
+            chapterCard.onclick = showLockedContentMessage;
+        }
+        chaptersGrid.appendChild(chapterCard);
+    });
+}
+
+/**
+ * NEW: Displays the sub-subjects for the General Science category.
+ */
+function displayGeneralScienceSubSubjects() {
+    const chaptersGrid = document.getElementById('chapters-grid');
+    chaptersGrid.innerHTML = ''; // This grid will be used for sub-subjects
+
+    const subSubjects = allQuizData.filter(d => d.category === 'general_science');
+
+    if (subSubjects.length === 0) {
+        chaptersGrid.innerHTML = '<p>No sub-subjects available. Please check back later.</p>';
+        return;
+    }
+
+    subSubjects.forEach(subSubject => {
+        const hasContent = subSubject.chapters && subSubject.chapters.some(chapterHasQuestions);
+        const card = document.createElement('div');
+        // Re-using chapter-card style for consistency
+        card.className = `chapter-card ${!hasContent ? 'locked' : ''}`;
+        card.innerHTML = `
+            <h3>${subSubject.subjectName}</h3>
+            <p>Quizzes on ${subSubject.subjectName}</p>
+            ${!hasContent ? '<div class="set-status">Coming Soon</div>' : ''}
+        `;
+
+        if (hasContent) {
+            card.onclick = () => selectSubSubject(subSubject.id);
+        } else {
+            card.onclick = showLockedContentMessage;
+        }
+        chaptersGrid.appendChild(card);
+    });
+}
+
+// ===================== NEW: CLASS-BASED FUNCTIONS =====================
+function selectClass(cls) {
+    dailyChallengeMode = false;
+    classMode = true;
+    currentClass = cls;
+    currentSubject = '';
+    currentChapter = '';
+    currentStream = '';
+    
+    if (cls === '9' || cls === '10') {
+        // Direct subject selection for class 9 and 10
+        displaySubjectsForClass();
+        document.getElementById('class-title').textContent = `Class ${cls}`;
+        showPage('class-page');
+    } else {
+        // Stream selection for class 11 and 12
+        displayStreamsForClass();
+        showPage('stream-page');
+    }
+}
+
+function displaySubjectsForClass() {
+    const grid = document.getElementById('class-content');
+    if (!grid) return;
+    
+    grid.innerHTML = '';
+    grid.className = 'subjects-grid';
+    
+    // Add Daily Challenge card for academic classes
+    const dailyChallengeCard = document.createElement('div');
+    dailyChallengeCard.id = `academic-daily-challenge-card-${currentClass}`;
+    dailyChallengeCard.className = 'subject-card daily-challenge-card';
+    const today = new Date();
+    const options = { day: 'numeric', month: 'short', year: 'numeric' };
+    const formattedDate = today.toLocaleDateString('en-GB', options); // This was step 1, but I've renumbered for clarity
+
+    dailyChallengeCard.innerHTML = `
+        <div class="daily-challenge-header">
+            <h2>Daily Challenge</h2>
+            <span id="academic-daily-challenge-notification-dot" class="notification-dot" style="display: none;"></span>
+        </div>
+        <p>A mix of 20 questions from all subjects for Class ${currentClass}.</p>
+        <div class="daily-challenge-footer">
+            <span id="academic-daily-challenge-date">${formattedDate}</span>
+            <span id="academic-daily-challenge-status">A new challenge awaits!</span>
+        </div>
+    `;
+    dailyChallengeCard.onclick = () => startAcademicDailyChallenge();
+    grid.appendChild(dailyChallengeCard);
+
+    // Sample Papers card for the class (opens a modal listing all sample papers uploaded for this class)
+    const samplePaperCard = document.createElement('div');
+    samplePaperCard.className = 'subject-card sample-paper-card';
+    samplePaperCard.innerHTML = `
+        <h2>Sample Papers</h2>
+        <p>Open sample papers for Class ${currentClass}</p>
+    `;
+    samplePaperCard.onclick = () => openSamplePapersViewer(currentClass);
+    grid.appendChild(samplePaperCard);
+
+    let subjects = [];
+    const classSubjects = allQuizData.filter(d => d.category === 'academic' && d.id.startsWith(`class${currentClass}_`));
+
+    if (currentClass === '9' || currentClass === '10') {
+        subjects = classSubjects.map(s => s.id.replace(`class${currentClass}_`, ''));
+    } else if (currentClass === '11' || currentClass === '12') {
+        if (!currentStream) return;
+        subjects = classSubjects.filter(s => s.streams?.includes(currentStream)).map(s => s.id.replace(`class${currentClass}_`, ''));
+    }
+    
+    if (!subjects || subjects.length === 0) {
+        grid.innerHTML = '<p>No subjects available for this class.</p>';
+        return;
+    }
+    
+    subjects.forEach(subject => {
+        const subjectDoc = allQuizData.find(d => d.id === `class${currentClass}_${subject}` && d.category === 'academic');
+        const subjectChapters = subjectDoc?.chapters || [];
+        const hasContent = subjectChapters && subjectChapters.some(chapterHasQuestions);
+
+        const card = document.createElement('div');
+        card.className = `subject-card ${!hasContent ? 'locked' : ''}`;
+        
+        // Add icons for Academic subjects like class 9, 10, 11, 12
+        const iconMap = {
+            math: 'https://cdn-icons-png.flaticon.com/512/2283/2283349.png',
+            science: 'https://cdn-icons-png.flaticon.com/512/3000/3000774.png',
+            physics: 'https://cdn-icons-png.flaticon.com/512/3000/3000774.png',
+            chemistry: 'https://cdn-icons-png.flaticon.com/512/4341/4341094.png',
+            biology: 'https://cdn-icons-png.flaticon.com/512/2783/2783988.png',
+            accounts: 'https://cdn-icons-png.flaticon.com/512/2621/2621853.png',
+            business: 'https://cdn-icons-png.flaticon.com/512/3059/3059953.png',
+            economics: 'https://cdn-icons-png.flaticon.com/512/1029/1029183.png',
+            history: 'https://cdn-icons-png.flaticon.com/512/3067/3067559.png'
+        };
+        
+        card.innerHTML = `
+            <img src="${iconMap[subject] || 'https://cdn-icons-png.flaticon.com/512/3131/3131636.png'}" alt="${subject} Icon" class="card-icon">
+            <h2>${getSubjectTitle(subject)}</h2>
+            <p>Practice ${getSubjectTitle(subject)} for Class ${currentClass}</p>
+            ${!hasContent ? '<div class="set-status">Coming Soon</div>' : ''}
+        `;
+        if (hasContent) {
+            card.onclick = function() { 
+                selectClassSubject(subject); 
+            };
+        } else {
+            card.onclick = showLockedContentMessage;
+        }
+        grid.appendChild(card);
+    });
+
+    checkAcademicDailyChallengeStatus(); // NEW: Check status when displaying subjects
+}
+
+/**
+ * Opens the Sample Papers viewer modal for a given class.
+ * It aggregates sample papers from all academic subject docs for the class
+ * and lists them for preview or opening in a new tab.
+ */
+function openSamplePapersViewer(classNum) {
+    const modal = document.getElementById('sample-paper-modal');
+    const listContainer = document.getElementById('sample-paper-list');
+    const previewContainer = document.getElementById('sample-paper-preview');
+    const openNewTabBtn = document.getElementById('open-sample-paper-new-tab-btn');
+    listContainer.innerHTML = '';
+    previewContainer.innerHTML = '';
+    openNewTabBtn.style.display = 'none';
+
+    // Gather all academic docs for this class
+    const docs = allQuizData.filter(d => d.category === 'academic' && String(d.class) === String(classNum));
+    if (!docs || docs.length === 0) {
+        listContainer.innerHTML = '<p>No sample papers found for this class.</p>';
+        modal.classList.add('visible');
+        return;
+    }
+
+    const items = [];
+    docs.forEach(doc => {
+        const subjectName = doc.subjectName || doc.id;
+        const sp = doc.samplePapers || {};
+        // If samplePapers is a string (legacy), normalize
+        if (typeof sp === 'string' && sp.trim()) {
+            items.push({ title: subjectName + ' (default)', url: sp });
+        } else if (typeof sp === 'object') {
+            for (const key in sp) {
+                if (!sp[key]) continue;
+                const title = key === 'default' ? `${subjectName}` : `${subjectName} - ${key.toUpperCase()}`;
+                items.push({ title, url: sp[key] });
+            }
+        }
+    });
+
+    if (items.length === 0) {
+        listContainer.innerHTML = '<p>No sample papers have been uploaded yet for this class.</p>';
+        modal.classList.add('visible');
+        return;
+    }
+
+    // Build list UI
+    const ul = document.createElement('ul');
+    ul.style.listStyle = 'none';
+    ul.style.padding = '0';
+    items.forEach((it, idx) => {
+        const li = document.createElement('li');
+        li.style.padding = '8px 0';
+        li.style.borderBottom = '1px solid var(--color-border)';
+        li.innerHTML = `<a href="#" data-url="${encodeURI(it.url)}" class="sample-paper-link">${it.title}</a>`;
+        ul.appendChild(li);
+    });
+    listContainer.appendChild(ul);
+
+    // Wire click events to preview or open
+    listContainer.querySelectorAll('.sample-paper-link').forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const url = decodeURI(link.dataset.url);
+            previewContainer.innerHTML = '';
+            openNewTabBtn.style.display = 'inline-block';
+            openNewTabBtn.onclick = () => { window.open(url, '_blank'); };
+
+            // Simple detection for PDF vs image
+            const lower = url.toLowerCase();
+            if (lower.endsWith('.pdf') || lower.includes('pdf')) {
+                // embed pdf in iframe but handle blocked/failed loads
+                previewContainer.innerHTML = '';
+                const iframe = document.createElement('iframe');
+                iframe.src = url;
+                iframe.style.width = '100%';
+                iframe.style.height = '480px';
+                iframe.style.border = '0';
+                // Add listeners to detect load or failure (X-Frame-Options or connection refused)
+                let loadHandled = false;
+                const fail = (msg) => {
+                    if (loadHandled) return;
+                    loadHandled = true;
+                    previewContainer.innerHTML = `<div style="padding:12px;border:1px solid var(--color-border);background:var(--color-secondary);">Could not preview this document inside the app. The host may block embedding (e.g. X-Frame-Options). You can open it in a new tab instead.</div>`;
+                    openNewTabBtn.style.display = 'inline-block';
+                    openNewTabBtn.onclick = () => { window.open(url, '_blank'); };
+                    console.warn('Sample paper preview failed:', msg, url);
+                };
+
+                // onload may still fire even for some blocked cases; use a timeout as a fallback
+                iframe.onload = () => {
+                    if (loadHandled) return;
+                    loadHandled = true;
+                    // loaded successfully
+                    // nothing else to do; iframe is visible
+                };
+                iframe.onerror = () => fail('iframe error');
+
+                // If the iframe doesn't load within 3s, assume it's blocked and show fallback
+                const t = setTimeout(() => {
+                    if (!loadHandled) {
+                        fail('timeout or blocked');
+                    }
+                    clearTimeout(t);
+                }, 3000);
+
+                previewContainer.appendChild(iframe);
+            } else {
+                // show image preview with onerror fallback
+                previewContainer.innerHTML = '';
+                const img = document.createElement('img');
+                img.src = url;
+                img.alt = 'Sample Paper';
+                img.style.maxWidth = '100%';
+                img.style.height = 'auto';
+                img.style.border = '1px solid var(--color-border)';
+                img.onerror = () => {
+                    previewContainer.innerHTML = `<div style="padding:12px;border:1px solid var(--color-border);background:var(--color-secondary);">Could not load the image preview. You can open it in a new tab instead.</div>`;
+                    openNewTabBtn.style.display = 'inline-block';
+                    openNewTabBtn.onclick = () => { window.open(url, '_blank'); };
+                };
+                previewContainer.appendChild(img);
+            }
+        });
+    });
+
+    // Show modal
+    modal.classList.add('visible');
+
+    // Close handler
+    const closeBtn = document.getElementById('close-sample-paper-modal-btn');
+    if (closeBtn) {
+        closeBtn.onclick = () => {
+            modal.classList.remove('visible');
+            previewContainer.innerHTML = '';
+            openNewTabBtn.style.display = 'none';
+        };
+    }
+}
+
+function displayStreamsForClass() {
+    const grid = document.getElementById('streams-grid');
+    if (!grid) return;
+    
+    grid.innerHTML = '';
+    
+    // Get unique streams for the class from the data
+    const streams = [...new Set(allQuizData.filter(d => d.id.startsWith(`class${currentClass}_`) && d.streams).flatMap(d => d.streams))];
+    
+    if (streams.length === 0) {
+        grid.innerHTML = '<p>No streams available for this class.</p>';
+        return;
+    }
+    
+    streams.forEach(stream => {
+        const streamCard = document.createElement('div');
+        streamCard.className = 'subject-card';
+        
+        const streamTitles = {
+            pcm: 'Physics, Chemistry, Mathematics',
+            pcb: 'Physics, Chemistry, Biology',
+            pcmb: 'Physics, Chemistry, Math, Biology',
+            commerce: 'Accounts, Business, Economics',
+            art: 'History, Economics, Political Science'
+        };
+        
+        streamCard.innerHTML = `
+            <h2>${stream.toUpperCase()}</h2>
+            <p>${streamTitles[stream] || `${stream.charAt(0).toUpperCase() + stream.slice(1)} Stream`}</p>
+        `;
+        streamCard.onclick = function() {
+            currentStream = stream;
+            displaySubjectsForClass();
+            document.getElementById('class-title').textContent = `Class ${currentClass} - ${stream.toUpperCase()} Stream`;
+            showPage('class-page');
+        };
+        grid.appendChild(streamCard);
+    });
+    
+    document.getElementById('stream-title').textContent = `Choose Your Stream (Class ${currentClass})`;
+}
+
+function selectStream(stream) {
+    currentStream = stream;
+    displaySubjectsForClass();
+    document.getElementById('class-title').textContent = `Class ${currentClass} - ${stream.toUpperCase()} Stream`;
+    showPage('class-page');
+}
+
+/**
+ * NEW: Handles selection of a sub-subject within General Science.
+ * @param {string} subSubjectId - The ID of the sub-subject (e.g., 'history').
+ */
+function selectSubSubject(subSubjectId) {
+    isGeneralScienceMode = true; // Ensure this flag is set
+    currentSubject = subSubjectId; // Now, currentSubject is 'history', 'geography', etc.
+    const subjectData = allQuizData.find(d => d.id === subSubjectId);
+    document.getElementById('subject-title').textContent = subjectData.subjectName;
+    displayChapters(subSubjectId); // Reuse the existing displayChapters function
+    showPage('subject-page'); // Stay on the same page, but show chapters now
+}
+
+function selectClassSubject(subject) {
+    currentSubject = subject;
+    document.getElementById('search-chapters').value = ''; // Clear search bar
+    document.getElementById('subject-title').textContent = `${getSubjectTitle(subject)} - Class ${currentClass}`;
+    displayChaptersForClass();
+    showPage('subject-page');
+}
+
+function displayChaptersForClass() {
+    const grid = document.getElementById('chapters-grid');
+    grid.innerHTML = '';
+    
+    const subjectDoc = allQuizData.find(d => d.id === `class${currentClass}_${currentSubject}` && d.category === 'academic');
+    const chapters = subjectDoc?.chapters || [];
+    
+    if (chapters.length === 0) {
+        grid.innerHTML = '<p>No chapters available for this subject. Please check back later.</p>';
+        return;
+    }
+    
+    chapters.forEach((chapter, index) => {
+        const hasQuestions = chapterHasQuestions(chapter);
+        const chapterCard = document.createElement('div');
+        chapterCard.className = `chapter-card ${!hasQuestions ? 'locked' : ''}`;
+        chapterCard.innerHTML = `
+            <h3>${chapter.name}</h3>
+            <p>Practice questions on ${chapter.name}</p>
+            ${!hasQuestions ? '<div class="set-status">Coming Soon</div>' : ''}
+        `;
+        if (hasQuestions) {
+            chapterCard.onclick = function() {
+                currentChapter = chapter.name;
+                displayChapterInfo();
+                showPage('chapter-page');
+            };
+        } else {
+            chapterCard.onclick = showLockedContentMessage;
+        }
+        grid.appendChild(chapterCard);
+    });
+}
+
+// ===================== NEW: CHAPTER SEARCH FUNCTION =====================
+function filterChapters() {
+    const searchTerm = document.getElementById('search-chapters').value.toLowerCase();
+    const chapterCards = document.querySelectorAll('#chapters-grid .chapter-card');
+    let chaptersFound = false;
+
+    chapterCards.forEach(card => {
+        const chapterName = card.querySelector('h3').textContent.toLowerCase();
+        if (chapterName.includes(searchTerm)) {
+            card.style.display = '';
+            chaptersFound = true;
+        } else {
+            card.style.display = 'none';
+        }
+    });
+
+    // Display a message if no chapters are found
+    let noResultsMessage = document.getElementById('no-results-message');
+    if (!chaptersFound && !noResultsMessage) {
+        noResultsMessage = document.createElement('p');
+        noResultsMessage.id = 'no-results-message';
+        noResultsMessage.textContent = 'No chapters found matching your search.';
+        document.getElementById('chapters-grid').appendChild(noResultsMessage);
+    } else if (chaptersFound && noResultsMessage) {
+        noResultsMessage.remove();
+    }
+}
+
+// ===================== CHAPTER INFO DISPLAY =====================
+function displayChapterInfo() {
+    document.getElementById('chapter-title').textContent = currentChapter;
+    
+    let chapterData = null;
+    let totalQuestions = 0;
+    
+    if (classMode) {
+        chapterData = allQuizData.find(d => d.id === `class${currentClass}_${currentSubject}` && d.category === 'academic')?.chapters.find(ch => ch.name === currentChapter);
+    } else if (isGeneralScienceMode) { // NEW: Handle General Science mode
+        chapterData = allQuizData.find(d => d.id === currentSubject && d.category === 'general_science')?.chapters.find(ch => ch.name === currentChapter);
+    } else {
+        chapterData = allQuizData.find(d => d.id === currentSubject)?.chapters.find(ch => ch.name === currentChapter);
+    }
+    
+    if (chapterData && chapterData.sets) {
+        // FIX: Correctly calculate total questions from the new Firestore data structure.
+        // The old `set.length` was incorrect as each `set` is now an object `{ questions: [...] }`.
+        totalQuestions = chapterData.sets.reduce((sum, set) => sum + (set.questions ? set.questions.length : 0), 0);
+    }
+
+    document.getElementById('total-questions').textContent = totalQuestions;
+    
+    // Calculate progress
+    const totalSetsInChapter = chapterData?.sets?.length || 0; // NEW: Get the actual number of sets.
+    let completedSets = 0;
+    let totalScore = 0;
+    
+    // NEW: Loop through the actual number of sets, not a fixed number.
+    for (let i = 0; i < totalSetsInChapter; i++) {
+        const progressKey = `${currentSubject}_${currentChapter}_${i}`;
+        if (userProgress[progressKey] && userProgress[progressKey].score >= 40) {
+            completedSets++;
+            totalScore += userProgress[progressKey].score;
+        }
+    }
+    
+    const averageScore = completedSets > 0 ? Math.round(totalScore / completedSets) : 0;
+
+    // NEW: Display progress based on the actual number of sets.
+    document.getElementById('completed-sets').textContent = `${completedSets}/${totalSetsInChapter}`;
+    document.getElementById('average-score').textContent = `${averageScore}%`;
+    
+    // Display practice sets
+    displayPracticeSets(chapterData);
+    displayProgressInfo(completedSets, averageScore);
+}
+
+function displayPracticeSets(chapterData) {
+    const setsGrid = document.getElementById('sets-grid');
+    setsGrid.innerHTML = '';
+    const totalSets = chapterData?.sets?.length || 0;
+    
+    for (let i = 0; i < totalSets; i++) {
+        const setCard = document.createElement('div');
+        setCard.className = 'set-card';
+        
+        const progressKey = `${currentSubject}_${currentChapter}_${i}`;
+        const progress = userProgress[progressKey];
+        
+        let setStatus = 'Not Started';
+        let cardClass = '';
+        
+        const hasQuestions = chapterData?.sets?.[i]?.questions?.length > 0;
+
+        if (progress) {
+            if (progress.score >= 40) {
+                setStatus = `Passed (${progress.score}%)`;
+                cardClass = 'completed';
+            } else {
+                setStatus = `Failed (${progress.score}%)`;
+                cardClass = 'failed';
+            }
+        }
+        
+        // Check if set should be locked
+        if (i > 0) {
+            const prevProgressKey = `${currentSubject}_${currentChapter}_${i-1}`;
+            const prevProgress = userProgress[prevProgressKey];
+            if (!prevProgress || prevProgress.score < 40) {
+                setStatus = 'Locked';
+                cardClass = 'locked locked-progress'; // Add a specific class for progress-locked sets
+            }
+        }
+        
+        // Check if questions are available
+        if (!hasQuestions) {
+            setStatus = 'Coming Soon';
+            cardClass = 'locked';
+        }
+        
+        setCard.className = `set-card ${cardClass}`;
+        setCard.innerHTML = `
+            <div class="set-title">Set ${i + 1}</div>
+            <div class="set-status">${setStatus}</div>
+        `;
+        
+        if (setStatus === 'Coming Soon') {
+            // Only 'Coming Soon' cards should show the modal
+            setCard.onclick = showLockedContentMessage;
+        } else if (!cardClass.includes('locked')) {
+            // Clickable only if not locked at all
+            setCard.onclick = (e) => {
+                const card = e.currentTarget;
+                if (card.classList.contains('completed')) {
+                    // If the set is already passed, show confirmation modal
+                    showRetakeConfirmation(i);
+                } else {
+                    // Otherwise, show the quiz mode selection modal directly
+                    promptQuizMode(i);
+                }
+            };
+        }
+        
+        setsGrid.appendChild(setCard);
+    }
+}
+
+/**
+ * NEW: Shows the retake confirmation modal.
+ * Stores the set index that the user intends to retake.
+ * @param {number} setIndex - The index of the quiz set to be retaken.
+ */
+function showRetakeConfirmation(setIndex) {
+    // Store the set index in a global variable or a data attribute
+    // Using pendingSetIndex which is already available for this purpose.
+    pendingSetIndex = setIndex;
+    document.getElementById('retake-confirm-modal').classList.add('visible');
+}
+
+/**
+ * NEW: Handles the logic after the user confirms the retake.
+ * It determines whether to start the quiz directly or show the mode selection.
+ */
+function handleRetakeConfirmation() {
+    const modal = document.getElementById('retake-confirm-modal');
+    modal.classList.remove('visible');
+
+    // If currentSet is defined, it means we came from the results page.
+    // The 'retakeQuiz' function handles this, so we just start the quiz.
+    // If pendingSetIndex is defined, it means we came from the chapter page.
+    if (pendingSetIndex !== -1) {
+        // User clicked a 'Passed' set on the chapter page, so show the mode choice modal.
+        promptQuizMode(pendingSetIndex);
+    } else {
+        // User clicked 'Retake' on the results page.
+        startQuiz(currentSet);
+    }
+}
+
+function promptQuizMode(setIndex) {
+    pendingSetIndex = setIndex;
+    const modal = document.getElementById('quiz-mode-modal');
+    modal.classList.add('visible');
+}
+
+function displayProgressInfo(completedSets, averageScore) {
+    const progressInfo = document.getElementById('progress-info');
+    const totalSetsInChapter = document.getElementById('completed-sets').textContent.split('/')[1] || 0;
+    const progressPercentage = totalSetsInChapter > 0 ? (completedSets / totalSetsInChapter * 100).toFixed(0) : 0;
+    progressInfo.innerHTML = `
+        <p><strong>Completed Sets:</strong> ${completedSets}/${totalSetsInChapter}</p>
+        <p><strong>Average Score:</strong> ${averageScore}%</p>
+        <p><strong>Chapter Progress:</strong> ${progressPercentage}%</p>
+    `;
+}
+
+// ===================== QUIZ FUNCTIONALITY (PRESERVED) =====================
+function startQuiz(setIndex) {
+    dailyChallengeMode = false;
+    practiceMode = false; // Ensure practice mode is off
+    currentSet = setIndex;
+    currentQuestionIndex = 0;
+    userAnswers = [];
+    
+    // Get quiz data based on mode
+    let chapterData = null;
+    if (classMode && !academicDailyChallenge) {
+        chapterData = allQuizData.find(d => d.id === `class${currentClass}_${currentSubject}` && d.category === 'academic')?.chapters.find(ch => ch.name === currentChapter);
+    } else if (isGeneralScienceMode && !dailyChallengeMode) { // FIX: Added check for General Science mode
+        chapterData = allQuizData.find(d => d.id === currentSubject && d.category === 'general_science')?.chapters.find(ch => ch.name === currentChapter);
+    } else if (!classMode && !dailyChallengeMode) {
+        // This now correctly handles only the main competitive subjects
+        chapterData = allQuizData.find(d => d.id === currentSubject && d.category === 'competitive')?.chapters.find(ch => ch.name === currentChapter);
+    }
+    
+    // FIX: The quizData was not being assigned for regular quizzes, causing an error on submission.
+    // This was because the check was exiting before quizData could be set.
+    if (dailyChallengeMode || academicDailyChallenge) {
+        // Daily challenge data is already set, so we do nothing here.
+    } else if (chapterData?.sets?.[setIndex]?.questions?.length > 0) {
+        quizData = chapterData.sets[setIndex].questions;
+    } else {
+        showNotification('This set is not available yet. Please check back later.', 'warning');
+        return;
+    }
+    // Initialize user answers array
+    userAnswers = new Array(quizData.length).fill(null);
+    
+    // Setup timer
+    timeRemaining = quizData.length * quizTimerSetting; // NEW: Use customizable timer setting
+    totalTime = timeRemaining;
+    
+    displayQuestion();
+    startTimer();
+    document.getElementById('open-chat-fab').style.display = 'none'; // NEW: Hide chat button during quiz
+    document.getElementById('open-help-bot-fab').style.display = 'none'; // NEW: Hide bot button during quiz
+    setupQuestionNumbers();
+    showPage('quiz-page');
+}
+
+function startPracticeMode(setIndex) {
+    practiceMode = true;
+    dailyChallengeMode = false;
+    currentSet = setIndex;
+    currentQuestionIndex = 0;
+    userAnswers = [];
+
+    // Get quiz data based on mode
+    let chapterData = null;
+    if (classMode) {
+        chapterData = allQuizData.find(d => d.id === `class${currentClass}_${currentSubject}` && d.category === 'academic')?.chapters.find(ch => ch.name === currentChapter);
+    } else {
+        chapterData = allQuizData.find(d => d.id === currentSubject && d.category === 'competitive')?.chapters.find(ch => ch.name === currentChapter);
+    }
+
+    if (!chapterData?.sets?.[setIndex]?.questions?.length > 0) {
+        showNotification('This set is not available for practice yet.', 'warning');
+        return;
+    }
+
+    quizData = chapterData.sets[setIndex].questions;
+
+    // Initialize user answers array
+    userAnswers = new Array(quizData.length).fill(null);
+
+    displayQuestion();
+    document.getElementById('open-chat-fab').style.display = 'none'; // NEW: Hide chat button during quiz
+    document.getElementById('open-help-bot-fab').style.display = 'none'; // NEW: Hide bot button during quiz
+    // DO NOT start the timer for practice mode
+    setupQuestionNumbers();
+    showPage('quiz-page');
+    updateLifelineDisplay();
+}
+
+function displayQuestion() {
+    if (!quizData || currentQuestionIndex >= quizData.length) return;
+
+    // Keep global helpers in sync for AI modules and compatibility fallbacks
+    window.currentQuestionIndex = currentQuestionIndex;
+    window.quizData = quizData;
+    window.allQuizData = allQuizData;
+    
+    const question = quizData[currentQuestionIndex];
+    
+    // Update question counter
+    document.getElementById('current-question').textContent = 
+        `Question ${currentQuestionIndex + 1} of ${quizData.length}`;
+    
+    // Update current set display
+    let setDisplay = practiceMode ? 'Practice' : (currentSet + 1);
+    document.getElementById('current-set').textContent = setDisplay;
+
+
+    // Hide timer in practice mode
+    document.getElementById('timer').style.display = practiceMode ? 'none' : 'block';
+    // FIX: Show lifelines in BOTH practice and timed mode
+    document.getElementById('lifeline-container').style.display = 'flex';
+
+    // Hide previous button in practice mode
+    document.getElementById('prev-btn').style.display = practiceMode ? 'none' : 'inline-flex';
+    
+    // Handle question year badge
+    const yearBadge = document.getElementById('question-year-badge');
+    if (question.year) {
+        yearBadge.textContent = question.year;
+        yearBadge.style.display = 'inline-block';
+    } else {
+        yearBadge.style.display = 'none';
+    }
+
+    // Display question
+    document.getElementById('question-text').textContent = question.question;
+    // Optional question image (added by admin via imageUrl)
+    const qImgEl = document.getElementById('question-image');
+    const openImgBtn = document.getElementById('open-question-image-btn');
+    if (qImgEl) {
+        if (question.imageUrl && question.imageUrl.toString().trim()) {
+            qImgEl.src = question.imageUrl;
+            qImgEl.alt = question.alt ? question.alt : `Image for question ${currentQuestionIndex + 1}`;
+            qImgEl.style.display = 'block';
+            // If image fails to load, hide it gracefully
+            qImgEl.onerror = () => {
+                qImgEl.style.display = 'none';
+                qImgEl.src = '';
+                qImgEl.alt = '';
+                if (openImgBtn) openImgBtn.style.display = 'none';
+            };
+            // Show and wire the Open Image button (UX improvement requested)
+            if (openImgBtn) {
+                openImgBtn.style.display = 'inline-block';
+                openImgBtn.onclick = () => {
+                    try { window.openImageViewer(question.imageUrl, question.alt || `Image for question ${currentQuestionIndex + 1}`); } catch (e) { console.warn('Failed to open image', e); }
+                };
+                // Also make the thumbnail clickable to open the viewer
+                qImgEl.style.cursor = 'pointer';
+                qImgEl.onclick = () => {
+                    try { window.openImageViewer(question.imageUrl, question.alt || `Image for question ${currentQuestionIndex + 1}`); } catch (e) { console.warn('Failed to open image', e); }
+                };
+            }
+        } else {
+            qImgEl.style.display = 'none';
+            qImgEl.src = '';
+            qImgEl.alt = '';
+            if (openImgBtn) openImgBtn.style.display = 'none';
+        }
+    }
+    
+    // Display options
+    const optionsContainer = document.getElementById('options-container');
+    optionsContainer.innerHTML = '';
+    
+    question.options.forEach((option, index) => {
+        const optionDiv = document.createElement('div');
+        optionDiv.className = 'option';
+        optionDiv.textContent = `${String.fromCharCode(65 + index)}. ${option}`;
+        optionDiv.onclick = () => selectOption(index);
+        
+        if (userAnswers[currentQuestionIndex] === index) {
+            optionDiv.classList.add('selected');
+        }
+        
+        optionsContainer.appendChild(optionDiv);
+    });
+    
+    // Clear feedback and hide next button for new question in practice mode
+    document.getElementById('practice-feedback').innerHTML = '';
+    document.getElementById('next-btn').style.display = practiceMode ? 'none' : 'inline-flex';
+
+
+    // Update navigation buttons
+    document.getElementById('prev-btn').disabled = currentQuestionIndex === 0;
+    document.getElementById('next-btn').textContent = 
+        currentQuestionIndex === quizData.length - 1 ? 'Finish' : 'Next';
+    
+    // Update bookmark button
+    updateBookmarkButton();
+
+    // NEW: Reset and enable lifeline buttons for the new question
+    document.getElementById('lifeline-5050').disabled = false;
+    document.getElementById('lifeline-hint').disabled = false;
+    document.getElementById('lifeline-skip').disabled = false;
+    // Reset Time Freeze button as well
+    if (document.getElementById('lifeline-freeze')) document.getElementById('lifeline-freeze').disabled = false;
+
+    updateQuestionNumbers();
+}
+
+function selectOption(optionIndex) {
+    if (practiceMode) {
+        // In practice mode, provide instant feedback
+        const question = quizData[currentQuestionIndex];
+        const isCorrect = optionIndex === question.answer;
+        const options = document.querySelectorAll('.option');
+        const feedbackEl = document.getElementById('practice-feedback');
+
+        // Disable all options after one is selected
+        options.forEach(opt => opt.classList.add('disabled'));
+
+        // Highlight the correct answer
+        options[question.answer].classList.add('correct-feedback');
+
+        if (isCorrect) {
+            feedbackEl.textContent = 'Correct!';
+            feedbackEl.className = 'practice-feedback feedback-correct';
+        } else {
+            // Highlight the user's wrong choice
+            options[optionIndex].classList.add('incorrect-feedback');
+            feedbackEl.textContent = 'Incorrect!';
+            feedbackEl.className = 'practice-feedback feedback-incorrect';
+        }
+
+        // Show the 'Next' or 'Finish' button
+        const nextBtn = document.getElementById('next-btn');
+        nextBtn.style.display = 'inline-flex';
+        if (currentQuestionIndex === quizData.length - 1) {
+            nextBtn.textContent = 'Finish Practice'; // The main event listener will handle the click
+        } else {
+            nextBtn.textContent = 'Next Question'; // The main event listener will handle the click
+        }
+        return; // End execution for practice mode
+    }
+
+    // --- Original logic for timed quiz mode ---
+    userAnswers[currentQuestionIndex] = optionIndex;
+    document.querySelectorAll('.option').forEach((option, index) => {
+        option.classList.toggle('selected', index === optionIndex);
+    });
+    updateQuestionNumbers();
+}
+
+function previousQuestion() {
+    if (currentQuestionIndex > 0) {
+        currentQuestionIndex--;
+        displayQuestion();
+    }
+}
+
+function nextQuestion() {
+    // In practice mode, if it's the last question, the "Finish" button should
+    // take the user back to the chapter, not try to submit a quiz.
+    if (practiceMode && currentQuestionIndex === quizData.length - 1) {
+        goToPracticeResults();
+        return;
+    }
+
+    if (currentQuestionIndex < quizData.length - 1) {
+        currentQuestionIndex++;
+        displayQuestion();
+    } else {
+        submitQuiz();
+    }
+}
+
+function goToQuestion(questionIndex) {
+    currentQuestionIndex = questionIndex;
+    displayQuestion();
+}
+
+function setupQuestionNumbers() {
+    const questionNumbers = document.getElementById('question-numbers');
+    questionNumbers.innerHTML = '';
+    
+    for (let i = 0; i < quizData.length; i++) {
+        const numberDiv = document.createElement('div');
+        numberDiv.className = 'question-number';
+        numberDiv.textContent = i + 1;
+        numberDiv.onclick = () => goToQuestion(i);
+        questionNumbers.appendChild(numberDiv);
+    }
+}
+
+function updateQuestionNumbers() {
+    const questionNumbers = document.querySelectorAll('.question-number');
+    questionNumbers.forEach((number, index) => {
+        number.classList.remove('current', 'answered');
+        if (index === currentQuestionIndex) {
+            number.classList.add('current');
+        } else if (userAnswers[index] !== null) {
+            number.classList.add('answered');
+        }
+    });
+}
+
+function startTimer() {
+    if (timer) {
+        clearInterval(timer);
+    }
+    timer = setInterval(() => {
+        timeRemaining--;
+        updateTimerDisplay();
+        
+        if (timeRemaining <= 0) {
+            clearInterval(timer);
+            submitQuiz();
+        }
+    }, 1000);
+}
+
+function updateTimerDisplay() {
+    const minutes = Math.floor(timeRemaining / 60);
+    const seconds = timeRemaining % 60;
+    const timerElement = document.getElementById('timer');
+    timerElement.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    
+    // Add warning classes
+    timerElement.classList.remove('timer-warning', 'timer-danger');
+    if (timeRemaining <= 300) { // 5 minutes
+        timerElement.classList.add('timer-warning');
+    }
+    if (timeRemaining <= 60) { // 1 minute
+        timerElement.classList.add('timer-danger');
+    }
+}
+
+/**
+ * Checks if a user has previously failed a specific quiz set.
+ * @param {string} progressKey - The unique key for the quiz set.
+ * @returns {boolean} - True if there is a recorded failed attempt, false otherwise.
+ */
+function hasPreviouslyFailed(progressKey) {
+    const progress = userProgress[progressKey];
+    // FIX: Correctly check for a failed attempt in the history.
+    // The logic should check if there's more than one attempt AND if any of the previous attempts had a score < 40.
+    if (progress && Array.isArray(progress.attempts) && progress.attempts.length > 1) {
+        return progress.attempts.slice(0, -1).some(attempt => typeof attempt.score === 'number' && attempt.score < 40);
+    }
+    return false;
+}
+
+/**
+ * NEW: Checks if a chapter is completed and awards a bonus if it's the first time.
+ */
+function checkAndAwardChapterBonus() {
+    const chapterCompletionKey = `chapter_completed_${currentSubject}_${currentChapter}`;
+    if (userProgress[chapterCompletionKey]) return; // Bonus already awarded
+
+    const chapterData = allQuizData.find(d => d.id === currentSubject)?.chapters.find(ch => ch.name === currentChapter);
+    const totalSets = chapterData?.sets?.length || 0;
+    const completedSets = (userProgress.stats?.[currentSubject]?.[currentChapter]?.completedSets) || 0;
+
+    if (totalSets > 0 && completedSets === totalSets) {
+        unlockAchievement('chapter_master'); // Also trigger the achievement
+    }
+}
+function submitQuiz() {
+    if (timer) {
+        clearInterval(timer);
+    }
+
+    if (practiceMode) {
+        // Practice mode doesn't have a results page, just goes back to chapter.
+        goToChapter();
+        return;
+    }
+
+    const timeTaken = totalTime - timeRemaining;
+    const results = calculateResults();
+
+    // Get user info for saving results
+    const _currentUser = auth.currentUser;
+    const userName = _currentUser?.displayName || _currentUser?.email?.split('@')[0] || 'Anonymous';
+    const userId = getOrCreateUserId(); // NEW: Get a unique ID for the user
+
+    saveResultToFirestore(
+        userName,
+        userId,
+        `${getSubjectTitle(currentSubject)} - ${currentChapter}`,
+        results.percentage
+    );
+
+    // Handle progress saving based on the quiz mode
+    if (academicDailyChallenge) {
+        const today = new Date().toISOString().split('T')[0];
+        const dailyProgressKey = `daily_challenge_class${currentClass}_${today}`;
+        updateStreak(results.passed); // NEW: Update streak
+        userProgress[dailyProgressKey] = { score: results.percentage, timeTaken: timeTaken };
+        saveUserProgress();
+    } else if (dailyChallengeMode) {
+        const today = new Date().toISOString().split('T')[0];
+        const dailyProgressKey = `daily_challenge_${today}`;
+        userProgress[dailyProgressKey] = { score: results.percentage, timeTaken: timeTaken };
+        saveUserProgress();
+        updateStreak(results.passed); // NEW: Update streak
+    } else {
+        // Save progress for regular chapter sets
+        const progressKey = `${currentSubject}_${currentChapter}_${currentSet}`;
+
+        // NEW: Instead of overwriting, we will store a history of attempts.
+        const newAttempt = {
+            score: results.percentage,
+            timeTaken: timeTaken,
+            date: new Date().toISOString(),
+            type: 'quiz',
+            subject: currentSubject,
+            chapter: currentChapter,
+            set: currentSet,
+            answers: userAnswers.slice() // Keep answers for review
+        };
+
+        if (!userProgress[progressKey] || !Array.isArray(userProgress[progressKey].attempts)) {
+            // If no history exists, create it.
+            userProgress[progressKey] = {
+                score: newAttempt.score, // Keep the best score at the top level for easy access
+                attempts: [newAttempt]
+            };
+            showNotification('Quiz result saved!', 'success');
+        } else {
+            // Add the new attempt to the history
+            userProgress[progressKey].attempts.push(newAttempt);
+            // Update the top-level score only if the new score is higher
+            if (newAttempt.score >= userProgress[progressKey].score) {
+                userProgress[progressKey].score = newAttempt.score;
+                showNotification('New high score saved!', 'success');
+            }
+        }
+
+        // Keep a global quiz history array for daily goal tracking.
+        userProgress.quizHistory = userProgress.quizHistory || [];
+        userProgress.quizHistory.push({
+            type: 'quiz',
+            date: newAttempt.date,
+            score: newAttempt.score,
+            timeTaken: newAttempt.timeTaken,
+            subject: newAttempt.subject,
+            chapter: newAttempt.chapter,
+            set: newAttempt.set
+        });
+
+        // --- NEW: Refined Coin Award Logic ---
+        let coinsEarned = 0;
+        let notificationMessages = [];
+
+        // 1. Award 10 coins for passing, but only once.
+        if (results.passed && !userProgress[progressKey].passBonusAwarded) {
+            coinsEarned += 10;
+            notificationMessages.push('You passed and earned 10 coins!');
+            userProgress[progressKey].passBonusAwarded = true;
+        }
+
+        // 2. Award 25 bonus coins for a perfect score, but only once.
+        if (results.percentage === 100 && !userProgress[progressKey].perfectScoreBonusAwarded) {
+            coinsEarned += 25;
+            notificationMessages.push('Perfect score! You earned a bonus of 25 coins!');
+            userProgress[progressKey].perfectScoreBonusAwarded = true;
+        }
+
+        // 3. Update user coins and show a combined notification.
+        if (coinsEarned > 0) {
+            userProgress.quizCoins = (userProgress.quizCoins || 0) + coinsEarned;
+            const finalMessage = `${notificationMessages.join(' ')} Total earned: ${coinsEarned} 💰`;
+            showNotification(finalMessage, 'success');
+        }
+        // --- End of New Coin Logic ---
+
+        saveUserProgress(); // Save the updated progress with the full history
+        checkAndAwardChapterBonus(); // NEW: Check for chapter completion bonus
+    }
+
+    // NEW: After any quiz, recalculate and save the overall profile stats.
+    // This ensures the user's profile data is always up-to-date in Firestore.
+    calculateOverallStats();
+
+    // FIX: Always display results and show the results page for any timed quiz.
+    displayResults(results, timeTaken);
+    showPage('results-page'); 
+
+    // Restore chat and help bot visibility after quiz submission
+    try {
+        const chatFab = document.getElementById('open-chat-fab');
+        const botFab = document.getElementById('open-help-bot-fab');
+        if (chatFab) chatFab.style.display = 'inline-flex';
+        if (botFab) botFab.style.display = 'inline-flex';
+    } catch (e) { /* Ignore if elements are not present */ }
+
+    // NEW: Check for achievements AFTER displaying results and saving progress.
+    checkAchievements(results, timeTaken);
+    updateCoinDisplay(); // NEW: Update coin display after potential earnings
+    updateStreakDisplay(); // NEW: Update streak display after a quiz
+
+    // NEW: Hook all gamification modules on quiz completion
+    const xpEarned = Math.round(results.percentage * 0.5) + (results.passed ? 25 : 5);
+    const quizMeta = {
+        subject: currentSubject,
+        chapter: currentChapter,
+        set: currentSet,
+        score: results.percentage,
+        passed: results.passed,
+        timeTaken: timeTaken
+    };
+    if (typeof LevelSystem !== 'undefined') {
+        LevelSystem.addXP(xpEarned, quizMeta);
+    }
+    if (typeof QuizifyQuests !== 'undefined') {
+    }
+    if (typeof QuizifyAnalytics !== 'undefined') {
+        QuizifyAnalytics.trackQuizCompletion(quizMeta);
+    }
+    if (typeof QuizifyLeaderboards !== 'undefined') {
+        QuizifyLeaderboards.updateUserScore(
+            getOrCreateUserId(),
+            auth.currentUser?.displayName || 'Anonymous',
+            results.percentage,
+            currentSubject
+        );
+    }
+    if (typeof SmartNotifications !== 'undefined') {
+        SmartNotifications.onQuizComplete(quizMeta);
+    }
+}
+
+function calculateResults() {
+    let correctCount = 0;
+    
+    userAnswers.forEach((answer, index) => {
+        if (answer === quizData[index].answer) {
+            correctCount++;
+        }
+    });
+    
+    const percentage = Math.round((correctCount / quizData.length) * 100);
+    
+    return {
+        correctCount,
+        incorrectCount: quizData.length - correctCount,
+        percentage,
+        passed: percentage >= 40
+    };
+}
+
+function displayResults(results, timeTaken) {
+    const scorePercentageEl = document.getElementById('score-percentage');
+    const scoreRingCircle = document.getElementById('score-ring-circle');
+    const scoreDetailsGrid = document.getElementById('score-details-grid');
+    const timeTakenEl = document.getElementById('time-taken');
+
+    // Animate the score percentage text
+    animateValue(scorePercentageEl.id, 0, results.percentage, 1000, '%');
+
+    // Animate the SVG progress ring
+    const radius = scoreRingCircle.r.baseVal.value;
+    const circumference = 2 * Math.PI * radius;
+    const offset = circumference - (results.percentage / 100) * circumference;
+
+    scoreRingCircle.style.strokeDasharray = `${circumference} ${circumference}`;
+    scoreRingCircle.style.strokeDashoffset = circumference; // Start with the ring empty
+    // A small delay to allow the element to render before transitioning
+    setTimeout(() => {
+        scoreRingCircle.style.strokeDashoffset = offset;
+    }, 100);
+
+    // Set ring color based on pass/fail
+    scoreRingCircle.classList.toggle('passed', results.passed);
+    scoreRingCircle.classList.toggle('failed', !results.passed);
+
+    // Populate the score details grid
+    scoreDetailsGrid.innerHTML = `
+        <div class="score-detail-item correct"><strong>${results.correctCount}</strong><span>Correct</span></div>
+        <div class="score-detail-item incorrect"><strong>${results.incorrectCount}</strong><span>Incorrect</span></div>
+        <div class="score-detail-item time"><strong id="time-taken">0:00</strong><span>Time Taken</span></div>
+    `;
+
+    // Format and display time taken
+    const minutes = Math.floor(timeTaken / 60);
+    const seconds = timeTaken % 60;
+    document.getElementById('time-taken').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    
+    // Update result status
+    const resultStatus = document.getElementById('result-status');
+    if (results.passed) {
+        resultStatus.textContent = '🎉 Congratulations! You passed the quiz!';
+        resultStatus.className = 'result-status passed';
+        triggerConfetti(); // NEW: Trigger confetti on pass
+    } else {
+        resultStatus.textContent = '❌ You need to score 40% or above to pass. Try again!';
+        resultStatus.className = 'result-status failed';
+    }
+
+    // ── Populate AI result feedback card ──
+    const aiResultText = document.getElementById('ai-result-text');
+    if (aiResultText && window.QuizifyBot && typeof QuizifyBot.generateResultFeedback === 'function') {
+        const feedback = QuizifyBot.generateResultFeedback(results.percentage, currentSubject);
+        // Format bold text from **...**
+        aiResultText.innerHTML = feedback.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    }
+}
+
+/**
+ * NEW: Creates and animates confetti for a celebratory effect.
+ */
+function triggerConfetti() {
+    const container = document.getElementById('confetti-container');
+    if (!container) return;
+
+    container.innerHTML = ''; // Clear old confetti
+    const confettiCount = 100;
+    const colors = ['#3b82f6', '#22c55e', '#eab308', '#ef4444', '#8b5cf6'];
+
+    for (let i = 0; i < confettiCount; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        
+        confetti.style.left = `${Math.random() * 100}vw`;
+        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.animationDelay = `${Math.random() * 2}s`;
+        confetti.style.animationDuration = `${2 + Math.random() * 3}s`; // Duration between 2s and 5s
+        confetti.style.transform = `rotateZ(${Math.random() * 360}deg)`;
+
+        container.appendChild(confetti);
+    }
+}
+
+/**
+ * NEW: Creates and animates festive sparkles in the background.
+ */
+function initializeSparkles() {
+    const container = document.getElementById('welcome-sparkles');
+    if (!container) return;
+
+    const sparkleCount = 25; // Number of sparkles for the welcome message
+
+    for (let i = 0; i < sparkleCount; i++) {
+        const sparkle = document.createElement('div');
+        sparkle.className = 'welcome-sparkle';
+
+        sparkle.style.top = `${Math.random() * 100}%`;
+        sparkle.style.left = `${Math.random() * 100}%`;
+        
+        const duration = 1 + Math.random() * 1.5; // Random duration between 1s and 2.5s
+        const delay = Math.random() * 2; // Random delay up to 2s
+
+        sparkle.style.animationDuration = `${duration}s`;
+        sparkle.style.animationDelay = `${delay}s`;
+
+        container.appendChild(sparkle);
+    }
+}
+
+function animateValue(id, start, end, duration, suffix = '') {
+    const obj = document.getElementById(id);
+    let startTimestamp = null;
+    const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        obj.innerHTML = Math.floor(progress * (end - start) + start) + suffix;
+        if (progress < 1) {
+            window.requestAnimationFrame(step);
+        }
+    };
+    window.requestAnimationFrame(step);
+}
+
+function retakeQuiz() {
+    if (dailyChallengeMode) {
+        // Daily challenges have a fixed set of questions for the day, so just restart it.
+        if (academicDailyChallenge) {
+            startAcademicDailyChallenge();
+        } else {
+            startDailyChallenge();
+        }
+        return;
+    }
+
+    // --- NEW LOGIC FOR REGULAR QUIZZES ---
+    // Find other available (un-passed) sets in the same chapter to avoid repetition.
+    let chapterData;
+    if (classMode) {
+        chapterData = allQuizData.find(d => d.id === `class${currentClass}_${currentSubject}` && d.category === 'academic')?.chapters.find(ch => ch.name === currentChapter);
+    } else if (isGeneralScienceMode) {
+        chapterData = allQuizData.find(d => d.id === currentSubject && d.category === 'general_science')?.chapters.find(ch => ch.name === currentChapter);
+    } else {
+        chapterData = allQuizData.find(d => d.id === currentSubject && d.category === 'competitive')?.chapters.find(ch => ch.name === currentChapter);
+    }
+
+    if (!chapterData || !chapterData.sets) {
+        startQuiz(currentSet); // Fallback to restarting the same quiz
+        return;
+    }
+
+    const totalSets = chapterData.sets.length;
+    const availableSets = [];
+
+    for (let i = 0; i < totalSets; i++) {
+        if (chapterData.sets[i]?.questions?.length > 0) {
+            const progressKey = `${currentSubject}_${currentChapter}_${i}`;
+            const progress = userProgress[progressKey];
+            if (!progress || progress.score < 40) {
+                availableSets.push(i);
+            }
+        }
+    }
+
+    const otherAvailableSets = availableSets.filter(set => set !== currentSet);
+
+    if (otherAvailableSets.length > 0) {
+        const nextSet = otherAvailableSets[Math.floor(Math.random() * otherAvailableSets.length)];
+        showNotification(`Starting another available set: Set ${nextSet + 1}`, 'info');
+        startQuiz(nextSet);
+    } else {
+        // All sets are passed, or this is the only set. Check if the current one is passed.
+        const progressKey = `${currentSubject}_${currentChapter}_${currentSet}`;
+        const progress = userProgress[progressKey];
+        if (progress && progress.score >= 40) {
+            // The user has passed this quiz before, so show confirmation.
+            // We set currentSet here because retake is from the results page.
+            // pendingSetIndex will be -1.
+            pendingSetIndex = -1; // Ensure this is reset
+            showRetakeConfirmation(currentSet);
+        } else {
+            // The user has not passed this quiz, so let them retake it directly.
+            showNotification("You haven't passed this set yet. Let's try again!", 'info');
+            startQuiz(currentSet);
+        }
+    }
+}
+
+function reviewAnswers() {
+    // NEW: Set the back button to go to the results page
+    const backBtn = document.getElementById('review-page-back-btn');
+    backBtn.onclick = goToResults;
+    document.getElementById('review-page-title').textContent = 'Review Your Answers';
+
+    // Pass the current quiz data and user answers to the display function
+    displayReview(quizData, userAnswers);
+    showPage('review-page');
+}
+
+/**
+ * Displays the review of a quiz, showing user answers against correct answers.
+ * @param {Array} questions - The array of question objects for the quiz.
+ * @param {Array} userAnswersForQuiz - The array of user's answers for that quiz.
+ */
+function displayReview(questions, userAnswersForQuiz) {
+    const reviewContainer = document.getElementById('review-container');
+    reviewContainer.innerHTML = '';
+    
+    questions.forEach((question, index) => {
+        const userAnswer = userAnswersForQuiz[index];
+        const correctAnswer = question.answer;
+        const isCorrect = userAnswer === correctAnswer;
+        
+        const reviewDiv = document.createElement('div');
+        reviewDiv.className = `review-question ${isCorrect ? 'correct' : 'incorrect'}`;
+        
+        let reviewHTML = `
+            <h3>Question ${index + 1}</h3>
+            ${question.year ? `<p class="review-year">Asked in: <strong>${question.year}</strong></p>` : ''}
+            <p><strong>${question.question}</strong></p>
+            <div class="review-options">
+        `;
+        
+        question.options.forEach((option, optIndex) => {
+            let optionClass = 'review-option';
+            if (optIndex === correctAnswer) {
+                optionClass += ' correct-answer';
+            }
+            if (optIndex === userAnswer && userAnswer !== correctAnswer) {
+                optionClass += ' user-wrong';
+            }
+            if (optIndex === userAnswer && userAnswer === correctAnswer) {
+                optionClass += ' user-answer';
+            }
+            
+            reviewHTML += `<div class="${optionClass}">${String.fromCharCode(65 + optIndex)}. ${option}</div>`;
+        });
+        
+        reviewHTML += `
+            </div>
+            <p><strong>Correct Answer:</strong> ${String.fromCharCode(65 + correctAnswer)}</p>
+        `;
+        
+        if (userAnswer === null) {
+            reviewHTML += `<p><strong>Your Answer:</strong> Not answered</p>`;
+        } else {
+            reviewHTML += `<p><strong>Your Answer:</strong> ${String.fromCharCode(65 + userAnswer)}</p>`;
+        }
+        
+        reviewDiv.innerHTML = reviewHTML;
+        // If the question has an image, add it to the review card (before the options block)
+        if (question.imageUrl && question.imageUrl.toString().trim()) {
+            try {
+                const imgEl = document.createElement('img');
+                imgEl.className = 'question-thumbnail';
+                imgEl.src = question.imageUrl;
+                imgEl.alt = `Image for question ${index + 1}`;
+                imgEl.onerror = () => { imgEl.style.display = 'none'; };
+                // Insert before the options container if present
+                const optionsBlock = reviewDiv.querySelector('.review-options');
+                if (optionsBlock) {
+                    reviewDiv.insertBefore(imgEl, optionsBlock);
+                } else {
+                    reviewDiv.appendChild(imgEl);
+                }
+                // Make review thumbnails clickable to open full-size image
+                imgEl.style.cursor = 'pointer';
+                imgEl.addEventListener('click', () => {
+                    try { window.openImageViewer(question.imageUrl, question.alt || `Image for question ${index + 1}`); } catch (e) { console.warn('Failed to open review image', e); }
+                });
+            } catch (e) {
+                // If anything goes wrong, skip image for safety
+                console.warn('Failed to add review image:', e);
+            }
+        }
+
+        reviewContainer.appendChild(reviewDiv);
+    });
+}
+
+// ===================== LOCAL STORAGE FUNCTIONS =====================
+/**
+ * Saves the user's entire progress object to their document in Firestore.
+ */
+async function saveUserProgress() {
+    const userId = getOrCreateUserId();
+    console.log('💾 saveUserProgress: userId =', userId);
+    
+    if (!userId || userId.startsWith('user_anonymous')) {
+        // Fallback to localStorage if user is not properly identified
+        localStorage.setItem('quizProgress', JSON.stringify(userProgress));
+        console.log("⚠️ User not identified, saving progress to localStorage.");
+        return;
+    }
+
+    userProgress.bookmarks = bookmarkedQuestions; // Ensure latest bookmarks are on the object before saving
+
+    try {
+        console.log('📤 Saving to userProgressCollection with userId:', userId);
+        console.log('📊 Saving data:', userProgress);
+        await userProgressCollection.doc(userId).set(userProgress);
+        console.log("✅ User progress saved to Firestore.");
+        // Update subject progress rings after saving
+        if (window.QuizifyApp) {
+            window.QuizifyApp.updateSubjectProgress();
+        }
+    } catch (error) {
+        console.error("❌ Error saving progress to Firestore: ", error);
+        // Fallback to localStorage on error
+        localStorage.setItem('quizProgress', JSON.stringify(userProgress));
+        console.log("📍 Saved to localStorage as fallback");
+    }
+}
+
+/**
+ * Loads the user's progress from their document in Firestore.
+ * If not found, it checks localStorage for any previously saved progress.
+ */
+async function loadUserProgress() {
+    showSpinnerModal(true, 'Syncing Your Progress', 'Please wait while we fetch your latest data...');
+    const userId = getOrCreateUserId();
+    console.log('📦 loadUserProgress: userId =', userId);
+    
+    if (!userId || userId.startsWith('user_anonymous')) {
+        const savedLocal = localStorage.getItem('quizProgress');
+        userProgress = savedLocal ? JSON.parse(savedLocal) : {};
+        console.log("❌ User not identified, loading progress from localStorage.");
+        showSpinnerModal(false); // Hide spinner
+        return;
+    }
+
+    try {
+        console.log('🔍 Querying userProgressCollection for userId:', userId);
+        const doc = await userProgressCollection.doc(userId).get();
+        
+        if (doc.exists) {
+            userProgress = doc.data();
+            console.log('✅ User progress loaded from Firestore:', userProgress);
+        } else {
+            console.log('⚠️ No user progress found in Firestore. Creating new progress...');
+            const currentUser = firebase.auth().currentUser;
+            // NEW: Initialize for a brand new user on Firestore
+            userProgress = {
+                userName: currentUser ? (currentUser.displayName || currentUser.email.split('@')[0]) : 'Anonymous',
+                email: currentUser ? currentUser.email : '',
+                quizCoins: 50, // Starting coins
+                lifelines: { fiftyFifty: 3, hint: 3, skip: 3, timeFreeze: 1 }, // Starting lifelines (include Time Freeze)
+                achievements: [],
+                bookmarks: [],
+                purchasedItems: { themes: ['system', 'light', 'dark'], avatars: ['👤'] },
+                activeAvatar: '👤',
+                theme: 'system',
+                quantitative: {},
+                english: {},
+                reasoning: {},
+                general_science: {},
+                mockTestHistory: []
+            };
+            await saveUserProgress(); // Save the defaults for the new user immediately
+        }
+        console.log("✅ User progress loaded from Firestore.");
+        showSpinnerModal(false); // Hide spinner on success
+    } catch (error) {
+        console.error("❌ Error loading progress from Firestore: ", error);
+        showSpinnerModal(false); // Hide spinner on error
+        const savedLocal = localStorage.getItem('quizProgress');
+        userProgress = savedLocal ? JSON.parse(savedLocal) : {};
+        console.log("📍 Fallback: Loading from localStorage");
+    }
+
+    // --- NEW: Initialize local state from the loaded userProgress object ---
+    // This ensures consistency for both new and existing users.
+    quizCoins = userProgress.quizCoins || 50;
+    lifelines = userProgress.lifelines || { fiftyFifty: 3, hint: 3, skip: 3, timeFreeze: 1 }; // Default lifelines (include Time Freeze)
+    bookmarkedQuestions = userProgress.bookmarks || []; // Ensure bookmarks are loaded
+    userProgress.purchasedItems = userProgress.purchasedItems || { themes: ['system', 'light', 'dark'], avatars: ['👤'] };
+    userProgress.activeAvatar = userProgress.activeAvatar || '👤';
+    userProgress.theme = userProgress.theme || 'dark';
+    
+    // NEW: Ensure all quiz subject data structures exist
+    userProgress.quantitative = userProgress.quantitative || {};
+    userProgress.english = userProgress.english || {};
+    userProgress.reasoning = userProgress.reasoning || {};
+    userProgress.general_science = userProgress.general_science || {};
+    userProgress.mockTestHistory = userProgress.mockTestHistory || [];
+    // userProgress.utilityTokens = userProgress.utilityTokens || {}; // REVERTED: Removed for now
+
+    // NEW: Apply active avatar
+    document.getElementById('profile-avatar-display').textContent = userProgress.activeAvatar || '👤';
+    
+    // Apply the loaded theme
+    applyTheme(userProgress.theme, false); // false to prevent re-saving
+    // Update lifeline UI counts after loading progress
+    updateLifelineDisplay();
+    
+    // Update subject progress rings after loading progress
+    if (window.QuizifyApp) {
+        window.QuizifyApp.updateSubjectProgress();
+    }
+
+}
+
+/**
+ * NEW: Calculates and displays the user's single best score across all quizzes.
+ */
+function displayPersonalBest() {
+    const personalBestSection = document.getElementById('personal-best-section');
+    const scoreValueEl = document.getElementById('personal-best-score-value');
+    const quizNameEl = document.getElementById('personal-best-quiz-name');
+
+    if (!personalBestSection || !scoreValueEl || !quizNameEl) return;
+
+    let bestScore = 0;
+    let bestQuizName = 'N/A';
+
+    // Iterate over all progress entries to find the highest score
+    for (const key in userProgress) {
+        // Ensure we are looking at a quiz progress entry which has a score
+        if (userProgress[key] && typeof userProgress[key].score === 'number') {
+            if (userProgress[key].score > bestScore) {
+                bestScore = userProgress[key].score;
+                // Extract a readable name from the progress key
+                // e.g., "quantitative_Time and Work_0" -> "Time and Work"
+                const parts = key.split('_');
+                if (parts.length >= 2) {
+                    bestQuizName = parts[1]; // The chapter name
+                }
+            }
+        }
+    }
+
+    if (bestScore > 0) {
+        // Animate the score and display the card
+        animateValue(scoreValueEl.id, 0, bestScore, 1500);
+        quizNameEl.textContent = bestQuizName;
+        personalBestSection.style.display = 'block';
+    } else {
+        personalBestSection.style.display = 'none';
+    }
+}
+
+function loadQuizSettings() {
+    // FIX: Load the quiz timer setting from the userProgress object,
+    // which is synced with Firestore. Default to 60 if not set.
+    quizTimerSetting = userProgress.quizTimer || 60;
+}
+function updateCoinDisplay() {
+    const coins = userProgress.quizCoins || 0;
+    // Sync all coin display elements
+    const els = ['quiz-coins-balance', 'hero-coins-display', 'header-coins-value'];
+    els.forEach(id => { const el = document.getElementById(id); if (el) el.textContent = coins; });
+
+    // Also sync side menu profile header
+    const user = firebase.auth().currentUser;
+    const displayName = user?.displayName || user?.email?.split('@')[0] || 'Student';
+    const avatar = userProgress.activeAvatar || '👤';
+
+    const menuName = document.getElementById('menu-user-name');
+    const menuAvatar = document.getElementById('menu-user-avatar');
+    const heroAvatar = document.getElementById('home-hero-avatar');
+
+    if (menuName) menuName.textContent = displayName;
+    if (menuAvatar) menuAvatar.textContent = avatar;
+    if (heroAvatar) heroAvatar.textContent = avatar;
+
+    // Refresh AI inline cards on data update
+    if (window.QuizifyBot && typeof QuizifyBot.refreshInlineCards === 'function') {
+        QuizifyBot.refreshInlineCards();
+    }
+}
+
+/**
+ * NEW: Saves the quiz timer setting to the user's progress object.
+ * This will be synced to Firestore by saveUserProgress().
+ */
+function saveQuizSettings() {
+    userProgress.quizTimer = quizTimerSetting;
+    saveUserProgress();
+}
+
+// ===================== UTILITY FUNCTIONS =====================
+/**
+ * Animates a number from a start to an end value.
+ * @param {string} id The ID of the element to update.
+ * @param {number} start The starting number.
+ * @param {number} end The ending number.
+ * @param {number} duration The duration of the animation in ms.
+ * @param {string} suffix A suffix to append to the number (e.g., '%').
+ */
+
+
+function formatTime(seconds) {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+}
+
+// ===================== NEW: THEME SWITCHER =====================
+function initializeSettingsPage() {
+    const saveAccountBtn = document.getElementById('save-account-btn');
+    const saveQuizBtn = document.getElementById('save-quiz-settings-btn');
+    const durationInput = document.getElementById('timer-duration-input');
+    const nameInput = document.getElementById('account-name-input');
+    const pinInput = document.getElementById('account-pin-input');
+    const deleteBtn = document.getElementById('delete-account-btn');
+    const editBtn = document.getElementById('edit-account-btn');    
+    const applyAvatarBtn = document.getElementById('apply-avatar-btn');
+
+    // We only require minimal settings elements now
+    if (!saveQuizBtn || !durationInput || !applyAvatarBtn) return;
+
+    // Wire up the Delete Account button
+    if (deleteBtn) {
+        deleteBtn.addEventListener('click', () => {
+            confirmAccountDeletion();
+        });
+    }
+    
+    // Account setting elements
+    const providerDisplay = document.getElementById('account-display-provider');
+    const emailDisplay = document.getElementById('account-display-email');
+    const nameUpdateInput = document.getElementById('account-name-update');
+    const saveNameBtn = document.getElementById('save-name-btn');
+    const passwordSection = document.getElementById('password-update-section');
+    const passwordUpdateInput = document.getElementById('account-password-update');
+    const savePasswordBtn = document.getElementById('save-password-btn');
+
+    // Populate fields when settings page is opened
+    const menuSettingsBtn = document.getElementById('menu-settings-btn');
+    if (menuSettingsBtn) {
+        menuSettingsBtn.addEventListener('click', () => {
+            document.getElementById('avatar-actions').style.display = 'none'; // Hide apply avatar button
+
+            loadQuizSettings(); // Load latest settings
+            durationInput.value = quizTimerSetting;
+            
+            // Populate account display info using Firebase Auth
+            const user = firebase.auth().currentUser;
+            if (user) {
+                // Determine provider
+                const providerData = user.providerData[0];
+                const providerId = providerData ? providerData.providerId : 'firebase';
+                let providerName = 'Email/Password';
+                if (providerId === 'google.com') providerName = 'Google';
+                
+                if (providerDisplay) providerDisplay.textContent = providerName;
+                if (emailDisplay) emailDisplay.textContent = user.email || 'No email associated';
+                
+                // Set name input
+                if (nameUpdateInput) nameUpdateInput.value = user.displayName || user.email?.split('@')[0] || '';
+                
+                // Show password update only for email/password users
+                if (passwordSection) {
+                    passwordSection.style.display = (providerId === 'password' || providerId === 'firebase') ? 'block' : 'none';
+                }
+            }
+            
+            goToSettings();
+            closeSideMenu();
+            populateCustomizationGrids();
+        });
+    }
+
+    // Set initial values on first load
+    loadQuizSettings();
+    document.getElementById('avatar-actions').style.display = 'none'; // Hide apply avatar button
+    durationInput.value = quizTimerSetting;
+
+    // Save Name Update
+    if (saveNameBtn && nameUpdateInput) {
+        saveNameBtn.addEventListener('click', async () => {
+            const user = firebase.auth().currentUser;
+            const newName = nameUpdateInput.value.trim();
+            if (!user) return;
+            if (!newName) {
+                showNotification('Name cannot be empty', 'error');
+                return;
+            }
+            
+            try {
+                saveNameBtn.disabled = true;
+                saveNameBtn.textContent = 'Updating...';
+                await user.updateProfile({ displayName: newName });
+                
+                // ALSO map to Firestore so features using Firestore data know the name
+                const firestoreDb = firebase.firestore();
+                try {
+                    await firestoreDb.collection('userProgress').doc(user.uid).set({
+                        userName: newName
+                    }, { merge: true });
+                    
+                    await firestoreDb.collection('users').doc(user.uid).set({
+                        userName: newName
+                    }, { merge: true });
+                } catch(fsErr) {
+                    console.warn("Could not sync name to all Firestore collections", fsErr);
+                }
+
+                showNotification('Name updated successfully!', 'success');
+                // Real-time update on home page UI
+                const userFocus = localStorage.getItem('userFocus') || 'none';
+                personalizeHomepage(newName, userFocus);
+            } catch (error) {
+                console.error("Error updating name:", error);
+                showNotification('Failed to update name: ' + error.message, 'error');
+            } finally {
+                saveNameBtn.disabled = false;
+                saveNameBtn.textContent = 'Update Name';
+                nameUpdateInput.value = ''; // clear input
+            }
+        });
+    }
+
+    // Save Password Update
+    if (savePasswordBtn && passwordUpdateInput) {
+        savePasswordBtn.addEventListener('click', async () => {
+            const user = firebase.auth().currentUser;
+            const newPassword = passwordUpdateInput.value;
+            if (!user) return;
+            if (newPassword.length < 6) {
+                showNotification('Password must be at least 6 characters', 'error');
+                return;
+            }
+            
+            try {
+                savePasswordBtn.disabled = true;
+                savePasswordBtn.textContent = 'Updating...';
+                await user.updatePassword(newPassword);
+                passwordUpdateInput.value = ''; // clear input
+                showNotification('Password updated successfully!', 'success');
+            } catch (error) {
+                console.error("Error updating password:", error);
+                if (error.code === 'auth/requires-recent-login') {
+                    showNotification('Please sign out and sign back in to change your password', 'error');
+                } else {
+                    showNotification('Failed to update password: ' + error.message, 'error');
+                }
+            } finally {
+                savePasswordBtn.disabled = false;
+                savePasswordBtn.textContent = 'Update Password';
+            }
+        });
+    }
+
+    // Event listener for saving ONLY quiz settings
+    saveQuizBtn.addEventListener('click', () => {
+        const newDuration = parseInt(durationInput.value, 10);
+        if (isNaN(newDuration) || newDuration < 10 || newDuration > 180) {
+            showNotification('Please enter a duration between 10 and 180 seconds.', 'error');
+            return;
+        }
+        quizTimerSetting = newDuration;
+        saveQuizSettings();
+        showNotification('Quiz settings saved!', 'success');
+    });
+
+    // NEW: Event listener for the Apply Avatar button
+    applyAvatarBtn.addEventListener('click', () => {
+        const selectedAvatarEl = document.querySelector('.selection-item.selected[data-avatar]');
+        if (selectedAvatarEl) {
+            const newAvatar = selectedAvatarEl.dataset.avatar;
+            selectAvatar(newAvatar);
+            document.getElementById('avatar-actions').style.display = 'none'; // Hide after applying
+        } else {
+            showNotification('Please select an avatar first.', 'info');
+        }
+    });
+}
+
+document.getElementById('settings-page').addEventListener('click', (e) => {
+    const avatarItem = e.target.closest('.selection-item[data-avatar]');
+    if (avatarItem) {
+        // NEW: Select avatar visually, don't apply it yet
+        document.querySelectorAll('.selection-item[data-avatar]').forEach(item => item.classList.remove('selected'));
+        avatarItem.classList.add('selected');
+        
+        // Show the "Apply" button
+        document.getElementById('avatar-actions').style.display = 'block';
+    }
+
+    // Handle theme selection clicks
+    const themeItem = e.target.closest('.selection-item[data-theme]');
+    if (themeItem) {
+        showNotification('This function is currently disabled by the administrator.', 'error');
+    }
+});
+
+/**
+ * NEW: Shows a confirmation modal before allowing the user to edit account details.
+ */
+function confirmAccountEdit() {
+    showNotification('Account editing is currently disabled.', 'info');
+    return;
+}
+
+/**
+ * Handles updating user account details (name/PIN) and migrating their data in Firestore.
+ */
+async function saveAccountChanges() {
+    showNotification('Account management is currently disabled.', 'info');
+    return;
+}
+
+/**
+ * NEW: Helper function to show or hide the generic spinner modal and reset its state.
+ * @param {boolean} show - True to show the modal, false to hide it.
+ * @param {string} [title=''] - The title to display in the modal.
+ * @param {string} [message=''] - The message to display in the modal.
+ */
+function showSpinnerModal(show, title = '', message = '') {
+    const modal = document.getElementById('spinner-modal');
+    if (!modal) return;
+
+    if (show) {
+        // Reset to initial "updating" state before showing
+        document.getElementById('spinner-modal-title').textContent = title || 'Loading...';
+        document.getElementById('spinner-modal-message').textContent = message || 'Please wait.';
+        document.getElementById('spinner-modal-spinner-container').style.display = 'block';
+        document.getElementById('spinner-modal-success-container').style.display = 'none';
+        modal.classList.add('visible');
+    } else {
+        modal.classList.remove('visible');
+    }
+}
+
+/**
+ * NEW: Handles the account deletion process.
+ * Shows a two-step confirmation flow.
+ */
+function confirmAccountDeletion() {
+    const deleteConfirmModal = document.getElementById('delete-confirm-modal');
+    const confirmTitle = document.getElementById('delete-confirm-title');
+    const confirmMessage = document.getElementById('delete-confirm-message');
+
+    confirmTitle.textContent = '⚠️ Delete Account';
+    confirmMessage.textContent = 'This action is permanent and cannot be undone. All your quiz progress, scores, coins, and data will be permanently deleted. Are you sure?';
+    deleteConfirmModal.classList.add('visible');
+
+    // Wire up the modal buttons
+    const cancelBtn = document.getElementById('cancel-delete-btn');
+    const proceedBtn = document.getElementById('confirm-delete-btn');
+
+    // Clear existing listeners by cloning
+    const newCancelBtn = cancelBtn.cloneNode(true);
+    cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
+    const newProceedBtn = proceedBtn.cloneNode(true);
+    proceedBtn.parentNode.replaceChild(newProceedBtn, proceedBtn);
+
+    newCancelBtn.addEventListener('click', () => {
+        deleteConfirmModal.classList.remove('visible');
+    });
+
+    newProceedBtn.addEventListener('click', () => {
+        deleteConfirmModal.classList.remove('visible');
+        const user = auth.currentUser;
+        const providerData = user?.providerData?.[0];
+        const providerId = providerData ? providerData.providerId : '';
+
+        // For email/password users, ask for password re-authentication
+        if (providerId === 'password') {
+            const credentialModal = document.getElementById('delete-credential-modal');
+            credentialModal.classList.add('visible');
+
+            const cancelCredBtn = document.getElementById('cancel-credential-btn');
+            const confirmCredBtn = document.getElementById('confirm-credential-btn');
+
+            // Clone to clear old listeners
+            const newCancelCredBtn = cancelCredBtn.cloneNode(true);
+            cancelCredBtn.parentNode.replaceChild(newCancelCredBtn, cancelCredBtn);
+            const newConfirmCredBtn = confirmCredBtn.cloneNode(true);
+            confirmCredBtn.parentNode.replaceChild(newConfirmCredBtn, confirmCredBtn);
+
+            newCancelCredBtn.addEventListener('click', () => {
+                credentialModal.classList.remove('visible');
+            });
+
+            newConfirmCredBtn.addEventListener('click', async () => {
+                const password = document.getElementById('delete-account-password-input').value;
+                if (!password) {
+                    showNotification('Please enter your password.', 'error');
+                    return;
+                }
+                try {
+                    const credential = firebase.auth.EmailAuthProvider.credential(user.email, password);
+                    await user.reauthenticateWithCredential(credential);
+                    credentialModal.classList.remove('visible');
+                    deleteAccount();
+                } catch (error) {
+                    console.error('Re-auth error:', error);
+                    showNotification('Incorrect password. Please try again.', 'error');
+                }
+            });
+        } else {
+            // For Google/Phone users, proceed directly (may require recent login)
+            deleteAccount();
+        }
+    });
+}
+
+async function deleteAccount() {
+    const user = auth.currentUser;
+    if (!user) {
+        showNotification('No user signed in.', 'error');
+        return;
+    }
+
+    const userId = user.uid;
+    
+    // Use the account update modal to show deletion progress
+    showSpinnerModal(true, 'Deleting Account...', 'Your data is being permanently removed. Please wait.');
+
+    try {
+        const firestoreDb = firebase.firestore();
+        
+        // Delete from all Firestore collections
+        const deletePromises = [
+            firestoreDb.collection('userProgress').doc(userId).delete().catch(e => console.warn('userProgress delete:', e)),
+            firestoreDb.collection('users').doc(userId).delete().catch(e => console.warn('users delete:', e)),
+            firestoreDb.collection('leaderboard').doc(userId).delete().catch(e => console.warn('leaderboard delete:', e)),
+            firestoreDb.collection('quizResults').doc(userId).delete().catch(e => console.warn('quizResults delete:', e)),
+        ];
+        
+        await Promise.all(deletePromises);
+        console.log('✅ All Firestore data deleted for user:', userId);
+
+        // Delete the Firebase Auth account
+        await user.delete();
+
+        // Clear local storage
+        localStorage.clear();
+        userProgress = {};
+
+        showSpinnerModal(false);
+        showNotification('Account deleted successfully. Reloading...', 'success');
+        setTimeout(() => window.location.reload(), 2000);
+    } catch (error) {
+        console.error("Error deleting account:", error);
+        showSpinnerModal(false);
+        if (error.code === 'auth/requires-recent-login') {
+            showNotification('For security, please log out and log back in, then try deleting again.', 'error');
+        } else {
+            showNotification('Failed to delete account: ' + error.message, 'error');
+        }
+    }
+}
+
+/**
+ * Initializes the theme based on user preference (light, dark, or system).
+ * Defaults to 'system' for new users.
+ */
+function initializeTheme() {
+    // This function is now just for one-time setup.
+    // The population logic is moved to populateCustomizationGrids.
+    // Add a listener to automatically change theme if OS preference changes and 'system' is selected
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+        if (userProgress.theme === 'system' || !userProgress.theme) {
+            const newColorScheme = event.matches ? "dark" : "light";
+            document.documentElement.setAttribute('data-color-scheme', newColorScheme);
+        }
+    });
+}
+
+function applyTheme(theme, shouldSave = true) {
+    // This function is now called AFTER user profile is loaded.
+    
+    // Always force dark theme per administrator rule
+    document.documentElement.setAttribute('data-color-scheme', 'dark');
+
+    // Save the new theme preference
+    if (shouldSave) {
+        userProgress.theme = theme;
+        saveUserProgress();
+    }
+
+    // Re-populate to update the 'active' state on the buttons
+    populateCustomizationGrids();
+}
+
+// ===================== NEW: DAILY CHALLENGE =====================
+function checkDailyChallengeStatus() {
+    if (classMode) return; // This is for competitive daily challenge
+    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+    const dailyProgressKey = `daily_challenge_${today}`; // FIX: Use consistent key
+    const progress = userProgress[dailyProgressKey];
+    const statusEl = document.getElementById('daily-challenge-status');
+    const notificationDot = document.getElementById('daily-challenge-notification-dot');
+    const dailyChallengeCard = document.getElementById('daily-challenge-section');
+
+    if (!statusEl || !notificationDot || !dailyChallengeCard) return;
+
+    if (progress) {
+        // User has attempted the challenge today
+        if (progress.score >= 40) {
+            // FIX: If passed, always hide the card for the day.
+            dailyChallengeCard.style.display = 'none';
+            notificationDot.style.display = 'none';
+        } else {
+            // User has failed, show status and allow retry
+            dailyChallengeCard.style.display = 'block'; // Ensure it's visible on failure
+            notificationDot.style.display = 'none'; // Hide dot on failed attempt
+            statusEl.textContent = `Attempted Today. Score: ${progress.score}%. Try again!`;
+            statusEl.style.color = 'var(--color-warning)';
+        }
+    } else {
+        // User has not attempted the challenge today.
+        dailyChallengeCard.style.display = 'block';
+        statusEl.textContent = 'A new challenge awaits!';
+        checkAndResetStreak(); // NEW: Check if streak is broken when the card is shown
+        statusEl.style.color = ''; // Reset color
+        notificationDot.style.display = 'block';
+
+        // Only show the notification once per day.
+        const lastNotificationDate = localStorage.getItem('dailyChallengeNotificationDate');
+        if (lastNotificationDate !== today) {
+            showNotification('A new Daily Challenge is available!', 'info');
+            localStorage.setItem('dailyChallengeNotificationDate', today);
+        }
+    }
+}
+
+function startDailyChallenge() {
+    dailyChallengeMode = true;
+    academicDailyChallenge = false;
+    currentSubject = 'Daily Challenge';
+    currentChapter = 'Mixed Questions';
+    currentSet = 0;
+    currentQuestionIndex = 0;
+    userAnswers = []; // Reset answers
+
+    quizData = generateDailyChallengeQuestions();
+
+    if (!quizData || quizData.length < 20) {
+        showNotification('Not enough questions for a Daily Challenge. Please add more content.', 'error');
+        goToHome();
+        return;
+    }
+
+    userAnswers = new Array(quizData.length).fill(null); // Ensure answers array is correct size
+    timeRemaining = quizData.length * 60;
+    totalTime = timeRemaining;
+
+    displayQuestion();
+    startTimer();
+    updateBookmarkButton(); // Add this line
+    // Hide chat and bot while the Daily Challenge is active
+    try {
+        const chatFab = document.getElementById('open-chat-fab');
+        const botFab = document.getElementById('open-help-bot-fab');
+        if (chatFab) chatFab.style.display = 'none';
+        if (botFab) botFab.style.display = 'none';
+    } catch (e) { /* Ignore if elements are not present */ }
+    setupQuestionNumbers();
+    showPage('quiz-page');
+}
+
+// NEW: App Wrapper Support Utility
+function getAppOrigin() {
+    const origin = window.location.origin;
+    const protocol = window.location.protocol;
+    const host = window.location.host;
+    
+    console.log('--- App Environment Info ---');
+    console.log('Origin:', origin);
+    console.log('Protocol:', protocol);
+    console.log('Host:', host);
+    console.log('URL:', window.location.href);
+    console.log('User Agent:', navigator.userAgent);
+    
+    // Show in a user-friendly UI
+    const modalHtml = `
+        <div class="modal-overlay visible" id="origin-info-modal">
+            <div class="modal-content" style="max-width: 400px; text-align: center;">
+                <h3>Your App Origin</h3>
+                <p>Add the following address to your <strong>Firebase Console > Auth > Settings > Authorized Domains</strong>:</p>
+                <div style="background: rgba(0,0,0,0.2); padding: 12px; border-radius: 8px; margin: 15px 0; font-family: monospace; border: 1px solid var(--color-border); word-break: break-all;">
+                    ${origin}
+                </div>
+                <p style="font-size: 0.8em; color: var(--color-text-secondary); margin-bottom: 20px;">
+                    This URL is used by Firebase to allow Google Sign-in to work within your app.
+                </p>
+                <button class="btn btn--primary" id="close-origin-modal" style="width: 100%;">Got it</button>
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    document.getElementById('close-origin-modal').onclick = () => {
+        document.getElementById('origin-info-modal').remove();
+    };
+}
+
+/**
+ * Shuffles an array in place using a seeded pseudo-random number generator.
+ * This ensures the shuffle is the same for a given seed (e.g., for a specific day).
+ * @param {Array} array The array to shuffle.
+ * @param {number} seed The seed for the random number generator.
+ * @returns {Array} The shuffled array.
+ */
+function seededShuffle(array, seed) { // This function is now exposed globally
+    let currentIndex = array.length, randomIndex;
+    const pseudoRandom = () => {
+        const x = Math.sin(seed++) * 10000;
+        return x - Math.floor(x);
+    };
+    while (currentIndex !== 0) {
+        randomIndex = Math.floor(pseudoRandom() * currentIndex);
+        currentIndex--;
+        [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+    }
+    return array;
+}
+
+function generateDailyChallengeQuestions() {
+    const getQuestionsForSubject = (subjectKey) => {
+        const subjectDoc = allQuizData.find(d => d.id === subjectKey);
+        if (!subjectDoc) return [];
+        return subjectDoc.chapters.flatMap(chapter =>
+            chapter.sets.flatMap(set =>
+                set.questions || [] // Handle sets that might not have a questions property
+            ).map(q => ({ ...q, subject: subjectKey, chapter: chapter.name })) // Add context
+        );
+    };
+
+    const today = new Date();
+    let seed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
+
+    const quantQuestions = getQuestionsForSubject('quantitative');
+    const reasoningQuestions = getQuestionsForSubject('reasoning');
+    const englishQuestions = getQuestionsForSubject('english');
+
+    // Shuffle each subject's questions using the daily seed
+    seededShuffle(quantQuestions, seed);
+    seededShuffle(reasoningQuestions, seed + 1); // Use a slightly different seed for each
+    seededShuffle(englishQuestions, seed + 2);
+
+    let dailyQuestions = [];
+    const fallbackPool = [];
+
+    // Take 7 from Quantitative, or as many as available
+    dailyQuestions.push(...quantQuestions.splice(0, 7));
+    // Take 7 from Reasoning, or as many as available
+    dailyQuestions.push(...reasoningQuestions.splice(0, 7));
+    // Take 6 from English, or as many as available
+    dailyQuestions.push(...englishQuestions.splice(0, 6));
+
+    // If we still need more questions, create a fallback pool
+    if (dailyQuestions.length < 20) {
+        fallbackPool.push(...quantQuestions, ...reasoningQuestions, ...englishQuestions);
+        seededShuffle(fallbackPool, seed + 3); // Shuffle the fallback pool
+        const needed = 20 - dailyQuestions.length;
+        dailyQuestions.push(...fallbackPool.slice(0, needed));
+    }
+
+    // Final shuffle of the 20 selected questions to mix them up
+    return seededShuffle(dailyQuestions, seed + 4).slice(0, 20);
+}
+
+// ===================== NEW: ACADEMIC DAILY CHALLENGE =====================
+function checkAcademicDailyChallengeStatus() {
+    if (!classMode || !currentClass) return;
+
+    const today = new Date().toISOString().split('T')[0];
+    const dailyProgressKey = `daily_challenge_class${currentClass}_${today}`;
+    const progress = userProgress[dailyProgressKey];
+    const statusEl = document.getElementById('academic-daily-challenge-status');
+    const cardEl = document.getElementById(`academic-daily-challenge-card-${currentClass}`);
+    const notificationDot = document.getElementById('academic-daily-challenge-notification-dot');
+
+    if (!statusEl || !notificationDot || !cardEl) return;
+
+    if (progress) {
+        notificationDot.style.display = 'none';
+        if (progress.score >= 40) {
+            // User has passed, hide the card for the rest of the day
+            cardEl.style.display = 'none';
+        } else {
+            // User has failed, show status and allow retry
+            cardEl.style.display = 'block';
+            statusEl.textContent = `Attempted. Score: ${progress.score}%. Try again!`;
+            statusEl.style.color = 'var(--color-warning)';
+        }
+    } else {
+        cardEl.style.display = 'block';
+        statusEl.textContent = 'A new challenge awaits!';
+        statusEl.style.color = '';
+        notificationDot.style.display = 'block';
+    }
+}
+
+function startAcademicDailyChallenge() {
+    dailyChallengeMode = true;
+    academicDailyChallenge = true;
+    currentSubject = `Class ${currentClass} Daily Challenge`;
+    currentChapter = 'Mixed Subjects';
+    currentSet = 0;
+    currentQuestionIndex = 0;
+    userAnswers = [];
+
+    quizData = generateAcademicDailyChallengeQuestions();
+
+    if (!quizData || quizData.length < 20) {
+        showNotification(`Not enough questions for a Class ${currentClass} Daily Challenge.`, 'error');
+        // Reset flags since the challenge did not start
+        dailyChallengeMode = false;
+        academicDailyChallenge = false;
+        currentSubject = ''; // Reset the subject to fix back navigation
+        goToClass();
+        return;
+    }
+
+    userAnswers = new Array(quizData.length).fill(null);
+    timeRemaining = quizData.length * 60;
+    totalTime = timeRemaining;
+
+    displayQuestion();
+    startTimer();
+    updateBookmarkButton();
+    // Hide chat and bot while the Academic Daily Challenge is active
+    try {
+        const chatFab = document.getElementById('open-chat-fab');
+        const botFab = document.getElementById('open-help-bot-fab');
+        if (chatFab) chatFab.style.display = 'none';
+        if (botFab) botFab.style.display = 'none';
+    } catch (e) { /* Ignore if elements are not present */ }
+    setupQuestionNumbers();
+    showPage('quiz-page');
+}
+
+function generateAcademicDailyChallengeQuestions() {
+    const allQuestions = [];
+    const classSubjects = allQuizData.filter(d => d.category === 'academic' && d.class === currentClass);
+
+    classSubjects.forEach(subjectDoc => {
+        subjectDoc.chapters.forEach(chapter => {
+            chapter.sets.forEach(set => {
+                if (set.questions && set.questions.length > 0) { // Check if questions array exists and is not empty
+                    allQuestions.push(...set.questions);
+                }
+            })
+        });
+    });
+
+    if (allQuestions.length === 0) {
+        return [];
+    }
+
+    const today = new Date();
+    const seed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate() + parseInt(currentClass);
+
+    return seededShuffle(allQuestions, seed).slice(0, 20);
+}
+
+// ===================== NEW: ONBOARDING & PERSONALIZATION =====================
+/**
+ * Detects if the app is running in a mobile environment (Mobile browser or PWA/WebView wrapper)
+ */
+function isMobileApp() {
+    // Check for common mobile platform protocols used by app wrappers
+    const isMobileProtocol = window.location.protocol === 'app:' || 
+                             window.location.protocol === 'capacitor:' || 
+                             window.location.protocol === 'file:';
+    
+    return isMobileProtocol ||
+           /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+           (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
+}
+
+async function checkUserProfile() { // NEW: Firebase Auth based profile check
+    // Handle redirect results for mobile environments
+    try {
+        const result = await auth.getRedirectResult();
+        if (result.user) {
+            console.log('✅ Google redirect sign-in successful:', result.user.email);
+            // Success handler is already in onAuthStateChanged
+        }
+    } catch (error) {
+        console.error('❌ Google redirect error:', error);
+        // showAuthError might not be available yet as it is defined later in a different scope,
+        // but we can log it. The UI listener will handle the actual error if it persists.
+    }
+
+    // Set up Firebase Auth state listener
+    auth.onAuthStateChanged(async (user) => {
+        if (user) {
+            // User is signed in
+            console.log('✅ User signed in:', user.email, 'UID:', user.uid);
+            // Close forgot password modal before hiding auth page
+            const forgotModal = document.getElementById('forgot-password-modal');
+            if (forgotModal) {
+                forgotModal.classList.remove('visible');
+            }
+            document.getElementById('auth-page').classList.add('hidden');
+            document.getElementById('logout-btn').style.display = 'inline-flex';
+
+            // Sync user profile explicitly into Firestore users collection
+            try {
+                await db.collection("users").doc(user.uid).set({
+                    email: user.email,
+                    displayName: user.displayName || user.email.split('@')[0],
+                    uid: user.uid,
+                    lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+                console.log('✅ User profile synced to Firestore.');
+            } catch (error) {
+                console.warn('⚠️ Could not sync user profile to Firestore:', error);
+            }
+
+            // Check if user has a focus preference saved
+            const userFocus = localStorage.getItem('userFocus');
+
+            await loadUserProgress();
+
+            if (!userFocus) {
+                // First time login - show focus selection modal
+                document.getElementById('focus-selection-modal').classList.add('visible');
+            } else {
+                const displayName = user.displayName || user.email.split('@')[0];
+                personalizeHomepage(displayName, userFocus);
+            }
+
+            initializeTheme();
+            initializeInfoPopup();
+            setupDelayedPopups();
+            updateStreakDisplay();
+            document.getElementById('app-version').textContent = `v${APP_VERSION}`;
+            document.getElementById('menu-app-version').textContent = `v${APP_VERSION}`;
+        } else {
+            // User is signed out - show auth page
+            console.log('ℹ️ No user signed in. Showing auth page.');
+            // Close any open modals when signing out
+            const forgotModal = document.getElementById('forgot-password-modal');
+            if (forgotModal) {
+                forgotModal.classList.remove('visible');
+            }
+            document.getElementById('auth-page').classList.remove('hidden');
+            document.getElementById('logout-btn').style.display = 'none';
+            initializeTheme();
+        }
+    });
+}
+
+/**
+ * Sets up delayed popups that appear after 5 minutes if conditions aren't met
+ */
+function setupDelayedPopups() {
+    const FIVE_MINUTES = 5 * 60 * 1000;
+    
+    setTimeout(() => {
+        if (!sessionStorage.getItem('storeOpened')) {
+            QuizifyStore.showStoreUpdatesModal();
+        }
+    }, FIVE_MINUTES);
+    
+    setTimeout(() => {
+        const today = new Date().toISOString().split('T')[0];
+        const lastCollectionDate = userProgress.lastDailyCoinCollectionDate;
+        if (lastCollectionDate !== today) {
+            showDailyCoinModal();
+        }
+    }, FIVE_MINUTES);
+}
+
+/**
+ * Initializes the auth page UI: form submissions, Google login, mode toggling, forgot password.
+ */
+function initializeAuthPage() {
+    let isSignUpMode = false;
+
+    const authForm = document.getElementById('auth-form');
+    const authTitle = document.getElementById('auth-title');
+    const authSubtitle = document.getElementById('auth-subtitle');
+    const authSubmitText = document.getElementById('auth-submit-text');
+    const authToggleText = document.getElementById('auth-toggle-text');
+    const authToggleLink = document.getElementById('auth-toggle-link');
+    const authNameGroup = document.getElementById('auth-name-group');
+    const authForgotPassword = document.getElementById('auth-forgot-password');
+    const authError = document.getElementById('auth-error');
+    const authSubmitBtn = document.getElementById('auth-submit-btn');
+    const authSubmitSpinner = document.getElementById('auth-submit-spinner');
+    const authGoogleBtn = document.getElementById('auth-google-btn');
+    const forgotPasswordLink = document.getElementById('forgot-password-link');
+
+    const emailInput = document.getElementById('auth-email-input');
+    const passwordInput = document.getElementById('auth-password-input');
+    const nameInput = document.getElementById('auth-name-input');
+
+    function setLoading(loading) {
+        authSubmitBtn.disabled = loading;
+        authSubmitText.style.display = loading ? 'none' : 'inline';
+        authSubmitSpinner.style.display = loading ? 'inline-block' : 'none';
+    }
+
+    function hideAuthError() {
+        authError.style.display = 'none';
+        authError.textContent = '';
+    }
+
+    // Hide errors when typing
+    emailInput.addEventListener('input', hideAuthError);
+    passwordInput.addEventListener('input', hideAuthError);
+    if(nameInput) nameInput.addEventListener('input', hideAuthError);
+
+    function showAuthError(message) {
+        authError.textContent = message;
+        authError.style.display = 'block';
+    }
+
+    function getFirebaseAuthErrorMessage(error) {
+        if (!error) return 'An error occurred. Please try again.';
+        const errorCode = error.code || '';
+        const messages = {
+            'auth/user-not-found': 'No account found with this email.',
+            'auth/wrong-password': 'Incorrect password. Try again.',
+            'auth/invalid-email': 'Please enter a valid email address.',
+            'auth/email-already-in-use': 'An account with this email already exists.',
+            'auth/weak-password': 'Password must be at least 6 characters.',
+            'auth/too-many-requests': 'Too many attempts. Please try again later.',
+            'auth/network-request-failed': 'Network error. Check your connection.',
+            'auth/popup-closed-by-user': 'Sign-in popup was closed.',
+            'auth/invalid-credential': 'Invalid email or password.',
+            'auth/unauthorized-domain': 'This domain is not authorized for OAuth operations.',
+            'auth/operation-not-allowed': 'Google Sign-In is not enabled in Firebase Console.'
+        };
+        return messages[errorCode] || error.message || 'An error occurred. Please try again.';
+    }
+
+    // Toggle between Login and Sign Up
+    authToggleLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        isSignUpMode = !isSignUpMode;
+        hideAuthError();
+
+        if (isSignUpMode) {
+            authTitle.textContent = 'Create Account';
+            authSubtitle.textContent = 'Start your learning journey today!';
+            authSubmitText.textContent = 'Sign Up';
+            authToggleText.textContent = 'Already have an account? ';
+            authToggleLink.textContent = 'Log in';
+            authNameGroup.style.display = 'flex';
+            authForgotPassword.style.display = 'none';
+        } else {
+            authTitle.textContent = 'Welcome Back';
+            authSubtitle.textContent = 'Log in to continue your learning streak!';
+            authSubmitText.textContent = 'Log In';
+            authToggleText.textContent = "Don't have an account? ";
+            authToggleLink.textContent = 'Sign up';
+            authNameGroup.style.display = 'none';
+            authForgotPassword.style.display = 'block';
+        }
+    });
+
+    // Form submission
+    authForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        hideAuthError();
+        setLoading(true);
+
+        const email = document.getElementById('auth-email-input').value.trim();
+        const password = document.getElementById('auth-password-input').value;
+        const displayName = document.getElementById('auth-name-input').value.trim();
+
+        try {
+            if (isSignUpMode) {
+                // Sign Up
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                // Set display name if provided
+                if (displayName) {
+                    await userCredential.user.updateProfile({ displayName: displayName });
+                }
+                console.log('✅ Account created:', userCredential.user.email);
+            } else {
+                // Log In
+                await auth.signInWithEmailAndPassword(email, password);
+                console.log('✅ Logged in successfully');
+            }
+            // onAuthStateChanged will handle the rest
+        } catch (error) {
+            console.error('❌ Auth error:', error);
+            showAuthError(getFirebaseAuthErrorMessage(error));
+        } finally {
+            setLoading(false);
+        }
+    });
+
+    // Google Sign-In
+    authGoogleBtn.addEventListener('click', async () => {
+        hideAuthError();
+        try {
+            if (isMobileApp()) {
+                console.log('📱 Mobile/App environment detected: switching to signInWithRedirect');
+                await auth.signInWithRedirect(googleProvider);
+            } else {
+                await auth.signInWithPopup(googleProvider);
+                console.log('✅ Google sign-in successful');
+            }
+        } catch (error) {
+            console.error('❌ Google sign-in error:', error);
+            if (error.code !== 'auth/popup-closed-by-user') {
+                showAuthError(getFirebaseAuthErrorMessage(error));
+            }
+        }
+    });
+
+    // Forgot Password — show popup modal (on login page, not after login)
+    forgotPasswordLink.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('auth-email-input').value.trim();
+        const forgotModal = document.getElementById('forgot-password-modal');
+        const forgotIcon = document.getElementById('forgot-pwd-icon');
+        const forgotTitle = document.getElementById('forgot-pwd-title');
+        const forgotMessage = document.getElementById('forgot-pwd-message');
+        const forgotContent = forgotModal.querySelector('.forgot-pwd-modal');
+
+        if (!email) {
+            showAuthError('Please enter your email address first.');
+            return;
+        }
+
+        try {
+            await auth.sendPasswordResetEmail(email);
+            hideAuthError();
+            // Show success popup on login page (before user logs in)
+            forgotContent.classList.remove('error-state');
+            forgotIcon.textContent = '📧';
+            forgotTitle.textContent = 'Check Your Email';
+            forgotMessage.textContent = `A password reset link has been sent to ${email}. Please check your inbox and spam folder.`;
+            forgotModal.classList.add('visible');
+            // Optionally show a toast notification as well
+            showNotification(`Password reset link sent to ${email}`, 'success');
+        } catch (error) {
+            console.error('❌ Password reset error:', error);
+            // Show error popup
+            forgotContent.classList.add('error-state');
+            forgotIcon.textContent = '⚠️';
+            forgotTitle.textContent = 'Reset Failed';
+            forgotMessage.textContent = getFirebaseAuthErrorMessage(error);
+            forgotModal.classList.add('visible');
+            showNotification('Failed to send password reset link', 'error');
+        }
+    });
+
+    // Close forgot password modal
+    const closeForgotPwdBtn = document.getElementById('close-forgot-pwd-modal');
+    if (closeForgotPwdBtn) {
+        closeForgotPwdBtn.addEventListener('click', () => {
+            const modal = document.getElementById('forgot-password-modal');
+            if (modal) {
+                modal.classList.remove('visible');
+            }
+        });
+    }
+
+    // ── Phone OTP Verification ──
+    let phoneConfirmationResult = null;
+    let phoneRecaptchaVerifier = null;
+
+    const sendOtpBtn = document.getElementById('send-otp-btn');
+    const sendOtpText = document.getElementById('send-otp-text');
+    const sendOtpSpinner = document.getElementById('send-otp-spinner');
+    const verifyOtpBtn = document.getElementById('verify-otp-btn');
+    const verifyOtpText = document.getElementById('verify-otp-text');
+    const verifyOtpSpinner = document.getElementById('verify-otp-spinner');
+    const phoneInput = document.getElementById('phone-number-input');
+    const otpInput = document.getElementById('otp-code-input');
+    const otpSection = document.getElementById('otp-input-section');
+    const resendOtpLink = document.getElementById('resend-otp-link');
+
+    function setPhoneLoading(btn, textEl, spinnerEl, loading) {
+        btn.disabled = loading;
+        textEl.style.display = loading ? 'none' : 'inline';
+        spinnerEl.style.display = loading ? 'inline-block' : 'none';
+    }
+
+    function initRecaptcha() {
+        if (phoneRecaptchaVerifier) {
+            phoneRecaptchaVerifier.clear();
+        }
+        phoneRecaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+            size: 'invisible',
+            callback: () => {
+                console.log('✅ reCAPTCHA solved');
+            },
+            'expired-callback': () => {
+                showAuthError('reCAPTCHA expired. Please try again.');
+            }
+        });
+    }
+
+    // Toggle Phone Auth Section
+    const authPhoneToggleBtn = document.getElementById('auth-phone-toggle-btn');
+    const socialAuthOptions = document.getElementById('social-auth-options');
+    const cancelPhoneAuthBtn = document.getElementById('cancel-phone-auth-btn');
+    const phoneAuthSection = document.getElementById('phone-auth-section');
+    const authDivider = document.querySelector('.auth-divider');
+    const authToggleTextWrapper = document.querySelector('.auth-toggle');
+
+    if (authPhoneToggleBtn) {
+        authPhoneToggleBtn.addEventListener('click', () => {
+            if(authForm) authForm.style.display = 'none';
+            if(authDivider) authDivider.style.display = 'none';
+            if(socialAuthOptions) socialAuthOptions.style.display = 'none';
+            if(authToggleTextWrapper) authToggleTextWrapper.style.display = 'none';
+            if(phoneAuthSection) phoneAuthSection.style.display = 'block';
+            hideAuthError();
+        });
+    }
+
+    if (cancelPhoneAuthBtn) {
+        cancelPhoneAuthBtn.addEventListener('click', () => {
+            if(authForm) authForm.style.display = 'block';
+            if(authDivider) authDivider.style.display = 'flex';
+            if(socialAuthOptions) socialAuthOptions.style.display = 'grid';
+            if(authToggleTextWrapper) authToggleTextWrapper.style.display = 'block';
+            if(phoneAuthSection) phoneAuthSection.style.display = 'none';
+            hideAuthError();
+            
+            // Reset phone fields
+            phoneInput.value = '';
+            otpInput.value = '';
+            otpSection.style.display = 'none';
+            sendOtpText.textContent = 'Send OTP';
+            sendOtpBtn.disabled = false;
+            if (phoneRecaptchaVerifier) {
+                phoneRecaptchaVerifier.clear();
+                phoneRecaptchaVerifier = null;
+            }
+        });
+    }
+
+    // Send OTP
+    sendOtpBtn.addEventListener('click', async () => {
+        hideAuthError();
+        const phoneNumber = phoneInput.value.trim();
+
+        if (!phoneNumber || phoneNumber.length < 10) {
+            showAuthError('Please enter a valid 10-digit phone number.');
+            return;
+        }
+
+        const fullPhoneNumber = '+91' + phoneNumber;
+
+        try {
+            setPhoneLoading(sendOtpBtn, sendOtpText, sendOtpSpinner, true);
+            initRecaptcha();
+            phoneConfirmationResult = await auth.signInWithPhoneNumber(fullPhoneNumber, phoneRecaptchaVerifier);
+            console.log('✅ OTP sent to', fullPhoneNumber);
+            
+            // Show OTP input section
+            otpSection.style.display = 'block';
+            sendOtpText.textContent = 'OTP Sent ✓';
+            sendOtpBtn.disabled = true;
+            otpInput.focus();
+            showNotification('OTP sent successfully! Check your phone.', 'success');
+        } catch (error) {
+            console.error('❌ Phone auth error:', error);
+            if (error.code === 'auth/billing-not-enabled') {
+                showAuthError('Phone sign-in requires the Firebase Blaze (pay-as-you-go) plan. Please upgrade your project in the Firebase Console and enable the "Phone" auth provider.');
+                console.error('📋 ACTION REQUIRED: Enable "Phone" auth provider and upgrade to Blaze plan in Firebase Console.');
+            } else {
+                showAuthError(getFirebaseAuthErrorMessage(error));
+            }
+            // Reset recaptcha on error
+            if (phoneRecaptchaVerifier) {
+                phoneRecaptchaVerifier.clear();
+                phoneRecaptchaVerifier = null;
+            }
+        } finally {
+            setPhoneLoading(sendOtpBtn, sendOtpText, sendOtpSpinner, false);
+        }
+    });
+
+    // Verify OTP
+    verifyOtpBtn.addEventListener('click', async () => {
+        hideAuthError();
+        const otpCode = otpInput.value.trim();
+
+        if (!otpCode || otpCode.length !== 6) {
+            showAuthError('Please enter the 6-digit OTP code.');
+            return;
+        }
+
+        if (!phoneConfirmationResult) {
+            showAuthError('No OTP was sent. Please click "Send OTP" first.');
+            return;
+        }
+
+        try {
+            setPhoneLoading(verifyOtpBtn, verifyOtpText, verifyOtpSpinner, true);
+            await phoneConfirmationResult.confirm(otpCode);
+            console.log('✅ Phone verification successful');
+            // onAuthStateChanged will handle the rest
+        } catch (error) {
+            console.error('❌ OTP verification error:', error);
+            if (error.code === 'auth/invalid-verification-code') {
+                showAuthError('Invalid OTP code. Please try again.');
+            } else {
+                showAuthError(getFirebaseAuthErrorMessage(error));
+            }
+        } finally {
+            setPhoneLoading(verifyOtpBtn, verifyOtpText, verifyOtpSpinner, false);
+        }
+    });
+
+    // Resend OTP
+    resendOtpLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        otpSection.style.display = 'none';
+        sendOtpText.textContent = 'Send OTP';
+        sendOtpBtn.disabled = false;
+        phoneConfirmationResult = null;
+        sendOtpBtn.click();
+    });
+}
+
+/**
+ * Saves the user's focus preference after first sign-up.
+ * This replaces the old saveUserPreferences that handled name/PIN.
+ */
+async function saveFocusPreference(focus) {
+    const normalizedFocus = normalizeUserFocus(focus);
+    localStorage.setItem('userFocus', normalizedFocus);
+
+    const user = auth.currentUser;
+    if (!user) return;
+
+    // Check if user is brand new (no progress doc yet)
+    const userId = user.uid;
+    const doc = await userProgressCollection.doc(userId).get();
+
+    if (!doc.exists) {
+        // Initialize userProgress with ALL default values for new users
+        console.log('📦 Initializing userProgress with default values...');
+        userProgress = {
+            userName: user.displayName || user.email.split('@')[0],
+            email: user.email,
+            quizCoins: 50,
+            lifelines: { fiftyFifty: 3, hint: 3, skip: 3, timeFreeze: 1 },
+            achievements: [],
+            bookmarks: [],
+            purchasedItems: { themes: ['system', 'light', 'dark'], avatars: ['👤'] },
+            activeAvatar: '👤',
+            theme: 'system',
+            quantitative: {},
+            english: {},
+            reasoning: {},
+            general_science: {},
+            mockTestHistory: []
+        };
+        await saveUserProgress();
+    }
+
+    document.getElementById('focus-selection-modal').classList.remove('visible');
+
+    const displayName = user.displayName || user.email.split('@')[0];
+    personalizeHomepage(displayName, normalizedFocus);
+    goToHome();
+}
+
+
+function personalizeHomepage(userName, userFocus) {
+    // NEW: Animate the welcome message
+    const nameDisplay = document.getElementById('user-name-display');
+    if (nameDisplay) {
+        nameDisplay.innerHTML = userName
+            .split('')
+            .map((char, i) => `<span style="animation-delay: ${i * 50}ms">${char === ' ' ? '&nbsp;' : char}</span>`)
+            .join('');
+    } else {
+        // Fallback for older structure
+        const welcomeHeading = document.getElementById('welcome-heading');
+        if (welcomeHeading) welcomeHeading.textContent = `Welcome, ${userName}!`;
+    }
+
+    // Update user progress object with current display name
+    userProgress.userName = userName;
+    const user = auth.currentUser;
+    if (user) {
+        userProgress.email = user.email;
+    }
+
+    setHomeMode(userFocus);
+
+    // Initialize the app view
+    initializeApp();
+}
+
+/**
+ * NEW: Checks if the PIN reminder should be shown (on first login of a session)
+ * and displays a modal with the user's PIN.
+ */
+function checkAndShowPinReminder() {
+    // PIN reminders are disabled because the old name/PIN account model is removed.
+}
+
+/**
+ * Sets the current date on the Daily Challenge card.
+ */
+function setDailyChallengeDate() {
+    const dateEl = document.getElementById('daily-challenge-date');
+    if (!dateEl) return;
+
+    const today = new Date();
+    // Formats the date as "26 Sep 2025"
+    const options = { day: 'numeric', month: 'short', year: 'numeric' };
+    dateEl.textContent = today.toLocaleDateString('en-GB', options);
+}
+
+function logout() {
+    // FIX: Close the side menu for a smoother experience
+    closeSideMenu();
+    // Close the side menu for a smoother experience
+    if (timer) {
+        clearInterval(timer);
+    }
+    // Show the custom confirmation modal instead of the browser's confirm dialog
+    document.getElementById('logout-confirm-modal').classList.add('visible');
+}
+
+// ===================== NEW: LOCKED CONTENT MODAL =====================
+function initializeLockedContentModal() {
+    const modal = document.getElementById('locked-content-modal');
+    const closeBtn = document.getElementById('close-locked-modal-btn');
+
+    if (!modal || !closeBtn) return;
+
+    const closeModal = () => {
+        modal.classList.remove('visible');
+    };
+
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            closeModal();
+        }
+    });
+}
+
+function showLockedContentMessage() {
+    document.getElementById('locked-content-modal').classList.add('visible');
+}
+
+/**
+ * NEW: Initializes the "Feature Coming Soon" modal.
+ */
+function initializeFeatureComingSoonModal() {
+    const modal = document.getElementById('feature-coming-soon-modal');
+    const closeBtn = document.getElementById('close-feature-coming-soon-btn');
+
+    if (!modal || !closeBtn) return;
+
+    const closeModal = () => modal.classList.remove('visible');
+
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+}
+
+/**
+ * NEW: Shows the "Feature Coming Soon" modal.
+ */
+function showFeatureComingSoonModal() {
+    const modal = document.getElementById('feature-coming-soon-modal');
+    if (modal) modal.classList.add('visible');
+}
+
+/**
+ * NEW: Initializes the purchase success modal.
+ */
+function initializePurchaseSuccessModal() {
+    const modal = document.getElementById('purchase-success-modal');
+    const closeBtn = document.getElementById('close-purchase-success-btn');
+
+    if (!modal || !closeBtn) return;
+
+    const closeModal = () => modal.classList.remove('visible');
+
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+}
+
+/**
+ * NEW: Shows the purchase success modal with a custom message.
+ * @param {string} itemName - The name of the item that was purchased.
+ */
+function showPurchaseSuccessModal(itemName) {
+    const modal = document.getElementById('purchase-success-modal');
+    const messageEl = document.getElementById('purchase-success-message');
+    if (!modal || !messageEl) return;
+
+    messageEl.textContent = `You have successfully purchased "${itemName}".`;
+    modal.classList.add('visible');
+}
+// ===================== NEW: LOGOUT CONFIRMATION MODAL =====================
+function initializeLogoutConfirmation() {
+    const modal = document.getElementById('logout-confirm-modal');
+    const confirmBtn = document.getElementById('confirm-logout-btn');
+    const cancelBtn = document.getElementById('cancel-logout-btn');
+
+    // FIX: Close side menu when logout process starts
+    closeSideMenu();
+    if (!modal || !confirmBtn || !cancelBtn) return;
+    const closeModal = () => {
+        modal.classList.remove('visible');
+    };
+
+    confirmBtn.addEventListener('click', async () => {
+        try {
+            await auth.signOut();
+            localStorage.removeItem('userFocus');
+            userProgress = {};
+            userProgress.activeAvatar = '👤'; // Reset avatar
+            window.location.reload();
+        } catch (error) {
+            console.error('❌ Logout error:', error);
+            window.location.reload(); // Reload anyway
+        }
+    });
+
+    cancelBtn.addEventListener('click', closeModal);
+
+    // Also allow closing by clicking the overlay
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            closeModal();
+        }
+    });
+}
+
+/**
+ * NEW: Initializes and displays a generic informational or festive popup.
+ * The content is controlled by the INFO_POPUP_CONFIG object.
+ * It shows only once per unique message ID to avoid annoying users.
+ */
+function initializeInfoPopup() {
+    const config = INFO_POPUP_CONFIG;
+    // NEW: Date-based check
+    if (!config.startDate || !config.endDate) {
+        return; // Do nothing if dates are not set
+    }
+
+    const today = new Date();
+    const startDate = new Date(config.startDate);
+    const endDate = new Date(config.endDate);
+
+    // Set time to 00:00:00 to compare dates only
+    today.setHours(0, 0, 0, 0);
+    endDate.setHours(23, 59, 59, 999); // Ensure the end date is inclusive
+
+    if (today < startDate || today > endDate) {
+        return; // Do not show if outside the date range
+    }
+
+    const modal = document.getElementById('info-modal');
+    const closeBtn = document.getElementById('close-info-modal-btn');
+    const iconEl = modal?.querySelector('.info-icon');
+    const titleEl = modal?.querySelector('#info-modal-title');
+    const messageEl = modal?.querySelector('#info-modal-message');
+    const subtextEl = modal?.querySelector('#info-modal-subtext');
+
+    if (!modal || !closeBtn || !iconEl || !titleEl || !messageEl || !subtextEl) return;
+
+    const lastSeenId = localStorage.getItem('seenInfoPopupId');
+    if (lastSeenId === config.id) {
+        return; // Already shown this announcement
+    }
+
+    // Populate the modal with content from the configuration
+    iconEl.textContent = config.icon;
+    titleEl.textContent = config.title;
+    if (config.messageHTML) {
+        messageEl.innerHTML = config.messageHTML;
+    } else {
+        messageEl.innerHTML = config.message.replace(/\n/g, '<br>');
+    }
+    subtextEl.textContent = config.subtext;
+
+    setTimeout(() => {
+        modal.classList.add('visible');
+        localStorage.setItem('seenInfoPopupId', config.id);
+    }, 400);
+
+    const closeModal = () => modal.classList.remove('visible');
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+}
+
+// ===================== ERROR HANDLING =====================
+window.addEventListener('error', function(event) {
+    console.error('Application error:', event.error);
+    showNotification('An unexpected error occurred. Please refresh the page.', 'error');
+});
+
+// Check if required data is loaded
+function checkDataAvailability() {
+    if (allQuizData.length === 0) {
+        console.warn('No quiz data loaded. Please ensure data files are included.');
+    }
+}
+
+// ===================== UPDATE NOTIFICATION SYSTEM =====================
+/**
+ * Checks for application and content updates on startup.
+ */
+function checkForUpdates() {
+    const lastVersion = localStorage.getItem('appVersion');
+
+    // 1. Check for App Version Update (for UI/feature changes)
+    if (!lastVersion) {
+        localStorage.setItem('appVersion', APP_VERSION);
+    } else if (lastVersion !== APP_VERSION) {
+        const updateInfo = COMMUNITY_POSTS[APP_VERSION];
+        const updateDetails = updateInfo?.changes || ['General improvements and bug fixes.'];
+        const devNote = updateInfo?.note || null;
+        const modalTitle = `New Version Updated: ${APP_VERSION}`;
+        showUpdateDetails(updateDetails, modalTitle, devNote);
+        localStorage.setItem('appVersion', APP_VERSION);
+        // Don't check for content on app version change to avoid multiple notifications
+        localStorage.setItem('lastSeenVersion', APP_VERSION); // Mark community post as seen
+        return;
+    }
+
+    checkCommunityUpdates(); // Check for new community posts only if app version hasn't changed
+
+    // 2. Check for New Content (specific topics)
+    const currentContentMap = generateContentMap();
+    const lastContentMapString = localStorage.getItem('contentMap');
+
+    if (!lastContentMapString) {
+        // First time user, just set the map
+        localStorage.setItem('contentMap', JSON.stringify(currentContentMap));
+        return;
+    }
+
+    const lastContentMap = JSON.parse(lastContentMapString);
+    const updatedChapters = [];
+
+    for (const chapterKey in currentContentMap) {
+        const currentSetCount = currentContentMap[chapterKey].count;
+        const lastSetCount = lastContentMap[chapterKey]?.count || 0;
+        if (currentSetCount > lastSetCount) {
+            updatedChapters.push(currentContentMap[chapterKey].name);
+        }
+    }
+
+    if (updatedChapters.length > 0) {
+        // Show notifications for new content
+        const details = updatedChapters.map(chapterName => `<li>New quiz sets are available in <strong>${chapterName}</strong>.</li>`);
+        const modalTitle = "New Quizzes Added!";
+        const devNote = "We're constantly adding new content to help you prepare. Happy quizzing!";
+        showUpdateDetails(details, modalTitle, devNote);
+        // Update the stored map
+        localStorage.setItem('contentMap', JSON.stringify(currentContentMap));
+    }
+}
+
+/**
+ * Generates a map of all available content.
+ * The map key is a unique identifier, and the value contains the chapter name and set count.
+ * e.g., { 'quantitative_Time and Work': { name: 'Time and Work', count: 5 } }
+ * @returns {object} The content map.
+ */
+function generateContentMap() {
+    const contentMap = {};
+
+    // Helper to process chapters
+    const processChapters = (chapters, subjectKey) => {
+        if (!chapters) return;
+        chapters.forEach((chapter) => {
+            if (chapter && chapter.name && chapter.sets) {
+                const nonEmptySets = chapter.sets.filter(set => set.questions?.length > 0).length;
+                if (nonEmptySets > 0) {
+                    const key = `${subjectKey}_${chapter.name}`;
+                    contentMap[key] = { name: chapter.name, count: nonEmptySets, subject: subjectKey };
+                }
+            }
+        });
+    };
+
+    // 1. Process competitive exams
+    allQuizData.forEach(subjectDoc => {
+        processChapters(subjectDoc.chapters, subjectDoc.id);
+    });
+
+    return contentMap;
+}
+
+/**
+ * Displays a toast notification.
+ * @param {string} message The message to display.
+ */
+function showNotification(message, type = 'info', details = null, modalTitle = 'What\'s New') {
+    const toast = document.getElementById('notification-toast');
+    const toastMessage = document.getElementById('toast-message');
+    const toastIconContainer = document.getElementById('toast-icon-container');
+    const infoBtn = document.getElementById('toast-info-btn');
+    const toastSpinner = document.getElementById('toast-spinner');
+
+    if (!toast || !toastMessage || !toastIconContainer || !infoBtn || !toastSpinner) return;
+
+    toastMessage.textContent = message;
+
+    // Clear previous classes and timeouts
+    toast.className = 'notification-toast';
+    toastIconContainer.innerHTML = ''; // Clear old icon
+    toastSpinner.style.display = 'none'; // Hide spinner by default
+    if (window.notificationTimeout) {
+        clearTimeout(window.notificationTimeout);
+    }
+
+    // NEW: Show spinner for 'updating' type
+    if (type === 'updating') {
+        toastSpinner.style.display = 'block';
+    }
+
+    // Create and append the correct icon
+    const icon = document.createElement('div');
+    icon.id = 'toast-icon';
+    toastIconContainer.appendChild(icon);
+
+    // Add new classes for type and visibility
+    toast.classList.add(`toast--${type}`);
+    toast.classList.add('show');
+
+    // Handle info button
+    if (details) {
+        infoBtn.style.display = 'block';
+        let title = modalTitle;
+        if (message.includes('App updated')) {
+            title = `New Version Updated: ${APP_VERSION}`;
+        }
+        infoBtn.onclick = () => showUpdateDetails(details, title);
+    } else {
+        infoBtn.style.display = 'none';
+    }
+
+    // Don't auto-hide 'updating' notifications
+    if (type !== 'updating') {
+        window.notificationTimeout = setTimeout(() => {
+            toast.classList.remove('show');
+        }, 6000); // Hide after 6 seconds
+    }
+}
+
+function initializeUpdateDetailsModal() {
+    const modal = document.getElementById('update-details-modal');
+    const closeBtn = document.getElementById('close-update-details-btn');
+
+    const closeModal = () => {
+        modal.classList.remove('visible');
+    };
+
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            closeModal();
+        }
+    });
+}
+
+function showUpdateDetails(details, title = 'Update Details', note = null) {
+    const modal = document.getElementById('update-details-modal');
+    const titleEl = document.getElementById('update-details-title');
+    const contentEl = document.getElementById('update-details-content');
+
+    titleEl.textContent = title;    
+    
+    let html = `<ul>${Array.isArray(details) ? details.map(item => `<li>${item}</li>`).join('') : `<li>${details}</li>`}</ul>`;
+    
+    if (note) {
+        html += `<p class="developer-note"><strong>Developer's Note:</strong> ${note}</p>`;
+    }
+
+    contentEl.innerHTML = html;
+    modal.classList.add('visible');
+}
+
+function closeSideMenu() {
+    const sideMenu = document.getElementById('side-menu');
+    const menuOverlay = document.getElementById('menu-overlay');
+    const menuToggleBtn = document.getElementById('menu-toggle-btn');
+
+    sideMenu.classList.remove('open');
+    menuOverlay.classList.remove('visible');
+    menuToggleBtn.classList.remove('is-active');
+}
+
+// ===================== NEW: SIDE MENU (HAMBURGER) =====================
+function initializeSideMenu() {
+    const menuToggleBtn = document.getElementById('menu-toggle-btn');
+    const closeMenuBtn = document.getElementById('close-menu-btn');
+    const menuHomeBtn = document.getElementById('menu-home-btn');
+    const menuBookmarksBtn = document.getElementById('menu-bookmarks-btn');
+    const menuCommunityBtn = document.getElementById('menu-community-btn');
+    const menuAboutUsBtn = document.getElementById('menu-about-us-btn'); // NEW
+    const menuSettingsBtn = document.getElementById('menu-settings-btn'); // NEW
+    const menuAchievementsBtn = document.getElementById('menu-achievements-btn'); // NEW
+    const menuProfileBtn = document.getElementById('menu-profile-btn'); // NEW
+    const menuStoreBtn = document.getElementById('menu-store-btn'); // NEW
+    const menuLeaderboardBtn = document.getElementById('menu-leaderboard-btn');
+    const menuVideosBtn = document.getElementById('menu-videos-btn'); // NEW
+    const menuOverlay = document.getElementById('menu-overlay');
+
+    if (!menuToggleBtn || !closeMenuBtn || !menuOverlay) {
+        console.warn('Side menu initialization skipped: missing required elements.');
+        return;
+    }
+    // Check if the button exists and add the click event
+    if (menuVideosBtn) {
+        menuVideosBtn.addEventListener('click', () => {
+            closeSideMenu();
+            window.location.href = 'new.html'; // Opens your Cinevix page!
+        });
+    }
+
+    
+    const openMenu = () => {
+        const sideMenu = document.getElementById('side-menu');
+        if (!sideMenu) {
+            console.warn('Side menu element not found during openMenu.');
+            return;
+        }
+        sideMenu.classList.add('open');
+        menuOverlay.classList.add('visible');
+        menuToggleBtn.classList.add('is-active');
+        updateCoinDisplay(); // FIX: Update coin display when menu opens
+        checkCommunityUpdates(); // Re-check to ensure dot is visible if menu was closed
+    };
+
+    menuToggleBtn.addEventListener('click', openMenu);
+    closeMenuBtn.addEventListener('click', closeSideMenu);
+    menuHomeBtn?.addEventListener('click', () => {
+        goToHome();
+        closeSideMenu();
+    });
+    menuBookmarksBtn?.addEventListener('click', () => {
+        displayBookmarkedQuestions();
+        closeSideMenu();
+    });
+    menuCommunityBtn?.addEventListener('click', () => {
+        displayCommunityPosts();
+        if (typeof showPage === 'function') {
+            showPage('community-page');
+        }
+        closeSideMenu();
+    });
+    menuAboutUsBtn?.addEventListener('click', () => { // NEW
+        displayAboutUsPage();
+        closeSideMenu();
+    });
+    menuAchievementsBtn?.addEventListener('click', () => { // NEW
+        displayAchievements();
+        closeSideMenu();
+    });
+    menuSettingsBtn?.addEventListener('click', () => { // NEW
+        goToSettings();
+        closeSideMenu();
+    });
+    menuProfileBtn?.addEventListener('click', () => { // NEW
+        displayProfilePage();
+        closeSideMenu();
+    });
+    menuStoreBtn?.addEventListener('click', () => { // NEW
+        try {
+            if (typeof QuizifyStore !== 'undefined' && QuizifyStore.displayStorePage) {
+                QuizifyStore.displayStorePage();
+            }
+        } catch (error) {
+            console.error('Error opening store:', error);
+            showNotification('Unable to open store right now. Please try again.', 'error');
+        } finally {
+            closeSideMenu();
+        }
+    });
+    menuLeaderboardBtn?.addEventListener('click', () => {
+        displayLeaderboard();
+        closeSideMenu();
+    });
+    menuVideosBtn?.addEventListener('click', () => { // NEW
+        QuizifyVideos.displayVideosPage();
+        closeSideMenu();
+    });
+
+    // NEW: Quests & Battle Pass menu buttons
+    document.getElementById('menu-quests-btn')?.addEventListener('click', () => {
+        showPage('quests-page');
+        if (typeof QuizifyQuests !== 'undefined') QuizifyQuests.renderQuests();
+        closeSideMenu();
+    });
+    document.getElementById('menu-battle-pass-btn')?.addEventListener('click', () => {
+        showPage('battle-pass-page');
+        if (typeof BattlePass !== 'undefined') BattlePass.renderBattlePass();
+        closeSideMenu();
+    });
+
+    menuOverlay.addEventListener('click', closeSideMenu);
+}
+
+// ===================== ENHANCED SCROLLBAR FUNCTIONALITY =====================
+function initializeSideMenuScrollbar() {
+    const sideMenuContent = document.querySelector('.side-menu-content');
+    if (!sideMenuContent) return;
+
+    // Enhanced scrolling for better touch support
+    sideMenuContent.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        sideMenuContent.scrollTop += e.deltaY;
+    }, { passive: false });
+
+    // Add touch scrolling enhancement
+    let startY = 0;
+    let scrollTop = 0;
+    let isScrolling = false;
+
+    sideMenuContent.addEventListener('touchstart', (e) => {
+        startY = e.touches[0].pageY;
+        scrollTop = sideMenuContent.scrollTop;
+        isScrolling = true;
+    }, { passive: true });
+
+    sideMenuContent.addEventListener('touchmove', (e) => {
+        if (!isScrolling) return;
+
+        const y = e.touches[0].pageY;
+        const walk = (startY - y) * 2; // Scroll speed multiplier
+        sideMenuContent.scrollTop = scrollTop + walk;
+    }, { passive: true });
+
+    sideMenuContent.addEventListener('touchend', () => {
+        isScrolling = false;
+    });
+
+    // Add scroll animation feedback
+    let scrollTimeout;
+    sideMenuContent.addEventListener('scroll', () => {
+        sideMenuContent.classList.add('scrolling');
+        clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(() => {
+            sideMenuContent.classList.remove('scrolling');
+        }, 150);
+    });
+
+    // Add keyboard navigation for scrollbar
+    document.addEventListener('keydown', (e) => {
+        const sideMenu = document.getElementById('side-menu');
+        if (!sideMenu || !sideMenu.classList.contains('open')) return;
+
+        if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            sideMenuContent.scrollBy({ top: -50, behavior: 'smooth' });
+        } else if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            sideMenuContent.scrollBy({ top: 50, behavior: 'smooth' });
+        } else if (e.key === 'PageUp') {
+            e.preventDefault();
+            sideMenuContent.scrollBy({ top: -sideMenuContent.clientHeight, behavior: 'smooth' });
+        } else if (e.key === 'PageDown') {
+            e.preventDefault();
+            sideMenuContent.scrollBy({ top: sideMenuContent.clientHeight, behavior: 'smooth' });
+        } else if (e.key === 'Home') {
+            e.preventDefault();
+            sideMenuContent.scrollTo({ top: 0, behavior: 'smooth' });
+        } else if (e.key === 'End') {
+            e.preventDefault();
+            sideMenuContent.scrollTo({ top: sideMenuContent.scrollHeight, behavior: 'smooth' });
+        }
+    });
+
+    // Add click-to-scroll functionality for the scrollbar track
+    // Note: Direct click handling on scrollbar pseudo-elements is not supported
+    // The scrollbar thumb interaction is handled via CSS hover/active states
+}
+
+/**
+ * NEW: Displays the About Us page.
+ */
+function displayAboutUsPage() {
+    showPage('about-us-page');
+}
+
+
+// ===================== NEW: HOMEPAGE GLOBAL SEARCH =====================
+function initializeHomepageSearch() {
+    const searchInput = document.getElementById('homepage-search-input');
+    const resultsContainer = document.getElementById('homepage-search-results');
+
+    searchInput.addEventListener('input', () => {
+        const query = searchInput.value.trim().toLowerCase();
+
+        if (query.length < 2) {
+            resultsContainer.style.display = 'none';
+            return;
+        }
+
+        const searchResults = performGlobalSearch(query);
+        displayHomepageSearchResults(searchResults, query);
+    });
+
+    // Hide results when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!searchInput.contains(e.target)) {
+            resultsContainer.style.display = 'none';
+        }
+    });
+}
+
+function performGlobalSearch(query) {
+    const results = [];
+
+    // NEW: Search all data from Firestore
+    allQuizData.forEach(subjectDoc => {
+        const isAcademic = subjectDoc.id.startsWith('class');
+        const subjectChapters = isAcademic ? Object.values(subjectDoc.chapters).flat() : subjectDoc.chapters;
+
+        // NEW: Handle General Science sub-subjects
+        if (subjectDoc.category === 'general_science') {
+            // The structure is already { chapters: [...] }
+        }
+
+        if (subjectChapters) {
+            subjectChapters.forEach(chapter => {
+                if (chapter.name.toLowerCase().includes(query)) {
+                    const result = {
+                        chapterName: chapter.name,
+                        subject: subjectDoc.id, // Use the document ID as the subject key
+                        type: isAcademic ? 'academic' : 'competitive',
+                        class: isAcademic ? subjectDoc.id.replace('class', '').match(/\d+/)[0] : '',
+                        isGeneralScience: subjectDoc.category === 'general_science' // NEW: Flag for GS
+                    };
+                    results.push(result);
+                }
+            });
+        }
+    });
+    return results;
+}
+
+function displayHomepageSearchResults(results, query) {
+    const resultsContainer = document.getElementById('homepage-search-results');
+    resultsContainer.innerHTML = '';
+
+    if (results.length === 0) {
+        resultsContainer.innerHTML = '<div class="search-result-item">No chapters found.</div>';
+    } else {
+        results.forEach(result => {
+            const item = document.createElement('div');
+            item.className = 'search-result-item';
+
+            // Highlight the matched query in the chapter name
+            const chapterName = result.chapterName;
+            const highlightedName = chapterName.replace(new RegExp(query, 'gi'), (match) => `<mark>${match}</mark>`);
+
+            let context = '';
+            if (result.isGeneralScience) {
+                context = `(General Science - ${getSubjectTitle(result.subject)})`;
+            } else if (result.type === 'academic') {
+                context = `(Class ${result.class} - ${getSubjectTitle(result.subject)})`;
+            } else {
+                context = `(${getSubjectTitle(result.subject)})`;
+            }
+            item.innerHTML = `${highlightedName} <span>${context}</span>`;
+            
+            item.onclick = () => {
+                currentChapter = result.chapterName;
+                currentSubject = result.subject;
+                isGeneralScienceMode = result.isGeneralScience; // NEW: Set GS mode
+                classMode = result.type === 'academic';
+                currentClass = result.class || '';
+                // Note: Stream is not needed here as we navigate directly to the chapter
+                displayChapterInfo();
+                showPage('chapter-page');
+                
+                // Clear search input and hide results after selection
+                document.getElementById('homepage-search-input').value = '';
+                resultsContainer.style.display = 'none';
+            };
+            resultsContainer.appendChild(item);
+        });
+    }
+    resultsContainer.style.display = 'block';
+}
+
+// ===================== NEW: BOOKMARKING FEATURE =====================
+function syncBookmarks() {
+    // NEW: Update the userProgress object and save it to Firestore.
+    userProgress.bookmarks = bookmarkedQuestions;
+    saveUserProgress();
+}
+
+function toggleBookmark() {
+    const currentQuestion = quizData[currentQuestionIndex];
+    // Create a unique ID for the question to check for existence
+    const questionId = `${currentSubject}-${currentChapter}-${currentSet}-${currentQuestionIndex}`;
+
+    const existingIndex = bookmarkedQuestions.findIndex(bm => bm.id === questionId);
+
+    if (existingIndex > -1) {
+        // Already bookmarked, so remove it
+        bookmarkedQuestions.splice(existingIndex, 1);
+        showNotification('Bookmark removed.', 'success');
+    } else {
+        // Not bookmarked, so add it
+        bookmarkedQuestions.push({
+            id: questionId,
+            question: currentQuestion,
+            context: {
+                subject: getSubjectTitle(currentSubject),
+                chapter: currentChapter
+            }
+        });
+        showNotification('Bookmark added!', 'success');
+    }
+
+    syncBookmarks(); // NEW: Sync bookmarks with Firestore
+    updateBookmarkButton();
+}
+
+function updateBookmarkButton() {
+    const bookmarkBtn = document.getElementById('bookmark-btn');
+    if (!bookmarkBtn) return;
+
+    const questionId = `${currentSubject}-${currentChapter}-${currentSet}-${currentQuestionIndex}`;
+    const isBookmarked = bookmarkedQuestions.some(bm => bm.id === questionId);
+
+    bookmarkBtn.classList.toggle('bookmarked', isBookmarked);
+    bookmarkBtn.title = isBookmarked ? 'Remove bookmark' : 'Bookmark this question';
+    bookmarkBtn.onclick = toggleBookmark;
+}
+
+function displayBookmarkedQuestions() {
+    const container = document.getElementById('bookmarks-container');
+    container.innerHTML = '';
+
+    if (bookmarkedQuestions.length === 0) {
+        container.innerHTML = '<p>You have no bookmarked questions yet. You can bookmark questions during a quiz.</p>';
+        showPage('bookmarks-page');
+        return;
+    }
+
+    bookmarkedQuestions.forEach((bm, index) => {
+        const div = document.createElement('div');
+        div.className = 'review-question';
+        div.innerHTML = `
+            <h3>${bm.context.subject} - ${bm.context.chapter}</h3>
+            <p><strong>${bm.question.question}</strong></p>
+            <p><strong>Correct Answer:</strong> ${String.fromCharCode(65 + bm.question.answer)}. ${bm.question.options[bm.question.answer]}</p>
+            <button class="remove-bookmark-btn" onclick="removeBookmark(${index})">Remove Bookmark</button>
+        `;
+        container.appendChild(div);
+    });
+
+    showPage('bookmarks-page');
+}
+
+function removeBookmark(index) {
+    if (index > -1 && index < bookmarkedQuestions.length) {
+        bookmarkedQuestions.splice(index, 1);
+        syncBookmarks(); // NEW: Sync bookmarks with Firestore
+        showNotification('Bookmark removed.', 'success');
+        // Refresh the view
+        displayBookmarkedQuestions();
+    }
+}
+
+// ===================== NEW: COMMUNITY PAGE FEATURE =====================
+function checkCommunityUpdates() {
+    const latestPostVersion = Object.keys(COMMUNITY_POSTS)[0];
+    const lastSeenVersion = localStorage.getItem('lastSeenVersion');
+    const menuDot = document.getElementById('menu-notification-dot');
+    const communityDot = document.getElementById('community-notification-dot');
+
+    // Always remove blinking class first to reset state
+    menuDot.classList.remove('blinking-dot');
+    communityDot.classList.remove('blinking-dot');
+
+    // Show dot if the user hasn't seen the latest post version
+    if (lastSeenVersion !== latestPostVersion) {
+        menuDot.style.display = 'block';
+        communityDot.style.display = 'block';
+        menuDot.classList.add('blinking-dot');
+        communityDot.classList.add('blinking-dot');
+
+        // Show a toast notification only once for the new post
+        const lastNotifiedVersion = localStorage.getItem('lastNotifiedCommunityVersion');
+        if (lastNotifiedVersion !== latestPostVersion) {
+            showNotification('You have a new community post!', 'info');
+            localStorage.setItem('lastNotifiedCommunityVersion', latestPostVersion);
+        }
+    } else {
+        menuDot.style.display = 'none';
+        communityDot.style.display = 'none';
+    }
+}
+
+function displayCommunityPosts() {
+    if (typeof showPage === 'function') {
+        showPage('community-page');
+    }
+
+    const container = document.getElementById('community-posts-container');
+    if (!container) {
+        console.warn('Community posts container missing');
+        return;
+    }
+    container.innerHTML = '';
+
+    const latestPostVersion = Object.keys(COMMUNITY_POSTS)[0];
+    // Mark posts as read by storing the latest version key
+    localStorage.setItem('lastSeenVersion', latestPostVersion);
+    checkCommunityUpdates(); // This will hide the dots
+
+    const versions = Object.keys(COMMUNITY_POSTS); // Keys are already in newest-to-oldest order
+
+    // NEW: Add a timeline container
+    const timelineContainer = document.createElement('div');
+    timelineContainer.className = 'timeline';
+    container.appendChild(timelineContainer);
+
+    // Refresh community stats whenever the community page content is shown
+    if (typeof QuizifyFriends !== 'undefined' && QuizifyFriends.loadCommunityStats) {
+        QuizifyFriends.loadCommunityStats().catch(err => console.error('Failed to refresh community stats:', err));
+    }
+
+    versions.forEach(version => {
+        const post = COMMUNITY_POSTS[version];
+        const postCard = document.createElement('div');
+        postCard.className = 'community-post-card';
+
+        // NEW: Icon mapping based on post type
+        const iconMap = {
+            feature: '⭐',
+            security: '🛡️',
+            content: '📚',
+            ui: '🎨',
+            update: '🔧'
+        };
+        const icon = iconMap[post.type] || '⚙️'; // Default icon
+
+        let bodyHtml = '<ul>';
+        post.changes.forEach(change => {
+            bodyHtml += `<li>${change}</li>`;
+        });
+        bodyHtml += '</ul>';
+
+        // NEW: Add a separate developer note section if it exists
+        if (post.note) {
+            bodyHtml += `<div class="developer-note"><strong>Developer's Note:</strong> ${post.note}</div>`;
+        } 
+
+        // NEW: Updated card structure for the timeline design
+        postCard.innerHTML = `
+            <div class="timeline-icon">${icon}</div>
+            <div class="community-post-header">
+                <h3>Version ${version}</h3>
+                <span class="post-date">${post.date || 'N/A'}</span>
+            </div>
+            <div class="community-post-body">${bodyHtml}</div>
+        `;
+        timelineContainer.appendChild(postCard);
+    });
+
+    showPage('community-page');
+}
+
+// ===================== NEW: STREAK COUNTER FEATURE =====================
+
+/**
+ * Checks if the user's streak is broken and resets it if necessary.
+ * This should be called once when the app loads or when the daily challenge card is displayed.
+ */
+function checkAndResetStreak() {
+    const today = new Date();
+    const lastStreakDateStr = userProgress.lastStreakDate;
+
+    if (!lastStreakDateStr) {
+        // No streak history, nothing to reset.
+        return;
+    }
+
+    const lastStreakDate = new Date(lastStreakDateStr);
+    const yesterday = new Date(today);
+    yesterday.setDate(today.getDate() - 1);
+
+    // Normalize dates to compare them without time component
+    lastStreakDate.setHours(0, 0, 0, 0);
+    yesterday.setHours(0, 0, 0, 0);
+    today.setHours(0, 0, 0, 0);
+
+    // If the last streak date is not today and not yesterday, the streak is broken.
+    if (lastStreakDate.getTime() < yesterday.getTime()) {
+        userProgress.streak = 0;
+        showNotification('You missed a day! Your streak has been reset.', 'warning');
+        saveUserProgress(); // Save the reset streak
+    }
+}
+
+/**
+ * Updates the user's streak count after completing a daily challenge.
+ * @param {boolean} passed - Whether the user passed the daily challenge.
+ */
+function updateStreak(passed) {
+    if (!passed) return; // Streak only updates on passing
+
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
+
+    if (userProgress.lastStreakDate === todayStr) {
+        return; // Already completed today, do nothing.
+    }
+
+    const yesterday = new Date();
+    yesterday.setDate(today.getDate() - 1);
+    const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+    if (userProgress.lastStreakDate === yesterdayStr) {
+        userProgress.streak = (userProgress.streak || 0) + 1; // Continue streak
+        showNotification(`🔥 Streak extended to ${userProgress.streak} days!`, 'success');
+    } else {
+        userProgress.streak = 1; // Start a new streak
+        showNotification('🔥 New streak started! Keep it going!', 'success');
+    }
+
+    userProgress.lastStreakDate = todayStr;
+    saveUserProgress();
+}
+
+/**
+ * Updates the streak counter display on the homepage.
+ */
+function updateStreakDisplay() {
+    const streakCounter = document.getElementById('streak-counter');
+    const streakValueEl = document.getElementById('streak-value');
+    const userFocus = localStorage.getItem('userFocus');
+
+    if (!streakCounter || !streakValueEl) return;
+
+    const streak = userProgress.streak || 0;
+
+    if (streak > 0 && userFocus === 'competitive') {
+        streakValueEl.textContent = streak;
+        streakCounter.style.display = 'inline-flex';
+    } else {
+        streakCounter.style.display = 'none';
+    }
+}
+
+
+// ===================== NEW: PROFILE PAGE FEATURE =====================
+let profileChart = null; // To hold the chart instance
+
+function initializeProfilePage() {
+    // The menu button handles displaying the page.
+    // This function is for any one-time setup if needed.
+}
+
+/**
+ * NEW: Initializes the event listeners for the profile page tabs.
+ */
+function initializeProfileTabs() {
+    const tabsContainer = document.querySelector('.profile-tabs');
+    if (!tabsContainer) return;
+
+    tabsContainer.addEventListener('click', (e) => {
+        if (e.target.classList.contains('profile-tab-btn')) {
+            const tabId = e.target.dataset.tab;
+
+            // Update button active state
+            document.querySelectorAll('.profile-tab-btn').forEach(btn => btn.classList.remove('active'));
+            e.target.classList.add('active');
+
+            // Update content active state
+            document.querySelectorAll('.profile-tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+        }
+    });
+}
+
+/**
+ * NEW: Initializes the event listeners for the settings page tabs.
+ */
+function initializeSettingsTabs() {
+    const tabsContainer = document.getElementById('settings-tabs-container');
+    if (!tabsContainer) return;
+
+    tabsContainer.addEventListener('click', (e) => {
+        const targetButton = e.target.closest('.profile-tab-btn');
+        if (targetButton) {
+            const tabId = targetButton.dataset.tab;
+
+            // Update button active state
+            document.querySelectorAll('#settings-tabs-container .profile-tab-btn').forEach(btn => btn.classList.remove('active'));
+            targetButton.classList.add('active');
+
+            // Update content active state
+            document.querySelectorAll('#settings-page .profile-tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+        }
+    });
+}
+
+function displayProfilePage() {
+    const _u = auth.currentUser;
+    const userName = _u?.displayName || _u?.email?.split('@')[0] || 'Guest';
+    const userFocus = localStorage.getItem('userFocus') || 'Not Set';
+
+    document.getElementById('profile-user-name').textContent = userName;
+    document.getElementById('profile-user-focus').textContent = userFocus.charAt(0).toUpperCase() + userFocus.slice(1);
+
+    const stats = calculateOverallStats();
+    const userLevel = calculateUserLevel(stats.totalQuizzes);
+
+    // NEW: Update avatar on profile page display
+    const avatarDisplay = document.getElementById('profile-avatar-display');
+    avatarDisplay.textContent = userProgress.activeAvatar || '👤';
+
+    document.getElementById('profile-quizzes-taken').textContent = stats.totalQuizzes;
+    document.getElementById('profile-average-score').textContent = `${stats.averageScore.toFixed(0)}%`;
+    document.getElementById('profile-quizzes-passed').textContent = stats.quizzesPassed;
+    
+    // NEW: Display user level
+    document.getElementById('profile-user-level').textContent = `Level ${userLevel.level}`;
+    document.getElementById('profile-level-progress').textContent = `${userLevel.currentXP}/${userLevel.nextLevelXP} XP`;
+    
+    // NEW: Update XP progress bar
+    const progressBar = document.getElementById('profile-level-progress-bar');
+    if (progressBar) {
+        const progressPercent = (userLevel.currentXP / userLevel.nextLevelXP) * 100;
+        progressBar.style.width = `${progressPercent}%`;
+    }
+
+    // NEW: Display user badges
+    const userBadges = getUserBadges(stats);
+    displayBadges(userBadges);
+
+    // Create or update the performance chart
+    createOrUpdatePerformanceChart(stats.subjectStats);
+
+    // NEW: Analyze and display topic strengths
+    const topicAnalysis = analyzeTopicStrength();
+    displayTopicStrength(topicAnalysis);
+
+    // NEW: Populate the friends tab
+    QuizifyFriends.displayFriends();
+
+    // NEW: Initialize all history filters and populate the history list
+    initializeHistoryFilters();
+
+    // NEW: Populate the friends tab
+    QuizifyFriends.displayFriends();
+
+
+
+    showPage('profile-page');
+}
+
+function calculateOverallStats() {
+    let totalQuizzes = 0;
+    let quizzesPassed = 0;
+    let totalScore = 0;
+    const subjectStats = {};
+
+    for (const key in userProgress) {
+        if (userProgress[key] && typeof userProgress[key].score === 'number') {
+            totalQuizzes++;
+            totalScore += userProgress[key].score;
+            if (userProgress[key].score >= 40) {
+                quizzesPassed++;
+            }
+
+            // Aggregate scores by subject
+            const subject = key.split('_')[0]; // e.g., 'quantitative' or 'class9'
+            if (!subjectStats[subject]) {
+                subjectStats[subject] = { totalScore: 0, count: 0 };
+            }
+            subjectStats[subject].totalScore += userProgress[key].score; // FIX: Use score from the current quiz entry
+            subjectStats[subject].count++;
+        }
+    }
+
+    const averageScore = totalQuizzes > 0 ? totalScore / totalQuizzes : 0;
+
+    // NEW: Save these calculated stats to the userProgress object so they get stored in Firestore.
+    saveProfileStats({ totalQuizzes, quizzesPassed, averageScore });
+
+    return { totalQuizzes, quizzesPassed, averageScore, subjectStats };
+}
+
+/**
+ * Calculates user level based on total quizzes completed.
+ * Level increases every 10 quizzes, with XP system.
+ */
+function calculateUserLevel(totalQuizzes) {
+    const xpPerQuiz = 10;
+    const xpForLevelUp = 100; // XP needed per level
+    
+    const totalXP = totalQuizzes * xpPerQuiz;
+    const level = Math.floor(totalXP / xpForLevelUp) + 1;
+    const currentLevelXP = totalXP % xpForLevelUp;
+    const nextLevelXP = xpForLevelUp;
+    
+    return {
+        level: level,
+        currentXP: currentLevelXP,
+        nextLevelXP: nextLevelXP,
+        totalXP: totalXP
+    };
+}
+
+/**
+ * Gets all badges that the user has earned.
+ */
+function getUserBadges(stats) {
+    const badges = [];
+    
+    // First Quiz Badge
+    if (stats.totalQuizzes >= 1) {
+        badges.push({
+            id: 'first-quiz',
+            name: 'First Steps',
+            description: 'Completed your first quiz',
+            icon: '🎯',
+            earned: true
+        });
+    }
+    
+    // Quiz Master Badge (10 quizzes)
+    if (stats.totalQuizzes >= 10) {
+        badges.push({
+            id: 'quiz-master',
+            name: 'Quiz Master',
+            description: 'Completed 10 quizzes',
+            icon: '👑',
+            earned: true
+        });
+    }
+    
+    // Scholar Badge (25 quizzes)
+    if (stats.totalQuizzes >= 25) {
+        badges.push({
+            id: 'scholar',
+            name: 'Scholar',
+            description: 'Completed 25 quizzes',
+            icon: '🎓',
+            earned: true
+        });
+    }
+    
+    // Perfect Score Badge
+    const hasPerfectScore = Object.values(userProgress).some(quiz => 
+        quiz && typeof quiz.score === 'number' && quiz.score === 100
+    );
+    if (hasPerfectScore) {
+        badges.push({
+            id: 'perfect-score',
+            name: 'Perfectionist',
+            description: 'Achieved a perfect score',
+            icon: '💎',
+            earned: true
+        });
+    }
+    
+    // Streak Master Badge
+    const currentStreak = userProgress.streak || 0;
+    if (currentStreak >= 7) {
+        badges.push({
+            id: 'streak-master',
+            name: 'Streak Master',
+            description: 'Maintained a 7-day streak',
+            icon: '🔥',
+            earned: true
+        });
+    }
+    
+    // High Scorer Badge
+    if (stats.averageScore >= 80) {
+        badges.push({
+            id: 'high-scorer',
+            name: 'High Scorer',
+            description: 'Maintained 80%+ average',
+            icon: '⭐',
+            earned: true
+        });
+    }
+    
+    return badges;
+}
+
+/**
+ * Displays user badges in the profile page.
+ */
+function displayBadges(badges) {
+    const container = document.getElementById('badges-container');
+    if (!container) return;
+    
+    container.innerHTML = '';
+    
+    if (badges.length === 0) {
+        container.innerHTML = '<p style="text-align: center; color: #666;">No badges earned yet. Keep taking quizzes to unlock achievements!</p>';
+        return;
+    }
+    
+    badges.forEach(badge => {
+        const badgeElement = document.createElement('div');
+        badgeElement.className = `badge-item ${badge.earned ? 'earned' : 'locked'}`;
+        badgeElement.innerHTML = `
+            <div class="badge-icon">${badge.icon}</div>
+            <div class="badge-info">
+                <h4>${badge.name}</h4>
+                <p>${badge.description}</p>
+            </div>
+        `;
+        container.appendChild(badgeElement);
+    });
+}
+
+function saveProfileStats(stats) {
+    userProgress.totalQuizzes = stats.totalQuizzes;
+    userProgress.quizzesPassed = stats.quizzesPassed;
+    userProgress.averageScore = stats.averageScore;
+}
+
+function createOrUpdatePerformanceChart(subjectStats) {
+    const ctx = document.getElementById('profile-chart-container');
+    // NEW: Add a list container for mobile view
+    ctx.innerHTML = '<canvas id="performanceChart"></canvas><div id="mobile-performance-list" class="mobile-performance-list"></div>';
+    const canvas = document.getElementById('performanceChart');
+    const mobileList = document.getElementById('mobile-performance-list');
+
+    const labels = Object.keys(subjectStats).map(getSubjectTitle);
+    const data = Object.values(subjectStats).map(stat => stat.totalScore / stat.count);
+
+    if (profileChart) {
+        profileChart.destroy(); // Destroy old chart instance
+    }
+
+    profileChart = new Chart(canvas, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Average Score by Subject',
+                data: data,
+                backgroundColor: ['#3b82f6', '#22c55e', '#eab308', '#ef4444', '#8b5cf6', '#f97316']
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    title: { display: true, text: 'Average Score (%)' }
+                }
+            }
+        }
+    });
+
+    // NEW: Populate the mobile-friendly list view
+    mobileList.innerHTML = ''; // Clear previous list
+    labels.forEach((label, index) => {
+        const score = data[index];
+        const item = document.createElement('div');
+        let progressBarColor;
+
+        // NEW: Determine color based on score
+        if (score >= 70) {
+            progressBarColor = 'linear-gradient(135deg, var(--color-success), #1a9a4a)';
+        } else if (score >= 40) {
+            progressBarColor = 'linear-gradient(135deg, var(--color-warning), #d48806)';
+        } else {
+            progressBarColor = 'linear-gradient(135deg, var(--color-error), #c0152f)';
+        }
+
+        item.className = 'performance-list-item';
+        item.innerHTML = `
+            <div class="subject-name">${label} <span>${score.toFixed(0)}%</span></div>
+            <div class="progress-bar-container">
+                <div class="progress-bar" style="width: ${score}%; background: ${progressBarColor};"></div>
+            </div>
+        `;
+        mobileList.appendChild(item);
+    });
+}
+
+// ===================== NEW: TOPIC STRENGTH ANALYSIS =====================
+
+/**
+ * Analyzes user progress to determine strengths and areas for improvement.
+ * @returns {{strengths: Array, improvements: Array}}
+ */
+function analyzeTopicStrength() {
+    const chapterScores = {};
+
+    // 1. Aggregate scores for each chapter
+    for (const key in userProgress) {
+        // FIX: Ignore daily challenges and other non-chapter progress keys.
+        if (key.startsWith('daily_challenge') || !key.includes('_')) {
+            continue;
+        }
+
+        // FIX: Robustly parse the key to handle chapter names with spaces.
+        // The key format is 'subject_chapter_name_setIndex'.
+        const lastUnderscoreIndex = key.lastIndexOf('_');
+        if (lastUnderscoreIndex > 0 && userProgress[key] && typeof userProgress[key].score === 'number') {
+            const subjectAndChapter = key.substring(0, lastUnderscoreIndex);
+            const firstUnderscoreIndex = subjectAndChapter.indexOf('_');
+            if (firstUnderscoreIndex === -1) continue; // Invalid format
+
+            const subject = subjectAndChapter.substring(0, firstUnderscoreIndex);
+            const chapter = subjectAndChapter.substring(firstUnderscoreIndex + 1);
+            const chapterKey = `${subject}_${chapter}`;
+            if (!chapterScores[chapterKey]) {
+                chapterScores[chapterKey] = { scores: [], name: chapter, subject: getSubjectTitle(subject) };
+            }
+            chapterScores[chapterKey].scores.push(userProgress[key].score);
+        }
+    }
+
+    // 2. Calculate average scores and categorize
+    const strengths = [];
+    const improvements = [];
+
+    for (const key in chapterScores) {
+        const chapterData = chapterScores[key];
+        const avgScore = chapterData.scores.reduce((a, b) => a + b, 0) / chapterData.scores.length;
+
+        const topic = {
+            name: chapterData.name,
+            subject: chapterData.subject,
+            score: Math.round(avgScore)
+        };
+
+        if (avgScore >= 70) {
+            strengths.push(topic);
+        } else if (avgScore >= 40) {
+            improvements.push(topic);
+        }
+    }
+
+    // Sort by score (descending for strengths, ascending for improvements)
+    strengths.sort((a, b) => b.score - a.score);
+    improvements.sort((a, b) => a.score - b.score);
+
+    return { strengths, improvements };
+}
+
+/**
+ * Displays the topic strength analysis on the profile page.
+ * @param {{strengths: Array, improvements: Array}} analysisData
+ */
+function displayTopicStrength(analysisData) {
+    const strengthList = document.getElementById('strength-topics-list');
+    const improvementList = document.getElementById('improvement-topics-list');
+
+    strengthList.innerHTML = analysisData.strengths.length ? analysisData.strengths.map(t => `<li>${t.name} <span>${t.score}%</span></li>`).join('') : '<li>Complete more quizzes to identify your strengths!</li>';
+    improvementList.innerHTML = analysisData.improvements.length ? analysisData.improvements.map(t => `<li>${t.name} <span>${t.score}%</span></li>`).join('') : '<li>No specific areas for improvement found yet. Keep it up!</li>';
+}
+
+/**
+ * NEW: Initializes all filters for the quiz history section and populates the initial view.
+ */
+function initializeHistoryFilters() {
+    const subjectFilter = document.getElementById('history-subject-filter');
+    const chapterFilter = document.getElementById('history-chapter-filter');
+    const statusFilter = document.getElementById('history-status-filter');
+
+    if (!subjectFilter || !chapterFilter || !statusFilter) return; // Add a guard clause
+
+    // --- 1. Populate Subject Filter ---
+    const attemptedSubjects = new Set(); // This was step 1, but I've renumbered for clarity
+    for (const key in userProgress) {
+        if (key.includes('_') && !key.startsWith('daily_challenge')) {
+            const isAcademic = key.startsWith('class');
+            let subjectKey;
+            if (isAcademic) {
+                const parts = key.split('_');
+                subjectKey = `${parts[0]}_${parts[1]}`; // e.g., 'class9_math'
+            } else {
+                subjectKey = key.split('_')[0];
+            }
+            // NEW FIX: Check against the loaded Firestore data (allQuizData)
+            if (allQuizData.some(d => d.id === subjectKey)) {
+                 attemptedSubjects.add(subjectKey);
+            }
+        }
+    }
+
+    subjectFilter.innerHTML = '<option value="all">All Subjects</option>';
+    attemptedSubjects.forEach(subject => {
+        const option = document.createElement('option');
+        option.value = subject;
+        option.textContent = getSubjectTitle(subject);
+        subjectFilter.appendChild(option);
+    });
+
+    // --- 2. Add Event Listeners ---
+    // FIX: Populate the status filter dropdown dynamically.
+    statusFilter.innerHTML = `
+        <option value="all">All</option>
+        <option value="passed">Passed</option>
+        <option value="failed">Failed</option>
+    `;
+
+    subjectFilter.addEventListener('change', () => {
+        populateChapterFilter();
+        populateQuizHistory();
+    });
+    chapterFilter.addEventListener('change', populateQuizHistory);
+    statusFilter.addEventListener('change', populateQuizHistory);
+
+    // --- 3. Initial Population ---
+    populateChapterFilter(); // Populate chapters based on default "All Subjects"
+    populateQuizHistory();   // Populate the history list for the first time
+}
+
+/**
+ * NEW: Populates the chapter filter based on the selected subject.
+ */
+function populateChapterFilter() {
+    const subjectFilter = document.getElementById('history-subject-filter');
+    const chapterFilter = document.getElementById('history-chapter-filter');
+    const selectedSubject = subjectFilter.value;
+
+    chapterFilter.innerHTML = '<option value="all">All Chapters</option>'; // Reset
+
+    if (selectedSubject === 'all') {
+        chapterFilter.disabled = true;
+        return;
+    }
+
+    const attemptedChapters = new Set();
+    for (const key in userProgress) {
+        if (key.startsWith(selectedSubject + '_') && userProgress[key] && Array.isArray(userProgress[key].attempts)) {
+            const chapterName = key.split('_')[1];
+            attemptedChapters.add(key.substring(key.indexOf('_') + 1, key.lastIndexOf('_')));
+        }
+    }
+
+    if (attemptedChapters.size > 0) {
+        attemptedChapters.forEach(chapter => {
+            const option = document.createElement('option');
+            option.value = chapter;
+            option.textContent = chapter;
+            chapterFilter.appendChild(option);
+        });
+        chapterFilter.disabled = false;
+    } else {
+        chapterFilter.disabled = true;
+    }
+}
+
+/**
+ * NEW: Gathers, filters, and displays all quiz attempts in the history section.
+ */
+function populateQuizHistory() {
+    const historyContainer = document.getElementById('history-list-container');
+    if (!historyContainer) return;
+
+    historyContainer.innerHTML = ''; // Clear previous list
+
+    const subjectFilter = document.getElementById('history-subject-filter').value;
+    const chapterFilter = document.getElementById('history-chapter-filter').value;
+    const statusFilter = document.getElementById('history-status-filter').value;
+
+    const allAttempts = [];
+
+    // 1. Gather all attempts from the userProgress object
+    for (const key in userProgress) {
+        // Check for a valid quiz progress key (e.g., 'subject_chapter_setIndex')
+        if (key.includes('_') && !key.startsWith('daily_challenge') && userProgress[key] && Array.isArray(userProgress[key].attempts)) {
+            const setIndex = key.substring(key.lastIndexOf('_') + 1);
+            let subject, chapter;
+
+            const isAcademic = key.startsWith('class');
+            if (isAcademic) {
+                const parts = key.split('_');
+                // FIX: Correctly construct the academic subject ID (e.g., 'class9_math')
+                subject = `class${parts[0].replace('class', '')}_${parts[1]}`;
+                chapter = parts.slice(2, -1).join('_'); // Re-join chapter name if it has underscores
+            } else {
+                subject = key.substring(0, key.indexOf('_'));
+                chapter = key.substring(key.indexOf('_') + 1, key.lastIndexOf('_'));
+            }
+
+            userProgress[key].attempts.forEach(attempt => {
+                allAttempts.push({
+                    subject,
+                    chapter,
+                    setIndex: parseInt(setIndex, 10),
+                    score: attempt.score,
+                    date: new Date(attempt.date),
+                    passed: attempt.score >= 40
+                });
+            });
+        }
+    }
+
+    // 2. Sort attempts by date, most recent first
+    allAttempts.sort((a, b) => b.date - a.date);
+
+    // 3. Filter attempts based on dropdown selections
+    const filteredAttempts = allAttempts.filter(attempt => {
+        const subjectMatch = (subjectFilter === 'all' || attempt.subject === subjectFilter);
+        const chapterMatch = (chapterFilter === 'all' || attempt.chapter === chapterFilter);
+        const statusMatch = (statusFilter === 'all' || (statusFilter === 'passed' && attempt.passed) || (statusFilter === 'failed' && !attempt.passed));
+        return subjectMatch && chapterMatch && statusMatch;
+    });
+
+    // 4. Display the filtered attempts
+    if (filteredAttempts.length === 0) {
+        historyContainer.innerHTML = '<p class="setting-description" style="text-align: center;">No quiz history found for the selected filters.</p>';
+        return;
+    }
+
+    filteredAttempts.forEach(attempt => {
+        const item = document.createElement('div');
+        const statusClass = attempt.passed ? 'passed' : 'failed';
+        item.className = `history-item ${statusClass}`;
+
+        // Add data attributes to uniquely identify this attempt for future review functionality
+        item.dataset.subject = attempt.subject;
+        item.dataset.chapter = attempt.chapter;
+        item.dataset.setIndex = attempt.setIndex;
+        item.dataset.attemptDate = attempt.date.toISOString(); // Store ISO string for precise lookup
+
+        item.onclick = () => {
+            reviewHistoricalQuiz(attempt);
+        };
+
+        const formattedDate = attempt.date.toLocaleDateString('en-GB', {
+            day: 'numeric', month: 'short', year: 'numeric'
+        });
+
+        item.innerHTML = `
+            <div class="history-item-details">
+                <h4>${getSubjectTitle(attempt.subject)} - ${attempt.chapter} (Set ${attempt.setIndex + 1})</h4>
+                <p>Attempted on: ${formattedDate}</p>
+            </div>
+            <div class="history-item-score">
+                <span class="stat-value">${attempt.score}%</span>
+            </div>
+        `;
+        historyContainer.appendChild(item);
+    });
+}
+
+/**
+ * NEW: Prepares and displays the review page for a specific historical quiz attempt.
+ * @param {object} attempt - The historical attempt object from userProgress.
+ */
+function reviewHistoricalQuiz(attempt) {
+    // Try to locate the saved attempt data robustly.
+    const progressKey = `${attempt.subject}_${attempt.chapter}_${attempt.setIndex}`;
+
+    // Primary lookup: direct key match
+    let fullAttemptData = userProgress[progressKey]?.attempts?.find(
+        a => new Date(a.date).toISOString() === attempt.date.toISOString()
+    );
+
+    // Fallback 1: search all progress entries for a matching attempt by ISO date
+    if (!fullAttemptData) {
+        for (const key in userProgress) {
+            const p = userProgress[key];
+            if (p && Array.isArray(p.attempts)) {
+                const found = p.attempts.find(a => new Date(a.date).toISOString() === attempt.date.toISOString());
+                if (found) {
+                    fullAttemptData = found;
+                    break;
+                }
+            }
+        }
+    }
+
+    if (!fullAttemptData || !fullAttemptData.answers) {
+        showNotification('Could not find the answers for this quiz attempt.', 'error');
+        return;
+    }
+
+    // Find the correct set of questions for this attempt; be permissive in matching
+    let questionSet = null;
+    const subjectId = attempt.subject;
+    const chapterName = attempt.chapter;
+    const setIndex = attempt.setIndex;
+
+    // Primary attempt: find by exact subject id
+    const subjectDoc = allQuizData.find(d => d.id === subjectId);
+    if (subjectDoc) {
+        const chapter = subjectDoc.chapters?.find(ch => ch.name === chapterName);
+        if (chapter && chapter.sets && chapter.sets[setIndex]) {
+            questionSet = chapter.sets[setIndex].questions;
+        }
+    }
+
+    // Fallback 2: If not found, scan all subjects for a chapter name match (handles naming mismatches)
+    if (!questionSet) {
+        for (const doc of allQuizData) {
+            const matchChapter = doc.chapters?.find(ch => ch.name === chapterName);
+            if (matchChapter && matchChapter.sets && matchChapter.sets[setIndex]) {
+                questionSet = matchChapter.sets[setIndex].questions;
+                break;
+            }
+        }
+    }
+
+    // If still not found, create safe placeholders so the review page won't crash.
+    if (!questionSet) {
+        const placeholderQuestions = (fullAttemptData.answers || []).map(() => ({
+            question: 'Question content not available',
+            options: ['N/A', 'N/A', 'N/A', 'N/A'],
+            answer: 0,
+            imageUrl: ''
+        }));
+
+        const backBtn = document.getElementById('review-page-back-btn');
+        if (backBtn) backBtn.onclick = displayProfilePage;
+        document.getElementById('review-page-title').textContent = `Review: ${chapterName} - Set ${setIndex + 1}`;
+        displayReview(placeholderQuestions, fullAttemptData.answers);
+        showPage('review-page');
+        return;
+    }
+
+    // Render the full review normally
+    const backBtn = document.getElementById('review-page-back-btn');
+    if (backBtn) backBtn.onclick = displayProfilePage;
+    document.getElementById('review-page-title').textContent = `Review: ${chapterName} - Set ${setIndex + 1}`;
+    displayReview(questionSet, fullAttemptData.answers);
+    showPage('review-page');
+}
+
+// ===================== NEW: FIREBASE & LEADERBOARD FUNCTIONS =====================
+
+/**
+ * Saves a quiz result to the Firestore database.
+ * Also updates the user's best score in a separate leaderboard collection.
+ * @param {string} name - The user's name.
+ * @param {string} userId - The unique ID for the user.
+ * @param {string} quizTitle - The combined subject and chapter title.
+ * @param {number} score - The user's score percentage.
+ */
+async function saveResultToFirestore(name, userId, quizTitle, score) {
+    // 1. Save every individual result for historical data
+    try {
+        await resultsCollection.add({
+            name: name,
+            userId: userId,
+            quiz: quizTitle,
+            score: score,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        console.log("Quiz result saved successfully!");
+    } catch (error) {
+        console.error("Error saving result to Firestore: ", error);
+    }
+
+    // 2. Update the leaderboard collection with the user's BEST score
+    const userLeaderboardRef = leaderboardCollection.doc(userId);
+
+    try {
+        const doc = await userLeaderboardRef.get();
+        if (!doc.exists || score > doc.data().score) {
+            // If the user is not on the leaderboard OR this new score is higher
+            await userLeaderboardRef.set({
+                name: name,
+                score: score,
+                activeAvatar: userProgress.activeAvatar || '👤', // NEW: Save avatar with score
+                lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            console.log("Leaderboard updated with new high score!");
+        }
+    } catch (error) {
+        console.error("Error updating leaderboard:", error);
+        showNotification('Could not update your leaderboard score.', 'error');
+    }
+}
+
+/**
+ * Fetches and displays the top 10 leaderboard scores from Firestore.
+ */
+async function displayLeaderboard() {
+    const leaderboardList = document.getElementById('leaderboard-list');
+    const userRankContainer = document.getElementById('user-rank-container');
+    const userRankDetails = document.getElementById('user-rank-details');
+    const spinner = document.getElementById('leaderboard-spinner');
+
+    leaderboardList.innerHTML = ''; // Clear previous list
+    spinner.style.display = 'flex'; // Show spinner
+    userRankContainer.style.display = 'none'; // Hide user rank initially
+    showPage('leaderboard-page');
+
+    try { // Fetch and display top 10
+        const snapshot = await leaderboardCollection.orderBy("score", "desc").limit(10).get();
+        spinner.style.display = 'none'; // Hide spinner after fetch
+
+        if (snapshot.empty) {
+            leaderboardList.innerHTML = '<li>No scores recorded yet. Be the first!</li>';
+            return;
+        }
+
+        leaderboardList.innerHTML = ''; // Clear loading state
+        let rank = 1;
+        let userInTop10 = false;
+        const currentUserId = getOrCreateUserId();
+
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            const isCurrentUser = doc.id === currentUserId;
+            if (isCurrentUser) {
+                userInTop10 = true;
+            }
+            
+            // Add medal classes for top 3
+            const rankClass = rank <= 3 ? `rank-${rank}` : '';
+            const medalIcon = rank <= 3 ? `<span class="leaderboard-medal"></span>` : '';
+            // NEW: Add avatar to each list item
+            const avatar = data.activeAvatar || '👤'; // Use saved avatar or default
+            const listItem = `<li class="${isCurrentUser ? 'current-user-rank' : ''} ${rankClass}">
+                                <span class="leaderboard-rank">${rank}.</span>
+                                <span class="leaderboard-avatar">${avatar}</span>
+                                ${medalIcon} <span class="leaderboard-name">${data.name}</span> <span class="leaderboard-score">${data.score}%</span>
+                              </li>`;
+            leaderboardList.innerHTML += listItem;
+            rank++;
+        });
+
+        // If user is not in top 10, fetch their specific rank
+        if (!userInTop10) {
+            const userDocRef = leaderboardCollection.doc(currentUserId);
+            const userDoc = await userDocRef.get();
+
+            if (userDoc.exists) {
+                const userScore = userDoc.data().score;
+                const userName = userDoc.data().name;
+
+                // Count users with a higher score to determine rank
+                const higherRankSnapshot = await leaderboardCollection.where("score", ">", userScore).get();
+                const userRank = higherRankSnapshot.size + 1;
+
+                // Display user's rank
+                const userAvatar = userProgress.activeAvatar || '👤';
+                userRankDetails.innerHTML = `
+                    <span class="leaderboard-rank">${userRank}.</span>
+                    <span class="leaderboard-avatar">${userAvatar}</span>
+                    <span class="leaderboard-name">${userName} (You)</span> 
+                    <span class="leaderboard-score">${userScore}%</span>
+                `;
+                userRankContainer.style.display = 'block';
+            }
+        }
+
+    } catch (error) {
+        spinner.style.display = 'none'; // Hide spinner on error
+        console.error("Error fetching leaderboard: ", error);
+        leaderboardList.innerHTML = '<li>Could not load leaderboard. Please try again later.</li>';
+        showNotification('Failed to fetch leaderboard data.', 'error');
+    }
+}
+
+function initializeLeaderboard() {
+    // This function can be used for any specific leaderboard initializations if needed in the future.
+    // For now, the menu button handles the display.
+}
+
+/**
+ * Gets a unique ID for the current user from localStorage, or returns anonymous if not set.
+ * This ensures each user's data is tracked uniquely.
+ * @returns {string} The user's unique ID or 'user_anonymous' if not logged in.
+ */
+function getOrCreateUserId() {
+    const user = auth.currentUser;
+    if (user) {
+        return user.uid;
+    }
+    // Return anonymous ID if user hasn't logged in yet
+    return 'user_anonymous';
+}
+
+/**
+ * NEW: Diagnostic function to test Firestore connectivity and permissions
+ */
+async function testFirestoreConnection() {
+    console.log('🧪 Testing Firestore connection...');
+    try {
+        // Test 1: Read from userCredentials
+        console.log('Test 1: Reading from userCredentials collection...');
+        const credentialSnapshot = await firebase.firestore().collection('userCredentials').limit(1).get();
+        console.log('✅ Can read from userCredentials:', credentialSnapshot.size);
+
+        // Test 2: Read from userProgress
+        console.log('Test 2: Reading from userProgress collection...');
+        const progressSnapshot = await firebase.firestore().collection('userProgress').limit(1).get();
+        console.log('✅ Can read from userProgress:', progressSnapshot.size);
+
+        // Test 3: Try writing a test document to userCredentials
+        console.log('Test 3: Attempting to write to userCredentials...');
+        const testDocRef = await firebase.firestore().collection('userCredentials').add({
+            test: true,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        console.log('✅ Can write to userCredentials:', testDocRef.id);
+        
+        // Clean up test document
+        await testDocRef.delete();
+        console.log('✅ Cleaned up test document');
+
+        console.log('✅ All Firestore tests passed!');
+        return true;
+    } catch (error) {
+        console.error('❌ Firestore test failed:', error);
+        return false;
+    }
+}
+
+/**
+ * NEW: Verifies if a user with the given name and PIN already exists in Firestore.
+ * If they do, returns their existing userId.
+ * If they don't, creates a new user and returns the new userId.
+ * Also handles migration from OLD userId format to new format.
+ * @param {string} userName - The user's name
+ * @param {string} userPin - The user's 4-digit PIN
+ * @returns {Promise<string>} The userId (existing or newly created)
+ */
+async function verifyOrCreateUser(userName, userPin) {
+    try {
+        // Create a unique identifier for this user based on name and PIN
+        const userCredentialId = `${userName.toLowerCase().replace(/[^a-z0-9]/g, '')}_${userPin}`;
+        console.log('Verifying user with credential ID:', userCredentialId);
+        
+        // STEP 1: Try to find in userCredentials collection (new system)
+        const q = firebase.firestore().collection('userCredentials').where('credential', '==', userCredentialId);
+        const snapshot = await q.get();
+        
+        console.log('Query snapshot size:', snapshot.size);
+        
+        if (!snapshot.empty) {
+            // User exists in new system - return their existing userId
+            const existingUserId = snapshot.docs[0].data().userId;
+            console.log('✅ Existing user found in userCredentials. Using userId:', existingUserId);
+            console.log('Existing user data:', snapshot.docs[0].data());
+            return { userId: existingUserId, isNewUser: false };
+        }
+        
+        // STEP 2: Check for OLD-format userId (migration needed)
+        console.log('⚠️  No entry in userCredentials. Checking for OLD-format account...');
+        const oldFormatUserId = `user_${userCredentialId}`;
+        console.log('Looking for OLD userId:', oldFormatUserId);
+        
+        const oldUserDoc = await userProgressCollection.doc(oldFormatUserId).get();
+        
+        if (oldUserDoc.exists) {
+            console.log('✅ Found OLD-format user data! Migrating to new system...');
+            console.log('Old user data:', oldUserDoc.data());
+            
+            // Migrate: Create a userCredentials entry pointing to the old userId
+            await firebase.firestore().collection('userCredentials').add({
+                credential: userCredentialId,
+                userId: oldFormatUserId,
+                userName: userName,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                userPin: userPin,
+                migrated: true,
+                migratedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            
+            console.log('✅ Migration complete! Old userId registered in userCredentials:', oldFormatUserId);
+            return { userId: oldFormatUserId, isNewUser: false };
+        }
+        
+        // STEP 3: No existing user found - create new user
+        console.log('❌ No existing user found. Creating new user...');
+        const newUserId = `user_${userCredentialId}_${Date.now()}`;
+        
+        console.log('Creating new userId:', newUserId);
+        
+        // Store the credential mapping in Firestore for future lookups
+        await firebase.firestore().collection('userCredentials').add({
+            credential: userCredentialId,
+            userId: newUserId,
+            userName: userName,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            userPin: userPin
+        });
+        
+        console.log('✅ New user created with userId:', newUserId);
+        return { userId: newUserId, isNewUser: true };
+    } catch (error) {
+        console.error('❌ Error in verifyOrCreateUser:', error);
+        throw error;
+    }
+}
+
+/**
+ * A generic function to migrate a document in Firestore from an old ID to a new ID.
+ * @param {firebase.firestore.CollectionReference} collection - The Firestore collection.
+ * @param {string} oldId - The old document ID.
+ * @param {string} newId - The new document ID.
+ * @param {object} [updateData={}] - Optional data to merge into the new document.
+ */
+async function migrateFirestoreDocument(collection, oldId, newId, updateData = {}) {
+    if (oldId === newId) return; // No migration needed if IDs are the same
+
+    const oldDocRef = collection.doc(oldId);
+    const oldDoc = await oldDocRef.get();
+
+    if (oldDoc.exists) {
+        const data = { ...oldDoc.data(), ...updateData };
+        const newDocRef = collection.doc(newId);
+        await newDocRef.set(data); // Create new document with merged data
+        await oldDocRef.delete(); // Delete the old document
+    }
+}
+
+// Add a unique ID to each question when it's loaded to help with tracking
+function addIdToQuestion(question, subject, chapter, setIndex, qIndex) {
+    question.id = `${subject}_${chapter}_${setIndex}_${qIndex}`;
+}
+
+// ===================== NEW: ACHIEVEMENTS SYSTEM =====================
+
+function initializeAchievements() {
+    const modal = document.getElementById('achievement-unlocked-modal');
+    const closeBtn = document.getElementById('close-achievement-modal-btn');
+    if (modal && closeBtn) {
+        closeBtn.onclick = () => modal.classList.remove('visible');
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) modal.classList.remove('visible');
+        });
+    }
+}
+
+/**
+ * Checks for and awards achievements based on the latest quiz result and overall progress.
+ * @param {object} results - The results object from the just-completed quiz.
+ */
+function checkAchievements(results, timeTaken) {
+    // FIX: Refactor the logic to allow multiple achievements to be unlocked at once.
+    // This ensures that on the first quiz, a user can get 'First Step', 'Achiever', and 'Perfectionist' simultaneously.
+    if (!userProgress.achievements) userProgress.achievements = [];
+
+
+    const stats = calculateOverallStats();
+    const totalQuizzes = stats.totalQuizzes;
+
+    // Check for 'First Quiz' and 'Achiever' achievements.
+    // These should only be awarded once.
+    if (totalQuizzes > 0) {
+        if (!hasAchievement('first_quiz')) {
+            unlockAchievement('first_quiz');
+        }
+        if (results.passed && !hasAchievement('passed_quiz')) {
+            unlockAchievement('passed_quiz');
+        }
+    }
+
+    // Check for 'Perfect Score'. This can be awarded multiple times if we enhance the system later,
+    // but for now, we check if it's the first time.
+    if (results.percentage === 100 && !hasAchievement('perfect_score')) {
+        unlockAchievement('perfect_score');
+    }
+
+    // 4. Chapter Master
+    const chapterKeyPrefix = `${currentSubject}_${currentChapter}`;
+    let passedSetsInChapter = 0;
+    for (let i = 0; i < 5; i++) {
+        const progress = userProgress[`${chapterKeyPrefix}_${i}`];
+        if (progress && progress.score >= 40) {
+            passedSetsInChapter++;
+        }
+    }
+    if (passedSetsInChapter === 5 && !hasAchievement(`chapter_master_${chapterKeyPrefix}`)) {
+        unlockAchievement(`chapter_master_${chapterKeyPrefix}`, ACHIEVEMENTS.chapter_master);
+    }
+
+    // 5. Streak Achievements
+    const streak = userProgress.streak || 0;
+    if (streak >= 5 && !hasAchievement('streak_5')) {
+        unlockAchievement('streak_5');
+    }
+    if (streak >= 10 && !hasAchievement('streak_10')) {
+        unlockAchievement('streak_10');
+    }
+
+    // NEW: Speed Demon - Pass with average time < 30s/question
+    const averageTimePerQuestion = timeTaken / (quizData.length || 1); // Avoid division by zero
+    if (results.passed && averageTimePerQuestion < 30 && !hasAchievement('speed_demon')) {
+        unlockAchievement('speed_demon');
+    }
+
+    // NEW: Comeback Kid - Pass a quiz that was previously failed
+    const progressKey = `${currentSubject}_${currentChapter}_${currentSet}`;
+    if (results.passed && hasPreviouslyFailed(progressKey) && !hasAchievement('comeback_kid')) {
+        unlockAchievement('comeback_kid');
+    }
+
+    // NEW: Dedicated Learner & Quiz Master
+    if (totalQuizzes >= 10 && !hasAchievement('dedicated_learner')) {
+        unlockAchievement('dedicated_learner');
+    }
+    if (totalQuizzes >= 50 && !hasAchievement('quiz_master')) {
+        unlockAchievement('quiz_master');
+    }
+
+    // After checking, save any new achievements
+    if (unlockedAchievements.size > 0) {
+        saveUserProgress();
+    }
+}
+
+function hasAchievement(id) {
+    return userProgress.achievements && userProgress.achievements.some(ach => ach.id === id);
+}
+
+function unlockAchievement(id, achievementData = null) {
+    if (hasAchievement(id)) return;
+
+    const achievement = achievementData || ACHIEVEMENTS[id];
+    if (!achievement) return;
+
+    userProgress.achievements.push({ id, name: achievement.name, date: new Date().toISOString() });
+    unlockedAchievements.add(id); // Track for this session
+
+    // NEW: Award bonus coins for specific achievements
+    if (id.startsWith('chapter_master')) {
+        userProgress.quizCoins = (userProgress.quizCoins || 0) + 100; // 100 coin bonus
+        showNotification(`Chapter Master! You earned a 100 coin bonus! 💰`, 'success');
+    }
+
+    // Show the unlock modal
+    const modal = document.getElementById('achievement-unlocked-modal');
+    document.getElementById('achievement-icon').textContent = achievement.icon;
+    document.getElementById('achievement-name').textContent = achievement.name;
+    document.getElementById('achievement-description').textContent = achievement.description;
+    modal.classList.add('visible');
+
+    // Update notification dots
+    document.getElementById('menu-notification-dot').style.display = 'block';
+    document.getElementById('achievements-notification-dot').style.display = 'block';
+}
+
+function displayAchievements() {
+    const grid = document.getElementById('achievements-grid');
+    grid.innerHTML = '';
+
+    // FIX: Ensure userProgress.achievements is an array before trying to access it.
+    if (!userProgress.achievements) {
+        userProgress.achievements = [];
+    }
+
+    for (const id in ACHIEVEMENTS) {
+        const achievement = ACHIEVEMENTS[id];
+        // FIX: Make the check for multi-instance achievements like 'chapter_master' more specific.
+        // This prevents potential conflicts if other achievement IDs share a prefix.
+        const isUnlocked = hasAchievement(id) || 
+                           (id.startsWith('chapter_master') && userProgress.achievements.some(a => a.id.startsWith('chapter_master_')));
+
+        const card = document.createElement('div');
+        card.className = `achievement-card ${isUnlocked ? 'unlocked' : ''}`;
+        card.innerHTML = `
+            <div class="achievement-card-icon">${achievement.icon}</div>
+            <h3 class="achievement-card-title">${achievement.name}</h3>
+            <p class="achievement-card-description">${achievement.description}</p>
+        `;
+        grid.appendChild(card);
+    }
+
+    // Hide notification dot after viewing
+    document.getElementById('achievements-notification-dot').style.display = 'none';
+    if (localStorage.getItem('lastSeenVersion') === Object.keys(COMMUNITY_POSTS)[0]) {
+        document.getElementById('menu-notification-dot').style.display = 'none';
+    }
+
+    showPage('achievements-page');
+}
+
+// ===================== NEW: DAILY COIN REWARD FUNCTIONS =====================
+
+function initializeDailyCoinModal() {
+    const modal = document.getElementById('daily-coin-modal');
+    const collectBtn = document.getElementById('collect-daily-coin-btn');
+    const closeBtn = document.getElementById('close-daily-coin-btn');
+
+    if (!modal || !collectBtn || !closeBtn) {
+        console.error('Daily coin modal elements not found:', { modal, collectBtn, closeBtn });
+        return;
+    }
+
+    console.log('Attaching daily coin modal event listeners');
+    console.log('Attaching daily coin modal event listeners');
+    collectBtn.addEventListener('click', () => {
+        console.log('Daily coin collect button clicked');
+        quizCoins += 2;
+        const today = new Date().toISOString().split('T')[0];
+        userProgress.lastDailyCoinCollectionDate = today;
+        userProgress.quizCoins = quizCoins;
+        
+        saveUserProgress();
+        updateCoinDisplay();
+        
+        modal.classList.remove('visible');
+        if (dailyCoinReminderInterval) {
+            clearInterval(dailyCoinReminderInterval);
+            dailyCoinReminderInterval = null;
+        }
+        
+        showNotification('You collected 2 daily coins! 💰', 'success');
+    });
+
+    const handleCloseClick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        modal.classList.remove('visible');
+        // Start reminder interval when user closes without collecting
+        if (!dailyCoinReminderInterval) {
+            dailyCoinReminderInterval = setInterval(() => {
+                const today = new Date().toISOString().split('T')[0];
+                const lastCollectionDate = userProgress.lastDailyCoinCollectionDate;
+                if (lastCollectionDate !== today) {
+                    showDailyCoinModal();
+                }
+            }, 2 * 60 * 1000); // 2 minutes
+        }
+    };
+    
+    closeBtn.addEventListener('click', handleCloseClick);
+    closeBtn.addEventListener('touchend', handleCloseClick);
+}
+
+function checkDailyCoinReward() {
+    const today = new Date().toISOString().split('T')[0];
+    const lastCollectionDate = userProgress.lastDailyCoinCollectionDate;
+
+    if (lastCollectionDate !== today) {
+        showDailyCoinModal();
+    }
+}
+
+function showDailyCoinModal() {
+    document.getElementById('daily-coin-modal').classList.add('visible');
+    // REMOVED: Reminder interval is now only set when user closes without collecting
+}
+
+// ===================== NEW: CUSTOMIZATION FUNCTIONS =====================
+
+/**
+ * Populates the avatar and theme selection grids in the settings page.
+ */
+function populateCustomizationGrids() {
+    // --- Populate Themes ---
+    const themeGrid = document.getElementById('theme-selection-grid');
+    if (!themeGrid) return;
+
+    themeGrid.innerHTML = '';
+    const purchasedThemes = userProgress.purchasedItems?.themes || ['system', 'light', 'dark'];
+    const allThemes = [
+        { id: 'system', name: 'System', icon: '💻' },
+        { id: 'light', name: 'Light', icon: '☀️' },
+        { id: 'dark', name: 'Dark', icon: '🌙' },
+        ...QuizifyStore.STORE_ITEMS.themes // Add purchasable themes
+    ];
+
+    allThemes.forEach(theme => {
+        if (purchasedThemes.includes(theme.id)) {
+            const item = document.createElement('div');
+            item.className = 'selection-item';
+            item.dataset.theme = theme.id;
+            item.title = theme.name;
+            item.innerHTML = `<div class="selection-item-icon">${theme.icon}</div>`;
+            if (theme.id === (userProgress.theme || 'system')) {
+                item.classList.add('active');
+            }
+            themeGrid.appendChild(item);
+        }
+    });
+
+    // --- Populate Avatars ---
+    const avatarGrid = document.getElementById('avatar-selection-grid');
+    if (!avatarGrid) return;
+
+    avatarGrid.innerHTML = '';
+    const purchasedAvatarIds = userProgress.purchasedItems?.avatars || ['👤'];
+
+    // Create a combined list of all possible avatars (default + purchasable)
+    const allAvatars = [
+        { id: '👤', name: 'Default', icon: '👤' }, // Ensure default is always available
+        ...QuizifyStore.STORE_ITEMS.avatars
+    ];
+
+    // Filter to get the full objects for purchased avatars
+    const purchasedAvatars = allAvatars.filter(avatar => purchasedAvatarIds.includes(avatar.id));
+
+    // Use a Set to avoid duplicates if the default '👤' is also in the store items
+    const uniquePurchasedAvatars = [...new Map(purchasedAvatars.map(item => [item.id, item])).values()];
+
+    uniquePurchasedAvatars.forEach(avatarObj => {
+        const avatar = avatarObj.icon || avatarObj.id; // Use icon or id for the emoji
+
+        const item = document.createElement('div');
+        item.className = 'selection-item';
+        item.dataset.avatar = avatar;
+        item.innerHTML = `<div class="selection-item-icon">${avatar}</div>`;
+        if (avatar === (userProgress.activeAvatar || '👤')) {
+            item.classList.add('active');
+        }
+        avatarGrid.appendChild(item);
+    });
+}
+
+/**
+ * Applies the selected theme and saves the preference.
+ * @param {string} theme - The theme ID to apply.
+ */
+/**
+ * Sets the selected avatar as active and saves the preference.
+ * @param {string} avatar - The avatar emoji/ID to set as active.
+ */
+function selectAvatar(avatar) {
+    if (userProgress.activeAvatar === avatar) return; // No change needed
+
+    userProgress.activeAvatar = avatar;
+    saveUserProgress(); // Save to Firestore
+    updateLeaderboardAvatar(avatar); // NEW: Update leaderboard immediately
+
+    // Update UI
+    document.getElementById('profile-avatar-display').textContent = avatar;
+    populateCustomizationGrids(); // Re-render to update the 'active' highlight
+    showNotification('Avatar updated!', 'success');
+}
+
+/**
+ * NEW: Updates the user's avatar in the leaderboard collection in Firestore.
+ * This ensures the change is reflected even without a new high score.
+ * @param {string} avatar - The new avatar emoji/ID.
+ */
+async function updateLeaderboardAvatar(avatar) {
+    const userId = getOrCreateUserId();
+    const userLeaderboardRef = leaderboardCollection.doc(userId);
+    try {
+        await userLeaderboardRef.update({ activeAvatar: avatar });
+        console.log("Leaderboard avatar updated successfully.");
+    } catch (error) {
+        console.log("Leaderboard avatar update skipped (user may not have a score yet). Error: ", error.code);
+    }
+}
+
+// ===================== NEW: LIFELINE FUNCTIONS =====================
+
+function updateLifelineDisplay() {
+    document.getElementById('lifeline-5050-count').textContent = userProgress.lifelines?.fiftyFifty ?? 0;
+    document.getElementById('lifeline-hint-count').textContent = userProgress.lifelines?.hint ?? 0;
+    document.getElementById('lifeline-skip-count').textContent = userProgress.lifelines?.skip ?? 0;
+    // Time Freeze count (if present)
+    const freezeCountEl = document.getElementById('lifeline-freeze-count');
+    if (freezeCountEl) freezeCountEl.textContent = userProgress.lifelines?.timeFreeze ?? 0;
+}
+
+function useFiftyFifty() {
+    if (!userProgress.lifelines || userProgress.lifelines.fiftyFifty <= 0) {
+        showNotification("You don't have any 50-50 lifelines!", 'error');
+        return;
+    }
+
+    // Disable the button immediately to prevent multiple clicks
+    const fiftyFiftyBtn = document.getElementById('lifeline-5050');
+    if (fiftyFiftyBtn) fiftyFiftyBtn.disabled = true;
+
+    // Decrement lifeline count and save progress
+    userProgress.lifelines.fiftyFifty--;
+    saveUserProgress();
+    updateLifelineDisplay();
+
+    const question = quizData[currentQuestionIndex];
+    const correctAnswerIndex = question.answer;
+    const optionElements = document.querySelectorAll('.option');
+    
+    // Get indices of all incorrect options
+    let wrongOptions = [0, 1, 2, 3].filter(i => i !== correctAnswerIndex);
+    
+    // Shuffle the wrong options and pick the first two to hide
+    wrongOptions.sort(() => Math.random() - 0.5);
+    const optionsToHide = wrongOptions.slice(0, 2);
+
+    // Hide the selected incorrect options
+    optionsToHide.forEach(index => {
+        if (optionElements[index]) {
+            optionElements[index].style.visibility = 'hidden';
+            optionElements[index].classList.add('disabled'); // Also disable clicks
+        }
+    });
+}
+
+function useHint() {
+    if (userProgress.lifelines.hint <= 0) {
+        showNotification("You don't have any hint lifelines!", 'error');
+        return;
+    }
+
+    userProgress.lifelines.hint--;
+    saveUserProgress();
+    updateLifelineDisplay();
+
+    const question = quizData[currentQuestionIndex];
+    const hint = question.hint || "No hint is available for this question.";
+    showNotification(hint, 'info');
+
+    document.getElementById('lifeline-hint').disabled = true; // Disable for this question
+}
+
+function useSkip() {
+    if (userProgress.lifelines.skip <= 0) {
+        showNotification("You don't have any skip lifelines!", 'error');
+        return;
+    }
+
+    userProgress.lifelines.skip--;
+    saveUserProgress();
+    updateLifelineDisplay();
+
+    nextQuestion(); // Simply move to the next question
+}
+
+/**
+ * Time Freeze lifeline: pauses the quiz timer for FREEZE_DURATION seconds.
+ */
+function useTimeFreeze() {
+    if (!userProgress.lifelines || (userProgress.lifelines.timeFreeze || 0) <= 0) {
+        showNotification("You don't have any Time Freeze lifelines!", 'error');
+        return;
+    }
+
+    // Prevent multiple clicks
+    const freezeBtn = document.getElementById('lifeline-freeze');
+    if (freezeBtn) freezeBtn.disabled = true;
+
+    // Deduct lifeline and save
+    userProgress.lifelines.timeFreeze = (userProgress.lifelines.timeFreeze || 0) - 1;
+    saveUserProgress();
+    updateLifelineDisplay();
+
+    // If timer is already frozen, do nothing
+    if (isTimerFrozen) return;
+
+    // Pause the main timer if it's running
+    if (timer) {
+        clearInterval(timer);
+        timer = null;
+    }
+
+    isTimerFrozen = true;
+    freezeRemaining = FREEZE_DURATION;
+
+    // Show freeze indicator next to timer
+    const indicator = document.getElementById('freeze-indicator');
+    if (indicator) {
+        indicator.style.display = 'inline-block';
+        indicator.textContent = `Frozen: ${freezeRemaining}s`;
+    }
+
+    // Start freeze countdown
+    freezeInterval = setInterval(() => {
+        freezeRemaining--;
+        if (indicator) indicator.textContent = `Frozen: ${freezeRemaining}s`;
+
+        if (freezeRemaining <= 0) {
+            clearInterval(freezeInterval);
+            freezeInterval = null;
+            isTimerFrozen = false;
+
+            if (indicator) {
+                indicator.style.display = 'none';
+                indicator.textContent = '';
+            }
+
+            // Resume the quiz timer
+            startTimer();
+            showNotification('Time Freeze ended. Timer resumed.', 'info');
+        }
+    }, 1000);
+}
+
+/**
+ * NEW: Initializes the Image Viewer modal and its close handlers.
+ */
+function initializeImageViewer() {
+    const modal = document.getElementById('image-viewer-modal');
+    const closeBtn = document.getElementById('close-image-viewer-btn');
+    const imgEl = document.getElementById('image-viewer-img');
+    const titleEl = document.getElementById('image-viewer-title');
+
+    if (!modal || !closeBtn || !imgEl) return;
+
+    const closeModal = () => {
+        modal.classList.remove('visible');
+        // Clear src to release memory
+        imgEl.src = '';
+        imgEl.alt = '';
+        if (titleEl) titleEl.textContent = 'Image';
+    };
+
+    closeBtn.addEventListener('click', closeModal);
+
+    // Close when clicking the overlay outside modal-content
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+
+    // Expose a global helper to open the viewer
+    window.openImageViewer = function(url, title = 'Image') {
+        if (!modal || !imgEl) return;
+        imgEl.src = url;
+        imgEl.alt = title || 'Image';
+        if (titleEl) titleEl.textContent = title || 'Image';
+        modal.classList.add('visible');
+    };
+}
+
+// ===== NEW ENGAGEMENT FEATURES =====
+
+/**
+ * Updates the daily goal progress display.
+ */
+function updateDailyGoal() {
+    const today = new Date().toISOString().split('T')[0];
+    const dailyGoalSection = document.getElementById('daily-goal-section');
+    const goalCompletedEl = document.getElementById('daily-goal-completed');
+    const goalProgressEl = document.getElementById('daily-goal-progress');
+    
+    if (!dailyGoalSection || !goalCompletedEl || !goalProgressEl) return;
+    
+    // Get today's quiz attempts
+    const todayQuizzes = (userProgress.quizHistory || []).filter(quiz => 
+        quiz.date && quiz.date.startsWith(today) && quiz.type !== 'mock'
+    );
+    
+    const completedToday = todayQuizzes.length;
+    const goalTarget = 5;
+    const progressPercent = Math.min((completedToday / goalTarget) * 100, 100);
+    
+    // Update display
+    goalCompletedEl.textContent = completedToday;
+    goalProgressEl.style.strokeDashoffset = 251.2 - (251.2 * progressPercent / 100);
+    
+    // Always show daily goal section
+    dailyGoalSection.style.display = 'block';
+}
+
+/**
+ * Shows goal completion celebration.
+ */
+function showGoalCelebration() {
+    const celebration = document.createElement('div');
+    celebration.className = 'achievement-popup';
+    celebration.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+            <span style="font-size: 24px;">🎯</span>
+            <h3 style="margin: 0;">Daily Goal Completed!</h3>
+        </div>
+        <p>You've completed 5 quizzes today! Here's your reward:</p>
+        <div style="font-weight: bold; color: #10b981;">+25 Quiz Coins + Special Badge</div>
+    `;
+    
+    document.body.appendChild(celebration);
+    
+    // Award coins
+    userProgress.quizCoins = (userProgress.quizCoins || 0) + 25;
+    updateCoinDisplay();
+    saveUserProgress();
+    
+    // Remove after 5 seconds
+    setTimeout(() => {
+        if (celebration.parentNode) {
+            celebration.remove();
+        }
+    }, 5000);
+}
+
+/**
+ * Checks for streak celebrations.
+ */
+function checkStreakCelebration() {
+    const currentStreak = userProgress.streak || 0;
+    const lastStreakCheck = localStorage.getItem('lastStreakCheck') || 0;
+    
+    if (currentStreak > lastStreakCheck && currentStreak > 1) {
+        // New streak milestone reached
+        showStreakCelebration(currentStreak);
+        localStorage.setItem('lastStreakCheck', currentStreak);
+        
+        // Award bonus coins for streak
+        userProgress.quizCoins = (userProgress.quizCoins || 0) + 10;
+        updateCoinDisplay();
+        saveUserProgress();
+    }
+}
+
+/**
+ * Shows streak celebration.
+ */
+function showStreakCelebration(streak) {
+    const celebrationEl = document.getElementById('streak-celebration');
+    if (!celebrationEl) return;
+    
+    celebrationEl.style.display = 'block';
+    
+    // Hide after 5 seconds
+    setTimeout(() => {
+        celebrationEl.style.display = 'none';
+    }, 5000);
+}
+
+/**
+ * Adds social sharing functionality.
+ */
+function shareAchievement(type, data) {
+    let shareText = '';
+    let shareUrl = window.location.origin;
+    
+    switch(type) {
+        case 'quiz_complete':
+            shareText = `I just completed a ${data.score}% quiz in ${data.subject} on Quizify! 🧠✨`;
+            break;
+        case 'streak':
+            shareText = `I'm on a ${data.streak}-day streak on Quizify! 🔥 Keep learning!`;
+            break;
+        case 'mock_test':
+            shareText = `Scored ${data.score}% on today's Mock Test! 📊 Quizify is awesome!`;
+            break;
+        default:
+            shareText = 'Check out Quizify - the best quiz app for learning! 📚';
+    }
+    
+    if (navigator.share) {
+        navigator.share({
+            title: 'Quizify Achievement',
+            text: shareText,
+            url: shareUrl
+        });
+    } else {
+        // Fallback: copy to clipboard
+        navigator.clipboard.writeText(`${shareText} ${shareUrl}`);
+        showNotification('Achievement link copied to clipboard!', 'success');
+    }
+}
+
+// ===================== QUIZ PROGRESS CONTROLS =====================
+window.clearProgress = function() {
+    const choice = confirm(
+        'What do you want to clear?\n\nClick OK to clear ONLY quiz history (coins & XP are kept).\nClick Cancel to go back.'
+    );
+    if (!choice) return;
+
+    // Wipe quiz history only
+    if (typeof userProgress !== 'undefined' && userProgress) {
+        userProgress.quizHistory = [];
+        userProgress.passedSets = {};
+        if (typeof saveUserProgress === 'function') saveUserProgress();
+    }
+
+    if (typeof showNotification === 'function') {
+        showNotification('Quiz history cleared successfully!', 'success');
+    }
+
+    // Ask if they also want a full wipe
+    setTimeout(() => {
+        const fullWipe = confirm('Do you also want to wipe ALL data (XP, coins, levels, quests)?\n\nThis CANNOT be undone!');
+        if (fullWipe) {
+            localStorage.clear();
+            alert('All progress wiped. The app will now reload.');
+            location.reload();
+        }
+    }, 500);
+};
