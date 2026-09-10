@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-import 'package:package_info_plus/package_info_plus.dart';
 
 class AppUpdateInfo {
   final bool hasUpdate;
@@ -26,15 +25,12 @@ class UpdateService {
   factory UpdateService() => _instance;
   UpdateService._internal();
 
+  static const String appVersion = "1.0.1";
   static const String _githubRepo = "MishrajiiCode/Quzify";
 
   Future<AppUpdateInfo?> checkForUpdate() async {
     try {
-      String currentVersion = "1.0.0";
-      try {
-        final packageInfo = await PackageInfo.fromPlatform();
-        currentVersion = packageInfo.version;
-      } catch (_) {}
+      const String currentVersion = appVersion;
 
       final url = Uri.parse("https://api.github.com/repos/$_githubRepo/releases/latest");
       final response = await http.get(
