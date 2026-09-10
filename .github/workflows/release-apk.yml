@@ -1,0 +1,112 @@
+name: Build & Release Quizify APK
+
+on:
+  push:
+    tags:
+      - 'v*'
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Tag name for release (e.g. v1.0.0)'
+        required: false
+        default: 'v1.0.0'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          flutter-version: '3.24.x'
+          cache: true
+
+      - name: Print Flutter & Environment Details
+        run: |
+          flutter --version
+          dart --version
+
+      - name: Install Mobile Dependencies
+        run: |
+          cd mobile
+          flutter pub get
+
+      - name: Build Android Release APK
+        run: |
+          cd mobile
+          flutter build apk --release
+
+      - name: Prepare APK Asset
+        run: |
+          cp mobile/build/app/outputs/flutter-apk/app-release.apk Quizify-Release.apk
+          ls -lh Quizify-Release.apk
+
+      - name: Upload APK as Workflow Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Quizify-Release-APK
+          path: Quizify-Release.apk
+          retention-days: 30
+
+      - name: Determine Release Tag
+        id: release_tag
+        if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TAG="${{ github.event.inputs.tag_name }}"
+          else
+            TAG="${{ github.ref_name }}"
+          fi
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+        with:
+          tag_name: ${{ steps.release_tag.outputs.tag }}
+          name: "Quizify AI ${{ steps.release_tag.outputs.tag }}"
+          body: |
+            ## 🚀 Quizify AI Mobile Release (${{ steps.release_tag.outputs.tag }})
+
+            Welcome to the official Android APK release of **Quizify AI**!
+
+            ### ✨ Included Features:
+            - **100% Pure Native Flutter & Kotlin Core**: Built with Dart & Kotlin Android framework.
+            - **Glossy Glassmorphic & Pill UI**: Frosted glass panels, ambient neon glows, floating pill navigation dock, and capsule options.
+            - **In-App Auto-Updater**: Directly detects new releases from GitHub and updates smoothly.
+            - **AI Study Tutor**: Interactive coaching chat with conceptual explanations and prompt pills.
+            - **AI Weakness Profiler**: Diagnostic analytics pinpointing weak subjects with 1-tap practice drills.
+            - **Global Leaderboards**: Top 3 podium with glowing rank pillars and ranked user lists.
+            - **Cyber Store**: Avatars, badges, and boosters purchasable with in-game Quiz Coins.
+
+            ### 📲 Installation Instructions:
+            1. Download the `Quizify-Release.apk` attached below.
+            2. On your Android phone, tap the downloaded file to install.
+            3. If prompted, allow "Install from Unknown Sources".
+            4. Launch **Quizify AI** and start learning!
+          draft: false
+          prerelease: false
+          files: |
+            Quizify-Release.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

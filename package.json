@@ -6,7 +6,8 @@
     "start": "node server.js",
     "server": "node server.js",
     "build-client": "cd client && npm install && npm run build",
-    "start:prod": "npm run build-client && node server.js"
+    "start:prod": "npm run build-client && node server.js",
+    "sync:mobile": "node sync-mobile.js"
   },
   "dependencies": {
     "express": "^4.18.2",

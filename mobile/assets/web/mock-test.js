@@ -1,0 +1,809 @@
+
+// mock-test.js - Contains all logic for the Mock Test feature.
+
+const MockTest = {
+    _app: null,
+    _allQuizData: [],
+    
+    // State for the current mock test
+    isActive: false,
+    questions: [],
+    userAnswers: [],
+    markedForReview: [], // NEW: Track questions marked for review
+    currentQuestionIndex: 0,
+    currentSection: 'quantitative',
+    timer: null,
+    timeRemaining: 0,
+
+    // DOM Elements
+    page: null,
+    rulesModal: null,
+    resultsPage: null,
+    
+    SECTION_CONFIG: { // This was step 1, but I've renumbered for clarity
+        quantitative: { name: 'Quantitative Aptitude', count: 25 },
+        english: { name: 'English', count: 25 },
+        reasoning: { name: 'Reasoning', count: 25 },
+        general_science: { name: 'General Science', count: 25 }
+    },
+
+    init(app, allQuizData) {
+        this._app = app;
+        this._allQuizData = allQuizData;
+
+        this.page = document.getElementById('mock-test-page');
+        this.rulesModal = document.getElementById('mock-test-rules-modal');
+        this.resultsPage = document.getElementById('mock-test-results-page'); // This was correct, the issue was in the handleLogin function.
+
+        this.initializeEventListeners();
+    },
+
+    initializeEventListeners() {
+        if (!this.page || !this.rulesModal || !this.resultsPage) return;
+
+        // Rules Modal
+        document.getElementById('start-mock-test-btn').addEventListener('click', () => {
+            this.rulesModal.classList.remove('visible');
+            this.start();
+        });
+        document.getElementById('close-rules-modal-btn').addEventListener('click', () => {
+            this.rulesModal.classList.remove('visible');
+            this._app.goToHome();
+        });
+
+        // Mock Test Page Navigation
+        this.page.querySelector('#mock-prev-btn').addEventListener('click', () => this.navigateQuestion(-1));
+        this.page.querySelector('#mock-next-btn').addEventListener('click', () => this.navigateQuestion(1));
+        this.page.querySelector('#mock-clear-btn').addEventListener('click', () => this.clearSelection());
+        this.page.querySelector('#mock-review-btn').addEventListener('click', () => this.toggleReviewMark());
+        this.page.querySelector('#mock-bookmark-btn').addEventListener('click', () => this.bookmarkQuestion());
+        this.page.querySelector('#mock-submit-btn').addEventListener('click', () => this.confirmSubmit());
+        this.page.querySelector('#mock-submit-sidebar-btn').addEventListener('click', () => this.confirmSubmit());
+
+        // Section Tabs
+        this.page.querySelector('#mock-section-tabs').addEventListener('click', (e) => {
+            if (e.target.matches('.mock-section-tab')) {
+                this.switchSection(e.target.dataset.section);
+            }
+        });
+
+        // Question Grid
+        this.page.querySelector('#mock-question-numbers').addEventListener('click', (e) => {
+            if (e.target.matches('.question-number')) {
+                this.goToQuestion(parseInt(e.target.dataset.index, 10));
+            }
+        });
+
+        // Options Container
+        this.page.querySelector('#mock-options-container').addEventListener('click', (e) => {
+            if (e.target.matches('.option')) {
+                this.selectOption(parseInt(e.target.dataset.optionIndex, 10));
+            }
+        });
+
+        // Results Page
+        this.resultsPage.querySelector('#mock-results-home-btn').addEventListener('click', () => this._app.goToHome());
+
+        const reviewBtn = this.resultsPage.querySelector('#mock-results-review-btn');
+        if (reviewBtn) {
+            reviewBtn.addEventListener('click', () => this.reviewAnswers());
+        }
+    },
+
+    showRules() {
+        // NEW: Prevent background scroll when modal is open
+        document.body.style.overflow = 'hidden';
+        this.rulesModal.querySelector('#close-rules-modal-btn').onclick = () => {
+            document.body.style.overflow = ''; // Restore scroll
+            this.rulesModal.classList.remove('visible');
+        };
+        this.rulesModal.classList.add('visible');
+    },
+
+    generateQuestions() {
+        const today = new Date();
+        const seed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
+
+        const selectedQuestions = {
+            quantitative: this.getRandomQuestions('quantitative', this.SECTION_CONFIG.quantitative.count, seed),
+            english: this.getRandomQuestions('english', this.SECTION_CONFIG.english.count, seed + 1),
+            reasoning: this.getRandomQuestions('reasoning', this.SECTION_CONFIG.reasoning.count, seed + 2),
+            general_science: this.getRandomGSQuestions(this.SECTION_CONFIG.general_science.count, seed + 3)
+        };
+
+        this.questions = [
+            ...selectedQuestions.quantitative,
+            ...selectedQuestions.english,
+            ...selectedQuestions.reasoning,
+            ...selectedQuestions.general_science
+        ];
+
+        if (this.questions.length === 0) {
+            this._app.showNotification('Could not generate a mock test. No questions available in any subject.', 'error');
+            this._app.goToHome();
+            return false;
+        }
+        return true; // Proceed even with fewer than 100 questions
+    },
+
+    getRandomQuestions(subjectKey, count, seed) {
+        const subjectData = this._allQuizData.find(d => d.id === subjectKey);
+        if (!subjectData) return [];
+ 
+        // DEFINITIVE FIX: This correctly handles the structure from your JS files.
+        // It flattens the array of sets, which are themselves arrays of questions.
+        const allQuestions = (subjectData.chapters || []).flatMap(chapter =>
+            (chapter.sets || []).flatMap(set => {
+                // The 'set' can be an array of questions `[...]` or an object `{ questions: [...] }`
+                return Array.isArray(set) ? set : (set.questions || []);
+            })
+        );
+ 
+        return this._app.seededShuffle(allQuestions, seed).slice(0, count).map(q => ({ ...q, section: subjectKey }));
+    },
+ 
+    getRandomGSQuestions(count, seed) {
+        const gsSubjects = this._allQuizData.filter(d => d.category === 'general_science');
+        // DEFINITIVE FIX: Use the same robust logic as getRandomQuestions.
+        const allGSQuestions = gsSubjects.flatMap(sub =>
+            (sub.chapters || []).flatMap(chapter =>
+                (chapter.sets || []).flatMap(set => Array.isArray(set) ? set : (set.questions || []))
+            )
+        );
+ 
+        return this._app.seededShuffle(allGSQuestions, seed).slice(0, count).map(q => ({ ...q, section: 'general_science' }));
+    },
+
+    start() {
+        // NEW: Restore body scroll when test starts
+        document.body.style.overflow = '';
+
+        if (!this.generateQuestions()) return;
+
+        this.isActive = true;
+        this.userAnswers = new Array(this.questions.length).fill(null);
+        this.markedForReview = []; // Initialize review marks
+        this.currentQuestionIndex = 0;
+        this.currentSection = 'quantitative';
+
+        // NEW: Dynamically calculate time. 60 mins for 100 questions = 36 seconds per question.
+        this.timeRemaining = this.questions.length * 36;
+        this.totalTime = this.timeRemaining; // Store the initial total time
+
+        this._app.showPage('mock-test-page');
+        this.renderQuestionGrid();
+        this.renderQuestion();
+        this.updateSectionTabs();
+        this.startTimer();
+        // Hide chat and bot while the mock test is active
+        try {
+            const chatFab = document.getElementById('open-chat-fab');
+            const botFab = document.getElementById('open-help-bot-fab');
+            if (chatFab) chatFab.style.display = 'none';
+            if (botFab) botFab.style.display = 'none';
+        } catch (e) { /* Ignore if elements not present */ }
+    },
+
+    updateQuestionGrid() {
+        const gridItems = this.page.querySelectorAll('.question-number');
+        gridItems.forEach((item, index) => {
+            item.classList.remove('current', 'answered', 'not-answered', 'marked');
+            if (index === this.currentQuestionIndex) {
+                item.classList.add('current');
+            } else if (this.userAnswers[index] !== null) {
+                item.classList.add('answered');
+            } else {
+                item.classList.add('not-answered');
+            }
+
+            if (this.markedForReview && this.markedForReview.includes(index)) {
+                item.classList.add('marked');
+            }
+
+            // Show/hide based on current section
+            if (item.dataset.section === this.currentSection) {
+                item.style.display = 'flex';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    },
+
+    updateSectionTabs() {
+        const tabs = this.page.querySelectorAll('.mock-section-tab');
+        tabs.forEach(tab => {
+            if (tab.dataset.section === this.currentSection) {
+                tab.classList.add('active');
+            } else {
+                tab.classList.remove('active');
+            }
+        });
+    },
+
+    selectOption(optionIndex) {
+        this.userAnswers[this.currentQuestionIndex] = optionIndex;
+        this.renderQuestion(); // Re-render to show selection
+    },
+
+    navigateQuestion(direction) {
+        const newIndex = this.currentQuestionIndex + direction;
+        if (newIndex >= 0 && newIndex < this.questions.length) {
+            const newQuestion = this.questions[newIndex];
+            if (newQuestion.section !== this.currentSection) {
+                this.switchSection(newQuestion.section);
+            }
+            this.currentQuestionIndex = newIndex;
+            this.renderQuestion();
+        }
+    },
+
+    goToQuestion(index) {
+        if (index >= 0 && index < this.questions.length) {
+            this.currentQuestionIndex = index;
+            this.renderQuestion();
+        }
+    },
+
+    switchSection(sectionKey) {
+        this.currentSection = sectionKey;
+        
+        // Find the first question of the new section and jump to it
+        const firstQuestionOfSectionIndex = this.questions.findIndex(q => q.section === sectionKey);
+        if (firstQuestionOfSectionIndex !== -1) {
+            this.currentQuestionIndex = firstQuestionOfSectionIndex;
+        }
+
+        this.updateSectionTabs();
+        this.renderQuestion();
+    },
+
+    confirmSubmit() {
+        let unansweredCount = 0;
+        try {
+            unansweredCount = this.userAnswers.filter(a => a === null).length;
+        } catch (e) {
+            console.error('Error calculating unanswered count:', e);
+        }
+
+        const message = unansweredCount > 0 
+            ? `You have ${unansweredCount} unanswered questions. Are you sure you want to submit?`
+            : 'Are you sure you want to submit the test?';
+
+        // Robust confirm: some mobile wrappers block window.confirm
+        let confirmed = true;
+        try {
+            if (typeof confirm === 'function') {
+                confirmed = confirm(message);
+            }
+        } catch (e) {
+            console.warn('Native confirm() failed or blocked, proceeding with submission:', e);
+        }
+
+        if (confirmed) {
+            this.submitTest();
+        }
+    },
+
+    submitTest() {
+        console.log('MockTest: Starting submission process...');
+        try {
+            if (this.timer) clearInterval(this.timer);
+            this.isActive = false;
+
+            const results = this.calculateResults();
+            console.log('MockTest: Results calculated:', results);
+
+            this.displayResults(results);
+            this.saveResults(results);
+
+            this._app.showPage('mock-test-results-page');
+            console.log('MockTest: Submission complete, showing results page.');
+
+            // Restore chat and bot visibility after mock test submission
+            try {
+                const chatFab = document.getElementById('open-chat-fab');
+                const botFab = document.getElementById('open-help-bot-fab');
+                if (chatFab) chatFab.style.display = 'inline-flex';
+                if (botFab) botFab.style.display = 'inline-flex';
+            } catch (e) { /* Ignore if elements not present */ }
+        } catch (error) {
+            console.error('CRITICAL ERROR in MockTest.submitTest:', error);
+            this._app.showNotification('Error submitting test: ' + error.message, 'error');
+            // Try to at least return to home if it's really stuck
+            setTimeout(() => this._app.goToHome(), 3000);
+        }
+    },
+
+    calculateResults() {
+        const sectionResults = {};
+        let totalCorrect = 0;
+        let totalIncorrect = 0;
+        let totalUnanswered = 0;
+
+        // Initialize section results
+        for (const key in this.SECTION_CONFIG) {
+            sectionResults[key] = {
+                correct: 0,
+                incorrect: 0,
+                unanswered: 0,
+                score: 0
+            };
+        }
+
+        this.questions.forEach((q, index) => {
+            const userAnswer = this.userAnswers[index];
+            const section = q.section;
+            // Support both 'answer' and 'correctAnswer' from Firestore data
+            const correctAnswer = q.answer !== undefined ? q.answer : q.correctAnswer;
+
+            if (userAnswer === null) {
+                if (sectionResults[section]) sectionResults[section].unanswered++;
+                totalUnanswered++;
+            } else if (userAnswer === correctAnswer) {
+                if (sectionResults[section]) sectionResults[section].correct++;
+                totalCorrect++;
+            } else {
+                if (sectionResults[section]) sectionResults[section].incorrect++;
+                totalIncorrect++;
+            }
+        });
+
+        // Calculate scores
+        let totalScore = 0;
+        for (const key in sectionResults) {
+            const section = sectionResults[key];
+            section.score = (section.correct * 2) - (section.incorrect * 0.5);
+            totalScore += section.score;
+        }
+
+        return {
+            totalScore,
+            totalCorrect,
+            totalIncorrect,
+            totalUnanswered,
+            sectionResults
+        };
+    },
+
+    displayResults(results) {
+        if (!this.resultsPage) {
+            console.error('MockTest: resultsPage element not found!');
+            return;
+        }
+
+        const totalPossibleMarks = this.questions.length * 2;
+        
+        // Helper to update text safely
+        const updateText = (id, text) => {
+            const el = this.resultsPage.querySelector(id);
+            if (el) el.textContent = text;
+        };
+
+        updateText('#mock-total-score', results.totalScore.toFixed(2));
+        updateText('#mock-total-marks', totalPossibleMarks.toFixed(2));
+        updateText('#mock-total-questions-summary', this.questions.length);
+        updateText('#mock-correct-answers', results.totalCorrect);
+        updateText('#mock-incorrect-answers', results.totalIncorrect);
+        updateText('#mock-unanswered', results.totalUnanswered);
+
+        // Time calculation
+        const timeTaken = this.totalTime - this.timeRemaining;
+        const minutes = Math.floor(timeTaken / 60);
+        const seconds = timeTaken % 60;
+        updateText('#mock-time-taken', `${minutes}m ${seconds}s`);
+
+        const sectionResultsContainer = this.resultsPage.querySelector('#mock-section-wise-results');
+        if (!sectionResultsContainer) return;
+        
+        sectionResultsContainer.innerHTML = '';
+
+        for (const key in results.sectionResults) {
+            const section = results.sectionResults[key];
+            const sectionConfig = this.SECTION_CONFIG[key];
+            // NEW: Calculate max marks for the section based on actual questions
+            const questionsInSection = this.questions.filter(q => q.section === key).length;
+            const maxSectionMarks = questionsInSection * 2;
+            const sectionHtml = `
+                <div class="section-result-item">
+                    <h4>${sectionConfig.name}</h4>
+                    <p>Score: <strong>${section.score.toFixed(2)} / ${maxSectionMarks}</strong></p>
+                    <div class="section-stats">
+                        <span>Correct: ${section.correct}</span>
+                        <span>Incorrect: ${section.incorrect}</span>
+                        <span>Unanswered: ${section.unanswered}</span>
+                    </div>
+                </div>
+            `;
+            sectionResultsContainer.innerHTML += sectionHtml;
+        }
+    },
+
+    saveResults(results) {
+        const today = new Date().toISOString().split('T')[0];
+        const dateKey = `mock_test_${today}`; // Key for grouping mock attempts by date
+
+        const attemptData = {
+            score: results.totalScore,
+            date: new Date().toISOString(),
+            timeTaken: this.totalTime - this.timeRemaining,
+            totalQuestions: this.questions.length,
+            totalCorrect: results.totalCorrect,
+            totalIncorrect: results.totalIncorrect,
+            totalUnanswered: results.totalUnanswered,
+            totalMarks: this.questions.length * 2,
+            details: results.sectionResults,
+            mockId: `Mock ${today}` // Example: Mock 2025-10-29
+        };
+
+        // Ensure a dedicated container for mock tests exists
+        this._app.userProgress.mockTests = this._app.userProgress.mockTests || {};
+
+        if (!this._app.userProgress.mockTests[dateKey]) {
+            this._app.userProgress.mockTests[dateKey] = { attempts: [] };
+        }
+
+        // Append attempt to the day's attempts array
+        this._app.userProgress.mockTests[dateKey].attempts.push(attemptData);
+
+        // Keep an easy-to-read summary list for global history (for profile/history views)
+        this._app.userProgress.quizHistory = this._app.userProgress.quizHistory || [];
+        this._app.userProgress.quizHistory.push({
+            type: 'mock',
+            date: attemptData.date,
+            score: attemptData.score,
+            timeTaken: attemptData.timeTaken,
+            totalQuestions: attemptData.totalQuestions,
+            mockId: attemptData.mockId
+        });
+
+        // ALSO store a quick lookup for the day's latest mock attempt in `mockHistory`.
+        // Other parts of the app (e.g., checkAndDisplayDailyMock) expect `userProgress.mockHistory`.
+        this._app.userProgress.mockHistory = this._app.userProgress.mockHistory || {};
+        // Save the most recent attempt summary for the date so UI can show "Attempted Today" etc.
+        this._app.userProgress.mockHistory[dateKey] = {
+            score: attemptData.score,
+            date: attemptData.date,
+            timeTaken: attemptData.timeTaken,
+            totalQuestions: attemptData.totalQuestions,
+            mockId: attemptData.mockId
+        };
+
+        // Optionally, keep a bestScore for the day
+        const day = this._app.userProgress.mockTests[dateKey];
+        day.bestScore = Math.max(...day.attempts.map(a => a.score));
+
+        // Save progress (Firestore/localStorage depending on user)
+        this._app.saveUserProgress();
+    },
+
+    checkAndDisplayDailyMock() {
+        const today = new Date().toISOString().split('T')[0];
+        const progressKey = `mock_test_${today}`;
+        const card = document.getElementById('mock-test-card');
+        const statusEl = card.querySelector('.mock-test-status');
+
+        if (this._app.userProgress.mockHistory && this._app.userProgress.mockHistory[progressKey]) {
+            const lastAttempt = this._app.userProgress.mockHistory[progressKey];
+            statusEl.textContent = `Attempted Today. Score: ${lastAttempt.score.toFixed(2)}`;
+            statusEl.style.color = 'var(--color-success)';
+        } else {
+            statusEl.textContent = 'A new mock test is available!';
+            statusEl.style.color = '';
+        }
+    },
+
+    reviewAnswers() {
+        const reviewContainer = document.getElementById('review-container');
+        reviewContainer.innerHTML = '';
+        document.getElementById('review-page-title').textContent = 'Mock Test - Answer Review';
+
+        // Wire up the back button to return to the results page
+        const backBtn = document.getElementById('review-page-back-btn');
+        backBtn.onclick = () => this._app.showPage('mock-test-results-page');
+
+        const sections = ['quantitative', 'english', 'reasoning', 'general_science'];
+
+        // Render an accordion-style review container grouped by section
+        sections.forEach(sectionKey => {
+            const sectionQuestions = this.questions.filter(q => q.section === sectionKey);
+            if (sectionQuestions.length === 0) return;
+
+            const sectionConfig = this.SECTION_CONFIG[sectionKey];
+
+            const sectionHeader = document.createElement('h2');
+            sectionHeader.className = 'review-section-header';
+            sectionHeader.textContent = sectionConfig.name;
+            reviewContainer.appendChild(sectionHeader);
+
+            const sectionContainer = document.createElement('div');
+            sectionContainer.className = 'mock-review-section';
+
+            sectionQuestions.forEach((question) => {
+                const globalIndex = this.questions.indexOf(question);
+                const userAnswer = this.userAnswers[globalIndex];
+                const correctAnswer = question.answer;
+                const isCorrect = userAnswer === correctAnswer;
+                const isUnanswered = userAnswer === null;
+
+                const reviewDiv = document.createElement('div');
+                let statusClass = isUnanswered ? 'unanswered' : (isCorrect ? 'correct' : 'incorrect');
+                reviewDiv.className = `review-question compact ${statusClass}`;
+
+                // Create a plain text preview to show when collapsed
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = question.question;
+                let plainQuestion = tempDiv.textContent || tempDiv.innerText || "";
+                if (plainQuestion.length > 60) plainQuestion = plainQuestion.substring(0, 60) + '...';
+
+                let badgeText = isUnanswered ? 'Skipped' : (isCorrect ? '✓ Correct' : '✗ Incorrect');
+
+                let reviewHTML = `
+                    <div class="review-question-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <h3>Q${globalIndex + 1}. ${plainQuestion}</h3>
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <span class="status-badge ${statusClass}">${badgeText}</span>
+                            <svg class="expand-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </div>
+                    </div>
+                    <div class="review-question-body">
+                        <p><strong>Question:</strong> ${question.question}</p>
+                `;
+
+                if (question.imageUrl && question.imageUrl.trim()) {
+                    reviewHTML += `<img class="question-thumbnail" src="${question.imageUrl}" alt="Question Image" onerror="this.style.display='none'">`;
+                }
+
+                reviewHTML += `<div class="review-options">`;
+                question.options.forEach((option, optIndex) => {
+                    let optionClass = 'review-option';
+                    if (optIndex === correctAnswer) optionClass += ' correct-answer';
+                    if (optIndex === userAnswer && !isCorrect) optionClass += ' user-wrong';
+                    reviewHTML += `<div class="${optionClass}">${String.fromCharCode(65 + optIndex)}. ${option}</div>`;
+                });
+                reviewHTML += `</div><p style="margin-top: 12px;"><strong>Correct Answer:</strong> ${String.fromCharCode(65 + correctAnswer)}</p><p><strong>Your Answer:</strong> ${isUnanswered ? 'Not answered' : String.fromCharCode(65 + userAnswer)}</p></div>`;
+                reviewDiv.innerHTML = reviewHTML;
+                sectionContainer.appendChild(reviewDiv);
+            });
+            reviewContainer.appendChild(sectionContainer);
+        });
+        this._app.showPage('review-page');
+    },
+
+    // ===== NEW USER-FRIENDLY FEATURES =====
+
+    /**
+     * Clears the current question selection.
+     */
+    clearSelection() {
+        this.userAnswers[this.currentQuestionIndex] = null;
+        this.renderQuestion();
+        this.updateQuestionGrid();
+        this.updateProgress();
+    },
+
+    /**
+     * Toggles the review mark for the current question.
+     */
+    toggleReviewMark() {
+        if (!this.markedForReview) {
+            this.markedForReview = [];
+        }
+        const index = this.markedForReview.indexOf(this.currentQuestionIndex);
+        if (index > -1) {
+            this.markedForReview.splice(index, 1);
+        } else {
+            this.markedForReview.push(this.currentQuestionIndex);
+        }
+        this.updateQuestionGrid();
+        this.updateReviewButton();
+        this._app.showNotification(
+            this.markedForReview.includes(this.currentQuestionIndex) ? 
+            'Question marked for review' : 'Review mark removed', 
+            'info'
+        );
+    },
+
+    /**
+     * Updates the review button appearance.
+     */
+    updateReviewButton() {
+        const reviewBtn = this.page.querySelector('#mock-review-btn');
+        const isMarked = this.markedForReview.includes(this.currentQuestionIndex);
+        reviewBtn.classList.toggle('marked', isMarked);
+        reviewBtn.title = isMarked ? 'Unmark for review' : 'Mark for review';
+    },
+
+    /**
+     * Bookmarks the current question (for later reference).
+     */
+    bookmarkQuestion() {
+        const question = this.questions[this.currentQuestionIndex];
+        if (!question) return;
+
+        // Add to bookmarks if not already there
+        const bookmarks = this._app.userProgress.bookmarks || [];
+        const bookmarkKey = `mock_${question.id}`;
+        
+        const existingIndex = bookmarks.findIndex(b => b.id === bookmarkKey);
+        if (existingIndex > -1) {
+            bookmarks.splice(existingIndex, 1);
+            this._app.showNotification('Question removed from bookmarks.', 'info');
+        } else {
+            bookmarks.push({
+                id: bookmarkKey,
+                question: question.question,
+                options: question.options,
+                correctAnswer: question.correctAnswer,
+                subject: question.subject,
+                chapter: question.chapter,
+                dateAdded: new Date().toISOString()
+            });
+            this._app.showNotification('Question bookmarked!', 'success');
+        }
+
+        this._app.userProgress.bookmarks = bookmarks;
+        this._app.saveUserProgress();
+        this.updateBookmarkButton();
+    },
+
+    /**
+     * Updates the bookmark button appearance.
+     */
+    updateBookmarkButton() {
+        const bookmarkBtn = this.page.querySelector('#mock-bookmark-btn');
+        const question = this.questions[this.currentQuestionIndex];
+        const bookmarks = this._app.userProgress.bookmarks || [];
+        const bookmarkKey = `mock_${question.id}`;
+        const isBookmarked = bookmarks.some(b => b.id === bookmarkKey);
+        
+        bookmarkBtn.classList.toggle('bookmarked', isBookmarked);
+        bookmarkBtn.title = isBookmarked ? 'Remove bookmark' : 'Bookmark question';
+    },
+
+    /**
+     * Updates the overall progress display.
+     */
+    updateProgress() {
+        const answered = this.userAnswers.filter(answer => answer !== null).length;
+        const total = this.questions.length;
+        
+        // Update progress bar
+        const progressFill = document.getElementById('mock-progress-fill');
+        const progressText = document.getElementById('mock-progress-text');
+        const percentage = (answered / total) * 100;
+        
+        progressFill.style.width = `${percentage}%`;
+        progressText.textContent = `${answered}/${total} Questions`;
+        
+        // Update section progress
+        this.updateSectionProgress();
+        
+        // Update answered count in sidebar
+        document.getElementById('answered-count').textContent = answered;
+    },
+
+    /**
+     * Updates progress for each section.
+     */
+    updateSectionProgress() {
+        const sections = ['quantitative', 'english', 'reasoning', 'general_science'];
+        
+        sections.forEach(section => {
+            const sectionQuestions = this.questions.filter(q => q.subject === section);
+            const answered = sectionQuestions.filter((q, index) => {
+                const globalIndex = this.questions.indexOf(q);
+                return this.userAnswers[globalIndex] !== null;
+            }).length;
+            
+            const progressEl = document.getElementById(`${section}-progress`);
+            if (progressEl) {
+                progressEl.textContent = `${answered}/${sectionQuestions.length}`;
+            }
+        });
+    },
+
+    /**
+     * Enhanced question rendering with better UI.
+     */
+    renderQuestion() {
+        const question = this.questions[this.currentQuestionIndex];
+        if (!question) return;
+
+        // Update question display
+        document.getElementById('mock-question-number').textContent = this.currentQuestionIndex + 1;
+        document.getElementById('mock-question-text').innerHTML = question.question;
+        document.getElementById('current-section-name').textContent = this.SECTION_CONFIG[this.currentSection].name;
+        document.getElementById('question-type').textContent = question.type || 'Multiple Choice';
+
+        // Render options
+        const optionsContainer = document.getElementById('mock-options-container');
+        optionsContainer.innerHTML = '';
+
+        question.options.forEach((option, index) => {
+            const optionDiv = document.createElement('div');
+            optionDiv.className = `option ${this.userAnswers[this.currentQuestionIndex] === index ? 'selected' : ''}`;
+            optionDiv.dataset.optionIndex = index;
+            optionDiv.innerHTML = `
+                <span class="option-letter">${String.fromCharCode(65 + index)}</span>
+                <span class="option-text">${option}</span>
+            `;
+            optionsContainer.appendChild(optionDiv);
+        });
+
+        // Update buttons
+        this.updateNavigationButtons();
+        this.updateReviewButton();
+        this.updateBookmarkButton();
+        this.updateProgress();
+        this.updateQuestionGrid();
+    },
+
+    /**
+     * Updates navigation button states.
+     */
+    updateNavigationButtons() {
+        const prevBtn = document.getElementById('mock-prev-btn');
+        const nextBtn = document.getElementById('mock-next-btn');
+        const clearBtn = document.getElementById('mock-clear-btn');
+        
+        prevBtn.disabled = this.currentQuestionIndex === 0;
+        nextBtn.disabled = this.currentQuestionIndex === this.questions.length - 1;
+        clearBtn.disabled = this.userAnswers[this.currentQuestionIndex] === null;
+        
+        prevBtn.classList.toggle('disabled', prevBtn.disabled);
+        nextBtn.classList.toggle('disabled', nextBtn.disabled);
+        clearBtn.classList.toggle('disabled', clearBtn.disabled);
+    },
+
+    /**
+     * Enhanced question grid with review marks.
+     */
+    renderQuestionGrid() {
+        const grid = document.getElementById('mock-question-numbers');
+        grid.innerHTML = '';
+
+        this.questions.forEach((question, index) => {
+            const numDiv = document.createElement('div');
+            numDiv.className = 'question-number';
+            numDiv.dataset.index = index;
+            numDiv.dataset.section = question.section;
+            numDiv.textContent = index + 1;
+
+            grid.appendChild(numDiv);
+        });
+
+            this.updateQuestionGrid();
+    },
+
+    /**
+     * Enhanced timer with warning.
+     */
+    startTimer() {
+        if (this.timer) clearInterval(this.timer);
+        const timerEl = this.page.querySelector('#mock-timer');
+        const warningEl = document.getElementById('timer-warning');
+
+        // NEW: Initial display of dynamic time
+        const initialMinutes = Math.floor(this.timeRemaining / 60);
+        const initialSeconds = this.timeRemaining % 60;
+        timerEl.textContent = `${String(initialMinutes).padStart(2, '0')}:${String(initialSeconds).padStart(2, '0')}`;
+        
+        this.timer = setInterval(() => {
+            this.timeRemaining--;
+            const minutes = Math.floor(this.timeRemaining / 60);
+            const seconds = this.timeRemaining % 60;
+            timerEl.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+            // Show warning when less than 5 minutes remain
+            if (this.timeRemaining <= 300) {
+                warningEl.style.display = 'block';
+                timerEl.classList.add('warning');
+            }
+
+            if (this.timeRemaining <= 0) {
+                clearInterval(this.timer);
+                this.submitTest();
+            }
+        }, 1000);
+    }
+};
