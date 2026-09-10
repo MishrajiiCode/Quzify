@@ -51,11 +51,6 @@ jobs:
           cd mobile
           flutter pub get
 
-      - name: Configure Android Permissions & Licenses
-        run: |
-          chmod +x mobile/android/gradlew
-          yes | flutter doctor --android-licenses || true
-
       - name: Build Android Release APK
         run: |
           cd mobile
